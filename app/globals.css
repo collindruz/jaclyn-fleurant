@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body,
+  * {
+    cursor: none !important;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-bone text-charcoal font-sans antialiased;
+  }
+
+  ::selection {
+    @apply bg-clay/20 text-charcoal;
+  }
+}
+
+/* Horizontal scroll: hide scrollbar on supporting browsers for cleaner look */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
