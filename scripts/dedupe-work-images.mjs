@@ -5,6 +5,7 @@
  *
  * Re-run: npm run work:filter:person && npm run color:group
  *   (person list + work-color-groups are based on current site-pull file set).
+ * To only refresh the filename list (no hash dedupe, no file moves), use: npm run work:sync-files
  *
  * Run: npm run work:dedupe
  */

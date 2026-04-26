@@ -14,7 +14,7 @@ export default function TheWorldPage() {
 
   return (
     <>
-      <main className="pt-24 sm:pt-28 md:pt-32">
+      <main className="pt-40 sm:pt-28 md:pt-32">
         <section className="px-5 sm:px-6 md:px-10">
           <div className="mx-auto max-w-3xl">
             <FadeIn slow>

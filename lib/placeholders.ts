@@ -1,11 +1,11 @@
 /**
- * Visual asset map — mirror folders to your current site, then add files under /public/images/.
+ * Visual asset map — all work stills live under `public/images/work/site-pull/`.
  *
- * ## Work page — color groups
- * `work:filter:person` → `work-person-filtered.json` (optional). `color:group` → auto groups in `work-color-groups.ts`.
- * **Curation** (`work-curation.json`): `colorOverrides`, `excludeFilenames`, `featuredOrder` — applied in
- * `apply-work-curation` on top of auto groups. Edit JSON without re-running the classifier to hide, move, or
- * feature images. Layout in `WorkExperience` is unchanged.
+ * **Color** comes from `work-color-groups` ( `npm run color:group` ) + `work-curation.json` (`colorOverrides`, etc.).
+ * **Sections** (Editorial, Red Carpet, …) are virtual: `lib/build-work-sections.ts` + `sectionOverrides` /
+ * `work-site-section-metadata.json` + quarter split on `SITE_PULL_FILENAMES` order. No on-disk folders.
+ *
+ * `workColorGroups` is the merge of all sections, deduped by `src` (for World and flat layouts).
  *
  * ## Instagram
  * Do not scrape Instagram. Export or download images only with permission; place them in
@@ -16,6 +16,11 @@ import type { WorkItem } from "./work-types";
 import type { WorkColorKey } from "./work-types";
 import { WORK_COLOR_ORDER } from "./work-types";
 import { applyWorkCuration } from "./apply-work-curation";
+import {
+  buildWorkSections,
+  mergeWorkSectionsToFlatColorGroups,
+  type WorkSections,
+} from "./build-work-sections";
 import { workCuration } from "./work-curation";
 import { workColorGroups as workColorGroupsGenerated } from "./work-color-groups";
 import {
@@ -23,11 +28,12 @@ import {
   PERSON_IMAGE_FILENAMES,
 } from "./work-person-filtered";
 import { SITE_PULL_FILENAMES } from "./site-pull-files";
+import workSiteSectionMetadata from "./work-site-section-metadata.json";
 import { WORLD_STILLS_MAX, WORLD_STILLS_MIN } from "./world-stills-bounds";
 
 export type { WorkItem } from "./work-types";
-export { WORK_COLOR_ORDER } from "./work-types";
-export type { WorkColorKey, WorkMediaKind } from "./work-types";
+export { WORK_COLOR_ORDER, WORK_SECTION_ORDER } from "./work-types";
+export type { WorkColorKey, WorkMediaKind, WorkSectionKey } from "./work-types";
 
 const ph = "/images/placeholder.svg";
 
@@ -63,7 +69,7 @@ function workItemsFromFilenames(
 /**
  * Auto groups from `color:group`, then curation; or fallback strips, then curation the same way.
  */
-export const workColorGroups: Record<WorkColorKey, WorkItem[]> = (() => {
+const curatedWorkColorGroups: Record<WorkColorKey, WorkItem[]> = (() => {
   const base: Record<WorkColorKey, WorkItem[]> = (() => {
     if (!isWorkColorGroupsEmpty(workColorGroupsGenerated)) {
       return workColorGroupsGenerated;
@@ -82,8 +88,22 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = (() => {
   return applyWorkCuration(base, workCuration);
 })();
 
+/** Virtual sections (same color groups each). Built from curated groups + section rules. */
+export const workSections: WorkSections = buildWorkSections(
+  curatedWorkColorGroups,
+  workCuration,
+  SITE_PULL_FILENAMES,
+  workSiteSectionMetadata as Record<string, string>
+);
+
+/** Flat merge of all sections, deduped by `src`, for World + legacy flat usage. */
+export const workColorGroups: Record<WorkColorKey, WorkItem[]> =
+  mergeWorkSectionsToFlatColorGroups(workSections);
+
 /** @deprecated Use workColorGroups — kept as alias for existing imports. */
 export const workAssets: Record<WorkColorKey, WorkItem[]> = workColorGroups;
+
+export type { WorkSections };
 
 /**
  * Global hero and world stills. Point at real files under /public/images/ as they exist.

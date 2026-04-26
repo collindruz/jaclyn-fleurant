@@ -12,7 +12,7 @@ const KEYS: WorkColorKey[] = [
   "vivid",
 ];
 
-function fileBaseFromSrc(src: string): string {
+export function fileBaseFromSrc(src: string): string {
   const i = src.lastIndexOf("/");
   return i === -1 ? src : src.slice(i + 1);
 }

@@ -1,5 +1,10 @@
 {
   "colorOverrides": {},
+  "sectionOverrides": {
+    "site-001.jpg": "editorial",
+    "site-042.jpg": "redCarpet",
+    "site-118.webp": "costumeDesign"
+  },
   "excludeFilenames": [],
   "featuredOrder": []
 }

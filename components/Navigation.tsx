@@ -14,46 +14,36 @@ export function Navigation() {
     );
   }
 
+  const linkClass = (active: boolean) =>
+    `text-[0.66rem] font-normal tracking-[0.08em] transition-opacity duration-1000 ${
+      active ? "text-charcoal/80" : "text-charcoal/38"
+    } ${active ? "" : "hover:opacity-70"}`;
+
   return (
-    <header
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-6 text-charcoal/80 sm:px-6 sm:py-7 md:px-10 md:py-8 bg-bone/60"
-    >
+    <header className="fixed top-0 left-0 right-0 z-50 flex flex-col gap-7 bg-bone/60 px-5 py-6 text-charcoal/80 sm:gap-8 sm:px-6 sm:py-7 md:flex-row md:items-center md:justify-between md:gap-0 md:px-10 md:py-8">
       <Link
         href="/"
-        className="font-serif text-[0.98rem] tracking-[0.18em] transition-opacity duration-1000 hover:opacity-50 sm:text-[1.05rem]"
+        className="w-max font-serif text-[0.98rem] tracking-[0.18em] transition-opacity duration-1000 hover:opacity-50 sm:text-[1.05rem]"
       >
         JACLYN FLEURANT
       </Link>
-      <nav className="hidden items-center gap-8 sm:gap-9 md:flex" aria-label="Main">
+      <nav
+        className="flex w-full flex-col items-end gap-7 sm:gap-8 md:w-auto md:flex-row md:items-center md:gap-8 md:gap-9"
+        aria-label="Main"
+      >
         {SITE_NAV.map((item) => {
           const active = pathname === item.href;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`text-[0.66rem] font-normal tracking-[0.08em] transition-opacity duration-1000 ${
-                active ? "text-charcoal/80" : "text-charcoal/38"
-              } ${active ? "" : "hover:opacity-70"}`}
+              className={linkClass(active)}
             >
               {item.label}
             </Link>
           );
         })}
       </nav>
-      <details className="md:hidden">
-        <summary className="list-none cursor-pointer text-[0.64rem] tracking-[0.1em] text-current/70">
-          Index
-        </summary>
-        <div
-          className="absolute right-5 top-[3.5rem] flex min-w-[10rem] flex-col gap-4 border border-charcoal/[0.08] bg-bone/98 p-4 text-left text-[0.64rem] tracking-[0.06em] text-charcoal/80"
-        >
-          {SITE_NAV.map((item) => (
-            <Link key={item.href} href={item.href} className="transition-opacity duration-700 hover:opacity-55">
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </details>
     </header>
   );
 }

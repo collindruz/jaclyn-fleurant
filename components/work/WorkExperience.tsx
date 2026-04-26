@@ -8,7 +8,13 @@ import {
 } from "framer-motion";
 import Image from "next/image";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { workAssets, WORK_COLOR_ORDER, type WorkItem } from "@/lib/placeholders";
+import {
+  workSections,
+  WORK_COLOR_ORDER,
+  WORK_SECTION_ORDER,
+  type WorkItem,
+} from "@/lib/placeholders";
+import type { WorkColorKey, WorkSectionKey } from "@/lib/work-types";
 
 const MOBILE_MQ = "(max-width: 767px)";
 
@@ -31,19 +37,44 @@ function workFocusLayoutId(panelId: string) {
   return `work-focus-${panelId}`;
 }
 
+/**
+ * `panelId` = `{sectionKey}-{colorKey}-{index}` (e.g. `editorial-black-0`).
+ * Section and color keys are unambiguous (fixed vocab).
+ */
+const PANEL_RE =
+  /^(editorial|redCarpet|advertising|costumeDesign)-(black|white|neutral|warm|cool|vivid)-(\d+)$/;
+
+function getColorGroupLabel(key: WorkColorKey): string {
+  const g = WORK_COLOR_ORDER.find((x) => x.key === key);
+  return g?.label ?? key;
+}
+
+function parseWorkPanelId(panelId: string): {
+  sectionKey: WorkSectionKey;
+  colorKey: WorkColorKey;
+  index: number;
+} | null {
+  const m = panelId.match(PANEL_RE);
+  if (!m || m[1] === undefined || m[2] === undefined || m[3] === undefined) {
+    return null;
+  }
+  return {
+    sectionKey: m[1] as WorkSectionKey,
+    colorKey: m[2] as WorkColorKey,
+    index: parseInt(m[3], 10),
+  };
+}
+
 function resolveWorkItem(
   panelId: string
 ): { item: WorkItem; groupLabel: string } | null {
-  for (const group of WORK_COLOR_ORDER) {
-    const prefix = `${group.key}-`;
-    if (!panelId.startsWith(prefix)) continue;
-    const rest = panelId.slice(prefix.length);
-    const i = parseInt(rest, 10);
-    if (Number.isNaN(i)) continue;
-    const items = workAssets[group.key];
-    if (items[i]) return { item: items[i], groupLabel: group.label };
-  }
-  return null;
+  const parsed = parseWorkPanelId(panelId);
+  if (!parsed) return null;
+  const { sectionKey, colorKey, index } = parsed;
+  if (Number.isNaN(index) || index < 0) return null;
+  const item = workSections[sectionKey][colorKey][index];
+  if (!item) return null;
+  return { item, groupLabel: getColorGroupLabel(colorKey) };
 }
 
 /**
@@ -252,7 +283,49 @@ function MobileFocusLayer({
   );
 }
 
+function sectionHasItems(sectionKey: WorkSectionKey): boolean {
+  return WORK_COLOR_ORDER.some(
+    (c) => workSections[sectionKey][c.key].length > 0
+  );
+}
+
+/** `true` if a section with content appears before this one in `WORK_SECTION_ORDER` (for spacing). */
+function sectionNeedsTopSpacer(key: WorkSectionKey): boolean {
+  for (const s of WORK_SECTION_ORDER) {
+    if (s.key === key) return false;
+    if (sectionHasItems(s.key)) return true;
+  }
+  return false;
+}
+
+/** First (section|color) row that has items — for top border on `ColorStrip`. */
+const FIRST_STRIP_KEY: string | null = (() => {
+  for (const s of WORK_SECTION_ORDER) {
+    for (const c of WORK_COLOR_ORDER) {
+      if (workSections[s.key][c.key].length > 0) {
+        return `${s.key}|${c.key}`;
+      }
+    }
+  }
+  return null;
+})();
+
+type ColorStripProps = {
+  sectionKey: WorkSectionKey;
+  sectionLabel: string;
+  groupKey: WorkColorKey;
+  label: string;
+  items: WorkItem[];
+  isFirst: boolean;
+  focusedPanelId: string | null;
+  isMobile: boolean;
+  onMobileTap: (panelId: string) => void;
+  reduceMotion: boolean;
+};
+
 function ColorStrip({
+  sectionKey,
+  sectionLabel,
   groupKey,
   label,
   items,
@@ -261,18 +334,10 @@ function ColorStrip({
   isMobile,
   onMobileTap,
   reduceMotion,
-}: {
-  groupKey: string;
-  label: string;
-  items: WorkItem[];
-  isFirst: boolean;
-  focusedPanelId: string | null;
-  isMobile: boolean;
-  onMobileTap: (panelId: string) => void;
-  reduceMotion: boolean;
-}) {
+}: ColorStripProps) {
   const hasFocus = Boolean(focusedPanelId) && isMobile;
-  const regionLabel = `${label} — work`;
+  const regionLabel = `${sectionLabel} — ${label}`;
+  const rowId = `${sectionKey}-${groupKey}`;
 
   return (
     <section
@@ -282,54 +347,47 @@ function ColorStrip({
           ? "border-0"
           : "border-t border-charcoal/[0.05] " + "pt-12 sm:pt-14 md:pt-18")
       }
-      id={groupKey}
-      aria-labelledby={`${groupKey}-heading`}
+      id={rowId}
+      aria-labelledby={`${rowId}-heading`}
     >
       <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
-        {items.length === 0 ? (
-          <p className="pb-5 font-sans text-[0.65rem] leading-relaxed tracking-[0.05em] text-charcoal/25 sm:pb-6">
-            Add image or video paths for this color group in{" "}
-            <span className="whitespace-nowrap text-charcoal/40">lib/placeholders.ts</span>
-          </p>
-        ) : (
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6 lg:gap-8">
-            <h2
-              id={`${groupKey}-heading`}
-              className="shrink-0 font-sans text-[0.52rem] font-normal leading-snug tracking-[0.22em] text-charcoal/30 md:w-24 md:pt-0.5 md:leading-tight lg:w-28"
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6 lg:gap-8">
+          <h2
+            id={`${rowId}-heading`}
+            className="shrink-0 font-sans text-[0.52rem] font-normal leading-snug tracking-[0.22em] text-charcoal/30 md:w-24 md:pt-0.5 md:leading-tight lg:w-28"
+          >
+            {label}
+          </h2>
+          <div className="min-w-0 flex-1 -mx-3 px-3 md:mx-0 md:px-0">
+            <ul
+              role="list"
+              aria-label={regionLabel}
+              className="no-scrollbar flex touch-pan-x gap-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-1.5 pr-0 sm:gap-5 sm:pr-0 md:gap-5"
+              style={{ WebkitOverflowScrolling: "touch" }}
             >
-              {label}
-            </h2>
-            <div className="min-w-0 flex-1 -mx-3 px-3 md:mx-0 md:px-0">
-              <ul
-                role="list"
-                aria-label={regionLabel}
-                className="no-scrollbar flex touch-pan-x gap-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-1.5 pr-0 sm:gap-5 sm:pr-0 md:gap-5"
-                style={{ WebkitOverflowScrolling: "touch" }}
-              >
-                {items.map((item, i) => {
-                  const capId = `${groupKey}-cap-${i}`;
-                  const panelId = `${groupKey}-${i}`;
-                  const isFocused = focusedPanelId === panelId;
-                  const isFaded = hasFocus && !isFocused;
-                  return (
-                    <StripItem
-                      key={`${groupKey}-${i}-${item.src}`}
-                      item={item}
-                      groupLabel={label}
-                      capId={capId}
-                      panelId={panelId}
-                      isMobile={isMobile}
-                      isFocused={isFocused}
-                      isFaded={isFaded}
-                      onMobileTap={onMobileTap}
-                      reduceMotion={reduceMotion}
-                    />
-                  );
-                })}
-              </ul>
-            </div>
+              {items.map((item, i) => {
+                const capId = `${sectionKey}-${groupKey}-cap-${i}`;
+                const panelId = `${sectionKey}-${groupKey}-${i}`;
+                const isFocused = focusedPanelId === panelId;
+                const isFaded = hasFocus && !isFocused;
+                return (
+                  <StripItem
+                    key={`${sectionKey}-${groupKey}-${i}-${item.src}`}
+                    item={item}
+                    groupLabel={label}
+                    capId={capId}
+                    panelId={panelId}
+                    isMobile={isMobile}
+                    isFocused={isFocused}
+                    isFaded={isFaded}
+                    onMobileTap={onMobileTap}
+                    reduceMotion={reduceMotion}
+                  />
+                );
+              })}
+            </ul>
           </div>
-        )}
+        </div>
       </div>
     </section>
   );
@@ -379,20 +437,44 @@ export function WorkExperience() {
           if (isMobile && focusedPanelId !== null) closeFocus();
         }}
       >
-        {WORK_COLOR_ORDER.map((group, i) => {
-          const items = workAssets[group.key];
+        {WORK_SECTION_ORDER.map((section) => {
+          if (!sectionHasItems(section.key)) return null;
           return (
-            <ColorStrip
-              key={group.key}
-              groupKey={group.key}
-              label={group.label}
-              items={items}
-              isFirst={i === 0}
-              focusedPanelId={focusedPanelId}
-              isMobile={isMobile}
-              onMobileTap={onMobileTap}
-              reduceMotion={reduceMotion}
-            />
+            <div
+              key={section.key}
+              className={
+                sectionNeedsTopSpacer(section.key)
+                  ? "mt-16 sm:mt-20 md:mt-24"
+                  : undefined
+              }
+            >
+              <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
+                <h2 className="mb-8 font-serif text-[1.15rem] font-light leading-snug text-charcoal/70 sm:mb-10 sm:text-[1.2rem] md:text-[1.35rem]">
+                  {section.label}
+                </h2>
+              </div>
+              {WORK_COLOR_ORDER.map((group) => {
+                const items = workSections[section.key][group.key];
+                if (items.length === 0) return null;
+                const isFirstStrip =
+                  FIRST_STRIP_KEY === `${section.key}|${group.key}`;
+                return (
+                  <ColorStrip
+                    key={`${section.key}-${group.key}`}
+                    sectionKey={section.key}
+                    sectionLabel={section.label}
+                    groupKey={group.key}
+                    label={group.label}
+                    items={items}
+                    isFirst={isFirstStrip}
+                    focusedPanelId={focusedPanelId}
+                    isMobile={isMobile}
+                    onMobileTap={onMobileTap}
+                    reduceMotion={reduceMotion}
+                  />
+                );
+              })}
+            </div>
           );
         })}
 

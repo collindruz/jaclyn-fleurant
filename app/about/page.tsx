@@ -20,7 +20,7 @@ const PRESS_LINKS: { publication: string; title: string; href: string }[] = [];
 export default function AboutPage() {
   return (
     <>
-      <main className="pt-24 sm:pt-28 md:pt-32">
+      <main className="pt-40 sm:pt-28 md:pt-32">
         <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-10">
           <FadeIn>
             <h1 className="sr-only">Read</h1>

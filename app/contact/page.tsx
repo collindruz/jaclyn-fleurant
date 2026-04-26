@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
-      <main className="pt-24 sm:pt-28 md:pt-32" id="write">
+      <main className="pt-40 sm:pt-28 md:pt-32" id="write">
         <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-10">
           <FadeIn>
             <div className="max-w-md">
