@@ -37,3 +37,4 @@ next-env.d.ts
 # site image pull (npm run pull:site-images) — keep folder, ignore heavy binaries
 public/images/work/site-pull/*
 !public/images/work/site-pull/.gitkeep
+**/.DS_Store
