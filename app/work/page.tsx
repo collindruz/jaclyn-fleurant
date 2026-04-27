@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function WorkPage() {
   return (
     <>
-      <main className="pb-10 pr-[84px] pt-32 sm:pt-24 sm:pb-10 md:pr-0">
+      <main className="pb-10 pt-[150px] sm:pt-24 sm:pb-10">
         <h1 className="sr-only">Work</h1>
         <WorkExperience />
       </main>

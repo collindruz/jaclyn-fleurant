@@ -7,7 +7,13 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import Image from "next/image";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   workSections,
   WORK_COLOR_ORDER,
@@ -103,26 +109,62 @@ const reducedT = { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] as const };
 
 const FADED_WHEN_FOCUS = 0.2;
 
-/** Top-level work sections (Editorial, Red Carpet, …) — chapter opener, not a list row. */
-const workChapterTitleClass =
-  "pl-0.5 sm:pl-1 pr-1 font-serif text-[1.4rem] font-light leading-[1.2] tracking-[-0.01em] " +
+/** Mobile strip activation / tap-to-open — do not block vertical page scroll. */
+const GAP_AXIS = 8;
+const HORIZONTAL_BEAT = 10;
+const TAP_MAX_PX = 20;
+const TAP_MAX_MS = 800;
+
+function isVerticalScrollIntent(dx: number, dy: number) {
+  return Math.abs(dy) > Math.abs(dx) + GAP_AXIS;
+}
+
+function isHorizontalPanIntent(dx: number, dy: number) {
+  return (
+    Math.abs(dx) > HORIZONTAL_BEAT && Math.abs(dx) > Math.abs(dy) + GAP_AXIS
+  );
+}
+
+function isLightTapGesture(dx: number, dy: number, dt: number) {
+  return (
+    Math.hypot(dx, dy) < TAP_MAX_PX && dt < TAP_MAX_MS
+  );
+}
+
+/** Muted two-digit index (01–04) — tiny, not a graphic treatment. */
+const workChapterIndexClass =
+  "mb-1.5 block font-sans text-[0.5rem] font-normal tabular-nums leading-none " +
+  "tracking-[0.08em] text-charcoal/28";
+
+const workChapterTitleTextClass =
+  "block font-serif text-[1.4rem] font-light leading-[1.2] tracking-[-0.01em] " +
   "text-charcoal/48 sm:text-[1.5rem] md:text-[1.65rem]";
 
-/** Space after chapter title before the lookbook strip (visual “pause”). */
+/** Space after chapter block before the lookbook strip (visual “pause”). */
 const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-14";
 
 /** Vertical break between main sections: larger than internal color groups, no rules or boxes. */
 const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-36";
+
+type MobileImagePointerEnd = {
+  dx: number;
+  dy: number;
+  dt: number;
+  sectionKey: WorkSectionKey;
+};
 
 type StripItemProps = {
   item: WorkItem;
   groupLabel: string;
   capId: string;
   panelId: string;
+  sectionKey: WorkSectionKey;
   isMobile: boolean;
   isFocused: boolean;
   isFaded: boolean;
-  onMobileTap: (panelId: string) => void;
+  /** Mobile: strip is “armed” (horizontal or first tap) — second tap can open focus. */
+  stripArmed: boolean;
+  onMobileImagePointerEnd: (panelId: string, p: MobileImagePointerEnd) => void;
   reduceMotion: boolean;
 };
 
@@ -131,12 +173,20 @@ function StripItem({
   groupLabel,
   capId,
   panelId,
+  sectionKey,
   isMobile,
   isFocused,
   isFaded,
-  onMobileTap,
+  stripArmed,
+  onMobileImagePointerEnd,
   reduceMotion,
 }: StripItemProps) {
+  const mobilePtr = useRef<{
+    x0: number;
+    y0: number;
+    t0: number;
+    id: number;
+  } | null>(null);
   const showCaption = Boolean(item.caption);
   const imageAlt = item.caption || `${groupLabel} photograph`;
   const mediaClass = "absolute inset-0 h-full w-full object-cover object-center";
@@ -152,12 +202,43 @@ function StripItem({
     </p>
   );
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (!isMobile) return;
-    if (isFaded) return;
-    e.stopPropagation();
-    onMobileTap(panelId);
-  };
+  const clearMobilePtr = useCallback(() => {
+    mobilePtr.current = null;
+  }, []);
+
+  const handleMobilePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (!isMobile || isFaded) return;
+      mobilePtr.current = {
+        x0: e.clientX,
+        y0: e.clientY,
+        t0: Date.now(),
+        id: e.pointerId,
+      };
+    },
+    [isFaded, isMobile]
+  );
+
+  const handleMobilePointerEnd = useCallback(
+    (e: React.PointerEvent) => {
+      if (!isMobile || isFaded) return;
+      const start = mobilePtr.current;
+      if (!start || e.pointerId !== start.id) return;
+      const dx = e.clientX - start.x0;
+      const dy = e.clientY - start.y0;
+      const dt = Date.now() - start.t0;
+      clearMobilePtr();
+      onMobileImagePointerEnd(panelId, { dx, dy, dt, sectionKey });
+    },
+    [
+      isFaded,
+      isMobile,
+      panelId,
+      sectionKey,
+      onMobileImagePointerEnd,
+      clearMobilePtr,
+    ]
+  );
 
   // Mobile: source slot while this item is shown in the focus layer
   if (isMobile && isFocused) {
@@ -198,7 +279,7 @@ function StripItem({
     );
   })();
 
-  // Desktop / tablet: static list item, no tap focus
+  // Desktop / tablet: static list item, no tap focus (stripArmed ignored)
   if (!isMobile) {
     return (
       <li
@@ -214,17 +295,27 @@ function StripItem({
     );
   }
 
-  // Mobile: motion + optional fade; tap to focus (not when faded)
+  const mobileCursorClass =
+    isFaded
+      ? "cursor-default select-none"
+      : stripArmed
+        ? "cursor-pointer"
+        : "cursor-default";
+
+  // Mobile: motion; pointer gestures decide strip activation vs open (no click — avoids scroll fights)
   return (
     <motion.li
       layout={false}
-      className={`${stripItemClass} ${isFaded ? "cursor-default select-none" : "cursor-pointer"}`}
+      className={`${stripItemClass} ${mobileCursorClass}`}
       role="listitem"
       aria-describedby={showCaption && !isFocused ? capId : undefined}
       initial={false}
       animate={{ opacity: isFaded ? FADED_WHEN_FOCUS : 1 }}
       transition={t}
-      onClick={handleClick}
+      onPointerDown={handleMobilePointerDown}
+      onPointerUp={handleMobilePointerEnd}
+      onPointerCancel={clearMobilePtr}
+      onClick={(e) => e.stopPropagation()}
     >
       <motion.div
         layout
@@ -321,7 +412,9 @@ type SectionWorkScrollProps = {
   sectionLabel: string;
   focusedPanelId: string | null;
   isMobile: boolean;
-  onMobileTap: (panelId: string) => void;
+  stripArmed: boolean;
+  onStripHorizontal: (sk: WorkSectionKey) => void;
+  onMobileImagePointerEnd: (panelId: string, p: MobileImagePointerEnd) => void;
   reduceMotion: boolean;
 };
 
@@ -335,11 +428,50 @@ function SectionWorkScroll({
   sectionLabel,
   focusedPanelId,
   isMobile,
-  onMobileTap,
+  stripArmed,
+  onStripHorizontal,
+  onMobileImagePointerEnd,
   reduceMotion,
 }: SectionWorkScrollProps) {
   const hasFocus = Boolean(focusedPanelId) && isMobile;
   const listId = `${sectionKey}-work-scroll`;
+  const hStripPtr = useRef<{
+    x0: number;
+    y0: number;
+    id: number;
+  } | null>(null);
+
+  const handleHStripPointerDown = useCallback(
+    (e: React.PointerEvent<HTMLUListElement>) => {
+      if (!isMobile) return;
+      hStripPtr.current = {
+        x0: e.clientX,
+        y0: e.clientY,
+        id: e.pointerId,
+      };
+    },
+    [isMobile]
+  );
+
+  const handleHStripPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLUListElement>) => {
+      if (!isMobile) return;
+      const s = hStripPtr.current;
+      if (!s || e.pointerId !== s.id) return;
+      const dx = e.clientX - s.x0;
+      const dy = e.clientY - s.y0;
+      if (isHorizontalPanIntent(dx, dy)) {
+        onStripHorizontal(sectionKey);
+      }
+    },
+    [isMobile, onStripHorizontal, sectionKey]
+  );
+
+  const clearHStripPtr = useCallback((e: React.PointerEvent<HTMLUListElement>) => {
+    const s = hStripPtr.current;
+    if (s && e.pointerId === s.id) hStripPtr.current = null;
+  }, []);
+
   return (
     <section
       className="relative w-full"
@@ -349,8 +481,15 @@ function SectionWorkScroll({
       <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
         <div className="-mx-3 min-w-0 px-3 md:mx-0 md:px-0">
           <ul
-            className="no-scrollbar m-0 flex list-none touch-pan-x items-center gap-3.5 overflow-x-auto overscroll-x-contain scroll-smooth p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 md:gap-4 md:pl-2.5"
-            style={{ WebkitOverflowScrolling: "touch" }}
+            className="no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto overscroll-x-contain scroll-smooth p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 md:gap-4 md:pl-2.5"
+            style={{
+              WebkitOverflowScrolling: "touch",
+              ...(isMobile ? { touchAction: "pan-x pan-y" } : null),
+            }}
+            onPointerDown={handleHStripPointerDown}
+            onPointerMove={handleHStripPointerMove}
+            onPointerUpCapture={clearHStripPtr}
+            onPointerCancelCapture={clearHStripPtr}
             aria-label={`${sectionLabel} — all color groups`}
           >
             {WORK_COLOR_ORDER.flatMap((group) => {
@@ -384,10 +523,12 @@ function SectionWorkScroll({
                           groupLabel={group.label}
                           capId={capId}
                           panelId={panelId}
+                          sectionKey={sectionKey}
                           isMobile={isMobile}
                           isFocused={isFocused}
                           isFaded={isFaded}
-                          onMobileTap={onMobileTap}
+                          stripArmed={stripArmed}
+                          onMobileImagePointerEnd={onMobileImagePointerEnd}
                           reduceMotion={reduceMotion}
                         />
                       );
@@ -410,16 +551,39 @@ export function WorkExperience() {
     getServerMobileSnapshot
   );
   const [focusedPanelId, setFocusedPanelId] = useState<string | null>(null);
+  const [stripReady, setStripReady] = useState<
+    Partial<Record<WorkSectionKey, boolean>>
+  >({});
+  const stripReadyRef = useRef(stripReady);
   const reduceMotion = useReducedMotion() ?? false;
+
+  useEffect(() => {
+    stripReadyRef.current = stripReady;
+  }, [stripReady]);
 
   const closeFocus = useCallback(() => {
     setFocusedPanelId(null);
+    setStripReady({});
   }, []);
 
-  /** Opens focus from a strip item (non-faded only; wrapper/overlay handle close). */
-  const onMobileTap = useCallback((panelId: string) => {
-    setFocusedPanelId(panelId);
+  const onStripHorizontal = useCallback((sk: WorkSectionKey) => {
+    setStripReady((r) => ({ ...r, [sk]: true }));
   }, []);
+
+  const onMobileImagePointerEnd = useCallback(
+    (panelId: string, p: MobileImagePointerEnd) => {
+      const { dx, dy, dt, sectionKey: sk } = p;
+      if (isVerticalScrollIntent(dx, dy)) return;
+      if (isHorizontalPanIntent(dx, dy)) return;
+      if (!isLightTapGesture(dx, dy, dt)) return;
+      if (!stripReadyRef.current[sk]) {
+        setStripReady((r) => ({ ...r, [sk]: true }));
+        return;
+      }
+      setFocusedPanelId(panelId);
+    },
+    []
+  );
 
   useEffect(() => {
     if (!isMobile) closeFocus();
@@ -450,6 +614,9 @@ export function WorkExperience() {
         {WORK_SECTION_ORDER.map((section) => {
           if (!sectionHasItems(section.key)) return null;
           const showSectionRule = sectionNeedsTopSpacer(section.key);
+          const sectionNum =
+            WORK_SECTION_ORDER.findIndex((s) => s.key === section.key) + 1;
+          const sectionIndexLabel = String(sectionNum).padStart(2, "0");
           return (
             <div
               key={section.key}
@@ -457,9 +624,14 @@ export function WorkExperience() {
             >
               <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
                 <h2
-                  className={`${workChapterTitleClass} ${workChapterTitleGapClass}`}
+                  className={`pl-0.5 pr-1 sm:pl-1 sm:pr-1 ${workChapterTitleGapClass}`}
                 >
-                  {section.label}
+                  <span className={workChapterIndexClass}>
+                    {sectionIndexLabel}
+                  </span>
+                  <span className={workChapterTitleTextClass}>
+                    {section.label}
+                  </span>
                 </h2>
               </div>
               <SectionWorkScroll
@@ -467,7 +639,9 @@ export function WorkExperience() {
                 sectionLabel={section.label}
                 focusedPanelId={focusedPanelId}
                 isMobile={isMobile}
-                onMobileTap={onMobileTap}
+                stripArmed={Boolean(stripReady[section.key])}
+                onStripHorizontal={onStripHorizontal}
+                onMobileImagePointerEnd={onMobileImagePointerEnd}
                 reduceMotion={reduceMotion}
               />
             </div>
