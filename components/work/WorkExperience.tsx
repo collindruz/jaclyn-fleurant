@@ -308,7 +308,7 @@ function StripItem({
         role="listitem"
         aria-describedby={showCaption ? capId : undefined}
       >
-        <div className="relative h-full w-full overflow-hidden">
+        <div className="relative h-full w-full cursor-pointer overflow-hidden">
           {mediaInner}
         </div>
         {caption}
@@ -525,10 +525,7 @@ function SectionWorkScroll({
       <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
         <div className="-mx-3 min-w-0 px-3 md:mx-0 md:px-0">
           <ul
-            className={
-              "no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto overscroll-x-contain scroll-smooth p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 md:gap-4 md:pl-2.5 " +
-              (isMobile ? "" : "md:cursor-pointer")
-            }
+            className="no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto overscroll-x-contain scroll-smooth p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 md:gap-4 md:pl-2.5"
             style={{
               WebkitOverflowScrolling: "touch",
               ...(isMobile ? { touchAction: "pan-x pan-y" } : null),
@@ -608,6 +605,7 @@ export function WorkExperience() {
     Partial<Record<WorkSectionKey, boolean>>
   >({});
   const stripReadyRef = useRef(stripReady);
+  const expandedSectionContainerRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion() ?? false;
 
   useEffect(() => {
@@ -656,6 +654,19 @@ export function WorkExperience() {
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
+  }, [isMobile, expandedSection]);
+
+  useEffect(() => {
+    if (isMobile || expandedSection === null) return;
+    const onDocPointerDown = (e: PointerEvent) => {
+      const el = expandedSectionContainerRef.current;
+      if (!el) return;
+      const t = e.target;
+      if (t instanceof Node && el.contains(t)) return;
+      setExpandedSection(null);
+    };
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
   }, [isMobile, expandedSection]);
 
   useEffect(() => {
@@ -720,6 +731,7 @@ export function WorkExperience() {
           return (
             <div
               key={section.key}
+              ref={expandedSection === section.key ? expandedSectionContainerRef : null}
               className={showSectionRule ? workSectionChapterBreakClass : undefined}
             >
               <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
