@@ -140,11 +140,11 @@ const workChapterTitleTextClass =
   "block font-serif text-[1.4rem] font-light leading-[1.2] tracking-[-0.01em] " +
   "text-charcoal/48 sm:text-[1.5rem] md:text-[1.65rem]";
 
-/** Space after chapter block before the lookbook strip (visual “pause”). */
-const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-14";
+/** Space after chapter block before the lookbook strip. */
+const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-10";
 
-/** Vertical break between main sections: larger than internal color groups, no rules or boxes. */
-const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-36";
+/** Vertical break between main sections (tighter on md+ only). */
+const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-24";
 
 type MobileImagePointerEnd = {
   dx: number;
