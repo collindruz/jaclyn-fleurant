@@ -1,7 +1,7 @@
 /**
  * Filenames in `public/images/work/site-pull` (regenerate with `npm run work:sync-files` or
  * `npm run work:dedupe` / `npm run pull:site-images`).
- * @generated 2026-04-27T16:17:38.120Z
+ * @generated 2026-04-27T16:35:00.183Z
  */
 export const SITE_PULL_FILENAMES = [
   "site-001.jpg",

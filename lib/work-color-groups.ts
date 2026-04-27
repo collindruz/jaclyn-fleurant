@@ -3,7 +3,7 @@
  * Source: public/images/work/site-pull (see work-person-filtered.json when present; auto palette, no crop).
  * Curation: lib/work-curation.json → applyWorkCuration() in the app.
  * Images analyzed: 352
- * @generated 2026-04-27T16:17:07.526Z
+ * @generated 2026-04-27T16:35:08.919Z
  */
 
 import type { WorkItem } from "./work-types";
