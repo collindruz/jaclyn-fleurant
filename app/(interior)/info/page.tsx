@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 export const metadata: Metadata = {
   title: "Info",
   description:
-    "JACLYN FLEURANT — stylist and creative director, New York. Press, contact, and Instagram.",
+    "JACLYN FLEURANT — Los Angeles based stylist and costume designer. Press, contact, and Instagram.",
 };
 
 const PRESS_LINKS: { publication: string; title: string; href: string }[] = [];
@@ -21,10 +21,28 @@ export default function InfoPage() {
         <FadeIn>
           <h1 className="font-serif text-2xl font-light text-charcoal/88 sm:text-3xl">Info</h1>
 
-          <div className="mt-10 max-w-md space-y-5 font-sans text-[0.9rem] leading-[1.75] text-charcoal/55 sm:mt-12 sm:text-[0.92rem] sm:leading-8">
+          <div
+            className="mt-10 max-w-xl space-y-6 text-left font-sans text-[0.92rem] leading-[1.85] text-charcoal/55 sm:mt-12 sm:space-y-7 sm:text-[0.95rem] sm:leading-[1.9]"
+          >
             <p>
-              JACLYN FLEURANT is a New York based stylist and creative director, working across
-              fashion, film, and live moments.
+              Jaclyn Fleurant is a Los Angeles based stylist and costume designer with a clear
+              and intentional point of view. Her work is guided by both instinct and precision,
+              shaped by a sensitivity to silhouette, texture, and mood. Clothing is never
+              incidental. It is used to define character, build identity, and create a sense of
+              presence within an image.
+            </p>
+            <p>
+              She studied Design and Merchandising at Drexel University and later Fashion
+              Marketing and Business at the London College of Fashion, developing a foundation
+              that blends both creative and structural thinking. Early time spent within the
+              studio of Marc Jacobs in New York refined her eye for proportion and detail,
+              grounding her approach in the craft of construction as much as in image making.
+            </p>
+            <p>
+              Now based in Los Angeles, Jaclyn works across editorial, advertising, performance,
+              and red carpet. Her work reflects a balance of control and intuition, with an
+              emphasis on clarity and restraint. The result is imagery that feels considered,
+              elevated, and quietly confident.
             </p>
           </div>
 
