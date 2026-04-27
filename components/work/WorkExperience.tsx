@@ -87,6 +87,11 @@ const stripItemClass =
   "w-[min(52vw,21rem)] min-w-[11rem] " +
   "md:w-[24vw] md:min-w-0 md:max-w-[10.5rem] lg:max-w-[12rem]";
 
+/** Horizontal scroll: `w-0` + `overflow-visible` keeps group width to the image row; label sticks in scrollport. */
+const COLOR_GROUP_STICKY_LABEL =
+  "pointer-events-none sticky left-3 top-3 z-20 w-0 shrink-0 self-start overflow-visible " +
+  "font-sans text-[0.5rem] font-normal leading-none uppercase tracking-[0.22em] text-charcoal/30 whitespace-nowrap";
+
 const liftClass =
   "relative h-full w-full origin-center transition duration-300 ease-out " +
   "will-change-transform " +
@@ -108,13 +113,7 @@ type StripItemProps = {
   isFaded: boolean;
   onMobileTap: (panelId: string) => void;
   reduceMotion: boolean;
-  /** Shown on the first image of each color group in the section scroll. */
-  colorLabelOverlay?: string;
 };
-
-const STRIP_COLOR_LABEL_OVERLAY_CLASS =
-  "pointer-events-none absolute left-2 top-2 z-[2] font-sans text-[0.5rem] font-normal uppercase " +
-  "leading-none tracking-[0.22em] text-charcoal/25";
 
 function StripItem({
   item,
@@ -126,7 +125,6 @@ function StripItem({
   isFaded,
   onMobileTap,
   reduceMotion,
-  colorLabelOverlay,
 }: StripItemProps) {
   const showCaption = Boolean(item.caption);
   const imageAlt = item.caption || `${groupLabel} photograph`;
@@ -189,13 +187,6 @@ function StripItem({
     );
   })();
 
-  const colorLabelEl =
-    colorLabelOverlay != null && colorLabelOverlay !== "" ? (
-      <span className={STRIP_COLOR_LABEL_OVERLAY_CLASS} aria-hidden>
-        {colorLabelOverlay}
-      </span>
-    ) : null;
-
   // Desktop / tablet: static list item, no tap focus
   if (!isMobile) {
     return (
@@ -204,8 +195,9 @@ function StripItem({
         role="listitem"
         aria-describedby={showCaption ? capId : undefined}
       >
-        {colorLabelEl}
-        {mediaInner}
+        <div className="relative h-full w-full overflow-hidden">
+          {mediaInner}
+        </div>
         {caption}
       </li>
     );
@@ -229,7 +221,6 @@ function StripItem({
         className="relative h-full w-full overflow-hidden bg-transparent"
         transition={reduceMotion ? reducedT : { ...layoutSpring, layout: layoutSpring }}
       >
-        {colorLabelEl}
         {mediaInner}
       </motion.div>
       {caption}
@@ -324,8 +315,9 @@ type SectionWorkScrollProps = {
 };
 
 /**
- * One horizontal scroller: walk colors in order; only images as list items, first per group gets a
- * top-left color label overlay.
+ * One horizontal scroller per section. Each color group is an `li` with real width = its image row;
+ * a sticky top-left label sits in that segment so it stays visible for the full group, then the next
+ * group’s label takes over as it reaches the left edge.
  */
 function SectionWorkScroll({
   sectionKey,
@@ -346,34 +338,52 @@ function SectionWorkScroll({
       <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
         <div className="-mx-3 min-w-0 px-3 md:mx-0 md:px-0">
           <ul
-            className="no-scrollbar flex touch-pan-x items-center gap-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-1.5 pr-0 sm:gap-5 sm:pr-0 md:gap-5"
+            className="no-scrollbar m-0 flex list-none touch-pan-x items-center gap-4 overflow-x-auto overscroll-x-contain scroll-smooth p-0 pb-1.5 pr-0 sm:gap-5 sm:pr-0 md:gap-5"
             style={{ WebkitOverflowScrolling: "touch" }}
             aria-label={`${sectionLabel} — all color groups`}
           >
             {WORK_COLOR_ORDER.flatMap((group) => {
               const items = workSections[sectionKey][group.key];
               if (items.length === 0) return [];
-              return items.map((item, i) => {
-                const capId = `${sectionKey}-${group.key}-cap-${i}`;
-                const panelId = `${sectionKey}-${group.key}-${i}`;
-                const isFocused = focusedPanelId === panelId;
-                const isFaded = hasFocus && !isFocused;
-                return (
-                  <StripItem
-                    key={`${sectionKey}-${group.key}-${i}-${item.src}`}
-                    item={item}
-                    groupLabel={group.label}
-                    capId={capId}
-                    panelId={panelId}
-                    isMobile={isMobile}
-                    isFocused={isFocused}
-                    isFaded={isFaded}
-                    onMobileTap={onMobileTap}
-                    reduceMotion={reduceMotion}
-                    colorLabelOverlay={i === 0 ? group.label : undefined}
-                  />
-                );
-              });
+              return [
+                <li
+                  key={`${sectionKey}-color-group-${group.key}`}
+                  className="flex min-w-0 shrink-0 list-none"
+                >
+                  <span
+                    className={COLOR_GROUP_STICKY_LABEL}
+                    aria-hidden
+                  >
+                    {group.label}
+                  </span>
+                  <ul
+                    className="m-0 flex min-w-0 list-none items-center gap-4 p-0 sm:gap-5 md:gap-5"
+                    role="list"
+                    aria-label={group.label}
+                  >
+                    {items.map((item, i) => {
+                      const capId = `${sectionKey}-${group.key}-cap-${i}`;
+                      const panelId = `${sectionKey}-${group.key}-${i}`;
+                      const isFocused = focusedPanelId === panelId;
+                      const isFaded = hasFocus && !isFocused;
+                      return (
+                        <StripItem
+                          key={`${sectionKey}-${group.key}-${i}-${item.src}`}
+                          item={item}
+                          groupLabel={group.label}
+                          capId={capId}
+                          panelId={panelId}
+                          isMobile={isMobile}
+                          isFocused={isFocused}
+                          isFaded={isFaded}
+                          onMobileTap={onMobileTap}
+                          reduceMotion={reduceMotion}
+                        />
+                      );
+                    })}
+                  </ul>
+                </li>,
+              ];
             })}
           </ul>
         </div>
