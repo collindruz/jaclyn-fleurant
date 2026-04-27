@@ -10,6 +10,7 @@ import Image from "next/image";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -156,9 +157,8 @@ const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-10";
 /** Vertical break between main sections (tighter on md+ only). */
 const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-24";
 
-/** Strip tile `width` transition — scroll correction runs after it completes. */
-const STRIP_TILE_WIDTH_TRANS_MS = 300;
-const STRIP_SCROLL_ALIGN_DELAY_MS = STRIP_TILE_WIDTH_TRANS_MS + 32;
+/** rAF cap while tile width is transitioning; keeps the anchor at `c0` every frame. */
+const STRIP_SCROLL_ALIGN_MAX_FRAMES = 50;
 
 type MobileImagePointerEnd = {
   dx: number;
@@ -446,8 +446,6 @@ type DesktopStripExpandAnchor = {
 type StripScrollAlignPayload = {
   panelId: string;
   centerViewportX: number;
-  /** `true` when the section was already expanded (no width transition). */
-  skipLayoutWait: boolean;
 };
 
 type SectionWorkScrollProps = {
@@ -519,45 +517,75 @@ function SectionWorkScroll({
     [isMobile, onDesktopStripExpand]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isMobile || !isSectionDesktopExpanded || !stripScrollAlign) return;
-    const { panelId, centerViewportX: c0, skipLayoutWait } = stripScrollAlign;
+    const { panelId, centerViewportX: c0 } = stripScrollAlign;
     const ul = scrollerRef.current;
     if (!ul) {
       onStripScrollAlignConsumed();
       return;
     }
-    const alignDelay =
-      reduceMotion || skipLayoutWait
-        ? 0
-        : STRIP_SCROLL_ALIGN_DELAY_MS;
-    const run = () => {
-      const el = ul.querySelector(
+    const findPanel = () =>
+      ul.querySelector(
         `[data-work-panel="${CSS.escape(panelId)}"]`
       ) as HTMLElement | null;
-      if (!el) {
-        onStripScrollAlignConsumed();
-        return;
-      }
-      const r = el.getBoundingClientRect();
+    const prevScrollBehavior = ul.style.scrollBehavior;
+    ul.style.scrollBehavior = "auto";
+    const alignOnce = () => {
+      const node = findPanel();
+      if (!node) return null;
+      const r = node.getBoundingClientRect();
       const c1 = r.left + r.width / 2;
-      ul.scrollLeft = ul.scrollLeft + c1 - c0;
+      const err = c1 - c0;
+      if (Math.abs(err) > 0.35) {
+        ul.scrollLeft += err;
+      }
+      const r2 = node.getBoundingClientRect();
+      return r2.left + r2.width / 2;
+    };
+    const finish = () => {
+      ul.style.scrollBehavior = prevScrollBehavior;
       onStripScrollAlignConsumed();
     };
-    if (alignDelay === 0) {
-      const id = requestAnimationFrame(() => {
-        requestAnimationFrame(run);
-      });
-      return () => cancelAnimationFrame(id);
+    if (alignOnce() === null) {
+      finish();
+      return;
     }
-    const tid = window.setTimeout(run, alignDelay);
-    return () => clearTimeout(tid);
+    let raf = 0;
+    let frame = 0;
+    let stable = 0;
+    const tick = () => {
+      const cAfter = alignOnce();
+      if (cAfter == null) {
+        finish();
+        return;
+      }
+      if (Math.abs(cAfter - c0) <= 0.5) {
+        stable += 1;
+      } else {
+        stable = 0;
+      }
+      frame += 1;
+      if (stable >= 2) {
+        finish();
+        return;
+      }
+      if (frame >= STRIP_SCROLL_ALIGN_MAX_FRAMES) {
+        finish();
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      ul.style.scrollBehavior = prevScrollBehavior;
+    };
   }, [
     isMobile,
     isSectionDesktopExpanded,
     stripScrollAlign,
     onStripScrollAlignConsumed,
-    reduceMotion,
   ]);
 
   const handleHStripPointerDown = useCallback(
@@ -684,7 +712,6 @@ export function WorkExperience() {
     sectionKey: WorkSectionKey;
     panelId: string;
     centerViewportX: number;
-    skipLayoutWait: boolean;
   } | null>(null);
   const [focusedPanelId, setFocusedPanelId] = useState<string | null>(null);
   const [stripReady, setStripReady] = useState<
@@ -867,7 +894,6 @@ export function WorkExperience() {
                       sectionKey: section.key,
                       panelId: anchor.panelId,
                       centerViewportX: anchor.centerViewportX,
-                      skipLayoutWait: expandedSection === section.key,
                     });
                   } else {
                     setExpandScrollAlign(null);
@@ -879,7 +905,6 @@ export function WorkExperience() {
                     ? {
                         panelId: expandScrollAlign.panelId,
                         centerViewportX: expandScrollAlign.centerViewportX,
-                        skipLayoutWait: expandScrollAlign.skipLayoutWait,
                       }
                     : null
                 }
