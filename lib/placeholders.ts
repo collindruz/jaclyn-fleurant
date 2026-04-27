@@ -111,10 +111,6 @@ export const images = {
   world: [ph, ph, ph, ph, ph, ph] as string[],
 } as const;
 
-export const copy = {
-  worldIntro: "Stills. One slow pass — not a catalog.",
-} as const;
-
 export { WORLD_STILLS_MAX, WORLD_STILLS_MIN } from "./world-stills-bounds";
 
 /**

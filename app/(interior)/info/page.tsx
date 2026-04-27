@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 export const metadata: Metadata = {
   title: "Info",
   description:
-    "JACLYN FLEURANT — Los Angeles based stylist and costume designer. Press, contact, and Instagram.",
+    "Stylist and costume designer. Press, contact, and Instagram.",
 };
 
 const PRESS_LINKS: { publication: string; title: string; href: string }[] = [];
@@ -25,7 +25,7 @@ export default function InfoPage() {
             className="mt-10 max-w-xl space-y-6 text-left font-sans text-[0.92rem] leading-[1.85] text-charcoal/55 sm:mt-12 sm:space-y-7 sm:text-[0.95rem] sm:leading-[1.9]"
           >
             <p>
-              Jaclyn Fleurant is a Los Angeles based stylist and costume designer with a clear
+              Jaclyn Fleurant is a stylist and costume designer with a clear
               and intentional point of view. Her work is guided by both instinct and precision,
               shaped by a sensitivity to silhouette, texture, and mood. Clothing is never
               incidental. It is used to define character, build identity, and create a sense of
@@ -49,9 +49,8 @@ export default function InfoPage() {
           <div className="mt-12 max-w-md sm:mt-16">
             <h2 className="sr-only">Contact</h2>
             <p className="font-sans text-[0.85rem] leading-7 text-charcoal/45 sm:leading-8 md:text-[0.9rem]">
-              A few sentences in the email is how I get context — I read the note before anything
-              else. Decks and PDFs are fine after that, if the project needs them. If the fit is
-              wrong, I’ll say so; if it’s not, we’ll go deeper.
+              A short note in email is enough to begin. Further materials are welcome when they
+              help describe the work. I read each message and respond when the project is a fit.
             </p>
             <ul className="mt-8 list-none space-y-4 p-0 sm:mt-10 sm:space-y-5">
               <li>

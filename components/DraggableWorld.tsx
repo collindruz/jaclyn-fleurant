@@ -13,7 +13,6 @@ import type { MouseEvent, RefObject } from "react";
 import {
   useCallback,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
@@ -118,7 +117,6 @@ export function DraggableWorld({ srcs }: DraggableWorldProps) {
     [srcs]
   );
   const n = list.length;
-  const areaId = useId();
   const constraintsRef = useRef<HTMLDivElement>(null);
   /** Top of stack when dragging, tapping, or not enlarged. */
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -182,12 +180,6 @@ export function DraggableWorld({ srcs }: DraggableWorldProps) {
       className="w-screen min-w-0 max-w-[100dvw] overflow-x-clip"
       onClick={onWorldClick}
     >
-      <p
-        className="mb-8 text-center font-sans text-[0.7rem] font-normal tracking-[0.12em] text-charcoal/35 md:mb-10"
-        id={`${areaId}-hint`}
-      >
-        move the stills — first tap to select, second to enlarge; tap off the stills to shrink
-      </p>
       {/*
         Drag bounds = this padded, viewport-tall box so stills stay mostly on screen.
         Replaces a very tall (130dvh) play area that let images drift far out of view.
@@ -198,8 +190,7 @@ export function DraggableWorld({ srcs }: DraggableWorldProps) {
           className="relative box-border w-full touch-manipulation select-none px-0 py-1 sm:px-2 sm:py-2 md:px-3 md:py-3"
           style={{ height: "min(100dvh, 1100px)" }}
           role="group"
-          aria-labelledby={`${areaId}-hint`}
-          aria-label="Loose stills: drag to move, first tap a still to select, second to enlarge, tap a print to shrink when enlarged, tap empty area or press Escape. Escape otherwise resets all."
+          aria-label="Stills"
         >
         {list.map((src, i) => {
           const L = PRINTS[i] ?? PRINTS[i % PRINTS.length]!;
@@ -391,7 +382,7 @@ function DraggablePrint({
       tabIndex={0}
       role="button"
       aria-pressed={isEnlarged}
-      aria-label={`Still ${index + 1} of ${n}, draggable. First tap to select, second to enlarge; when enlarged, tap a still or the background to close.`}
+      aria-label={`Still ${index + 1} of ${n}`}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
