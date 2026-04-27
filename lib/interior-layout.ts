@@ -1,8 +1,10 @@
 /**
- * Shared `<main>` top spacing for all routes under `app/(interior)/` (not the homepage).
- * Use only here — do not add per-page `pt-*` for header clearance; no right padding, full width.
+ * Shared `<main>` for all routes under `app/(interior)/`.
+ * The global `Navigation` is `sticky` (not `fixed`), so it reserves height in the document flow —
+ * do not add per-page `pt-*` to clear a floating header. Full width, no right gutter.
  */
-export const interiorMainTopClass =
-  "box-border w-full min-w-0 " +
-  "pt-[calc(200px+env(safe-area-inset-top,0px))] " +
-  "md:pt-[calc(140px+env(safe-area-inset-top,0px))]";
+export const interiorMainClass =
+  "box-border w-full min-w-0 min-h-0";
+
+/** @deprecated use `interiorMainClass` — padding was for `fixed` nav; no longer used. */
+export const interiorMainTopClass = interiorMainClass;

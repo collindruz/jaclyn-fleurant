@@ -16,7 +16,7 @@ html {
 
 @layer base {
   body {
-    @apply bg-bone text-charcoal font-sans antialiased;
+    @apply overflow-x-clip bg-bone text-charcoal font-sans antialiased;
   }
 
   ::selection {

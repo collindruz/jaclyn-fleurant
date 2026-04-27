@@ -20,7 +20,7 @@ export function Navigation() {
     } ${active ? "" : "hover:opacity-70"}`;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex flex-row items-start justify-between gap-3 bg-bone/60 px-5 py-6 text-charcoal/80 sm:gap-4 sm:px-6 sm:py-7 md:items-center md:justify-between md:gap-0 md:px-10 md:py-8">
+    <header className="sticky top-0 z-50 flex w-full flex-row items-start justify-between gap-3 bg-bone/60 px-5 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-6 text-charcoal/80 sm:gap-4 sm:px-6 sm:pt-[calc(1.75rem+env(safe-area-inset-top,0px))] sm:pb-7 md:items-center md:justify-between md:gap-0 md:px-10 md:pt-[calc(2rem+env(safe-area-inset-top,0px))] md:pb-8">
       <Link
         href="/"
         className="min-w-0 shrink font-serif text-[0.98rem] tracking-[0.18em] transition-opacity duration-1000 hover:opacity-50 sm:text-[1.05rem]"

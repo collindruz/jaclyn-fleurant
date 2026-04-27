@@ -25,23 +25,23 @@ type DraggableWorldProps = {
 };
 
 /**
- * Collage: desktop = left / center / right with varied tops; mobile = same band stacked
- * but `left` staggered (12%, 38%, 68% and between) so stills are not a single left column.
+ * Collage: desktop = left / center / right; mobile = full-width band with `left` spread
+ * (~5–78%) so prints are not pinned to a single left column (no implicit “nav gutter”).
  */
 const PRINTS: {
   m: { t: string; l: string; w: string };
   d: { t: string; l: string; w: string };
 }[] = [
-  { m: { t: "0%", l: "12%", w: "58%" }, d: { t: "5%", l: "5%", w: "21%" } },
-  { m: { t: "16%", l: "32%", w: "54%" }, d: { t: "4%", l: "38%", w: "20%" } },
-  { m: { t: "6%", l: "2%", w: "64%" }, d: { t: "8%", l: "66%", w: "20%" } },
-  { m: { t: "34%", l: "8%", w: "58%" }, d: { t: "38%", l: "12%", w: "22%" } },
-  { m: { t: "24%", l: "38%", w: "52%" }, d: { t: "32%", l: "40%", w: "20%" } },
-  { m: { t: "48%", l: "4%", w: "62%" }, d: { t: "30%", l: "68%", w: "20%" } },
-  { m: { t: "58%", l: "22%", w: "55%" }, d: { t: "58%", l: "6%", w: "21%" } },
-  { m: { t: "42%", l: "2%", w: "58%" }, d: { t: "52%", l: "38%", w: "20%" } },
-  { m: { t: "72%", l: "10%", w: "56%" }, d: { t: "10%", l: "68%", w: "19%" } },
-  { m: { t: "64%", l: "28%", w: "50%" }, d: { t: "62%", l: "58%", w: "20%" } },
+  { m: { t: "0%", l: "5%", w: "32%" }, d: { t: "5%", l: "5%", w: "21%" } },
+  { m: { t: "14%", l: "20%", w: "30%" }, d: { t: "4%", l: "38%", w: "20%" } },
+  { m: { t: "6%", l: "40%", w: "32%" }, d: { t: "8%", l: "66%", w: "20%" } },
+  { m: { t: "30%", l: "60%", w: "30%" }, d: { t: "38%", l: "12%", w: "22%" } },
+  { m: { t: "20%", l: "78%", w: "20%" }, d: { t: "32%", l: "40%", w: "20%" } },
+  { m: { t: "44%", l: "4%", w: "34%" }, d: { t: "30%", l: "68%", w: "20%" } },
+  { m: { t: "36%", l: "38%", w: "32%" }, d: { t: "58%", l: "6%", w: "21%" } },
+  { m: { t: "58%", l: "58%", w: "30%" }, d: { t: "52%", l: "38%", w: "20%" } },
+  { m: { t: "68%", l: "18%", w: "28%" }, d: { t: "10%", l: "68%", w: "19%" } },
+  { m: { t: "52%", l: "72%", w: "24%" }, d: { t: "62%", l: "58%", w: "20%" } },
 ];
 
 /** Rest (non-enlarged) only: press / drag nudge. */
@@ -178,7 +178,10 @@ export function DraggableWorld({ srcs }: DraggableWorldProps) {
   if (n === 0) return null;
 
   return (
-    <div className="w-full" onClick={onWorldClick}>
+    <div
+      className="w-screen min-w-0 max-w-[100dvw] overflow-x-clip"
+      onClick={onWorldClick}
+    >
       <p
         className="mb-8 text-center font-sans text-[0.7rem] font-normal tracking-[0.12em] text-charcoal/35 md:mb-10"
         id={`${areaId}-hint`}
