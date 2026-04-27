@@ -163,12 +163,8 @@ const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-10";
 /** Vertical break between main sections (tighter on md+ only). */
 const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-24";
 
-/** Must match `md:duration-[550ms]` on strip tiles (one motion with center scroll). */
-const STRIP_EXPAND_SCROLL_MS = 550;
-
-function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
+/** After md+ tile `width` transition (`md:duration-[550ms]`), then center the anchor tile. */
+const STRIP_CENTER_AFTER_EXPAND_MS = 575;
 
 type MobileImagePointerEnd = {
   dx: number;
@@ -537,74 +533,27 @@ function SectionWorkScroll({
     if (isMobile || !isSectionDesktopExpanded || !stripExpandCenter) return;
     const { panelId } = stripExpandCenter;
     let cancelled = false;
-    let rafChain0 = 0;
-    let rafChain1 = 0;
-    const scrollAnim = { id: 0 };
-
-    const getScrollerAndItem = () => {
-      const s = scrollerRef.current;
-      const it =
+    const scrollTimer = window.setTimeout(() => {
+      if (cancelled) return;
+      const item =
         itemRefs.current.get(panelId) ??
-        (s?.querySelector(
+        (scrollerRef.current?.querySelector(
           `[data-work-panel="${CSS.escape(panelId)}"]`
         ) as HTMLLIElement | null);
-      return { s, it };
-    };
-
-    rafChain0 = requestAnimationFrame(() => {
-      rafChain1 = requestAnimationFrame(() => {
-        if (cancelled) return;
-        const { s, it: item } = getScrollerAndItem();
-        if (!s || !item) {
-          onStripExpandCenterConsumed();
-          return;
-        }
-        const scrollerRect = s.getBoundingClientRect();
-        const itemRect = item.getBoundingClientRect();
-        const currentScroll = s.scrollLeft;
-        const itemCenter =
-          itemRect.left - scrollerRect.left + currentScroll + itemRect.width / 2;
-        const maxScroll = Math.max(0, s.scrollWidth - s.clientWidth);
-        const targetScroll = Math.max(
-          0,
-          Math.min(itemCenter - s.clientWidth / 2, maxScroll)
-        );
-        const from = s.scrollLeft;
-        const delta = targetScroll - from;
-        if (Math.abs(delta) < 0.5) {
-          onStripExpandCenterConsumed();
-          return;
-        }
-        if (reduceMotion) {
-          s.scrollLeft = targetScroll;
-          onStripExpandCenterConsumed();
-          return;
-        }
-        const t0 = performance.now();
-        const tick = (now: number) => {
-          if (cancelled) return;
-          const sc = scrollerRef.current;
-          if (!sc) {
-            onStripExpandCenterConsumed();
-            return;
-          }
-          const t = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
-          sc.scrollLeft = from + delta * easeInOutCubic(t);
-          if (t < 1) {
-            scrollAnim.id = requestAnimationFrame(tick);
-          } else {
-            onStripExpandCenterConsumed();
-          }
-        };
-        scrollAnim.id = requestAnimationFrame(tick);
+      if (!item) {
+        onStripExpandCenterConsumed();
+        return;
+      }
+      item.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "nearest",
+        inline: "center",
       });
-    });
-
+      onStripExpandCenterConsumed();
+    }, STRIP_CENTER_AFTER_EXPAND_MS);
     return () => {
       cancelled = true;
-      cancelAnimationFrame(rafChain0);
-      cancelAnimationFrame(rafChain1);
-      cancelAnimationFrame(scrollAnim.id);
+      clearTimeout(scrollTimer);
     };
   }, [
     isMobile,
