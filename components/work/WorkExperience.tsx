@@ -298,95 +298,86 @@ function sectionNeedsTopSpacer(key: WorkSectionKey): boolean {
   return false;
 }
 
-/** First (section|color) row that has items — for top border on `ColorStrip`. */
-const FIRST_STRIP_KEY: string | null = (() => {
-  for (const s of WORK_SECTION_ORDER) {
-    for (const c of WORK_COLOR_ORDER) {
-      if (workSections[s.key][c.key].length > 0) {
-        return `${s.key}|${c.key}`;
-      }
-    }
-  }
-  return null;
-})();
+const LABEL_INLINE_CLASS =
+  "whitespace-nowrap font-sans text-[0.52rem] font-normal uppercase leading-snug " +
+  "tracking-[0.22em] text-charcoal/30 select-none";
 
-type ColorStripProps = {
+type SectionWorkScrollProps = {
   sectionKey: WorkSectionKey;
   sectionLabel: string;
-  groupKey: WorkColorKey;
-  label: string;
-  items: WorkItem[];
-  isFirst: boolean;
   focusedPanelId: string | null;
   isMobile: boolean;
   onMobileTap: (panelId: string) => void;
   reduceMotion: boolean;
 };
 
-function ColorStrip({
+/**
+ * One horizontal scroller: for each color with items, inline label + that group’s images
+ * (Black → … → Vivid).
+ */
+function SectionWorkScroll({
   sectionKey,
   sectionLabel,
-  groupKey,
-  label,
-  items,
-  isFirst,
   focusedPanelId,
   isMobile,
   onMobileTap,
   reduceMotion,
-}: ColorStripProps) {
+}: SectionWorkScrollProps) {
   const hasFocus = Boolean(focusedPanelId) && isMobile;
-  const regionLabel = `${sectionLabel} — ${label}`;
-  const rowId = `${sectionKey}-${groupKey}`;
-
+  const listId = `${sectionKey}-work-scroll`;
   return (
     <section
-      className={
-        "relative w-full " +
-        (isFirst
-          ? "border-0"
-          : "border-t border-charcoal/[0.05] " + "pt-12 sm:pt-14 md:pt-18")
-      }
-      id={rowId}
-      aria-labelledby={`${rowId}-heading`}
+      className="relative w-full"
+      id={listId}
+      aria-label={`${sectionLabel} work`}
     >
       <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6 lg:gap-8">
-          <h2
-            id={`${rowId}-heading`}
-            className="shrink-0 font-sans text-[0.52rem] font-normal leading-snug tracking-[0.22em] text-charcoal/30 md:w-24 md:pt-0.5 md:leading-tight lg:w-28"
+        <div className="-mx-3 min-w-0 px-3 md:mx-0 md:px-0">
+          <ul
+            className="no-scrollbar flex touch-pan-x items-center gap-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-1.5 pr-0 sm:gap-5 sm:pr-0 md:gap-5"
+            style={{ WebkitOverflowScrolling: "touch" }}
+            aria-label={`${sectionLabel} — all color groups`}
           >
-            {label}
-          </h2>
-          <div className="min-w-0 flex-1 -mx-3 px-3 md:mx-0 md:px-0">
-            <ul
-              role="list"
-              aria-label={regionLabel}
-              className="no-scrollbar flex touch-pan-x gap-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-1.5 pr-0 sm:gap-5 sm:pr-0 md:gap-5"
-              style={{ WebkitOverflowScrolling: "touch" }}
-            >
-              {items.map((item, i) => {
-                const capId = `${sectionKey}-${groupKey}-cap-${i}`;
-                const panelId = `${sectionKey}-${groupKey}-${i}`;
-                const isFocused = focusedPanelId === panelId;
-                const isFaded = hasFocus && !isFocused;
-                return (
-                  <StripItem
-                    key={`${sectionKey}-${groupKey}-${i}-${item.src}`}
-                    item={item}
-                    groupLabel={label}
-                    capId={capId}
-                    panelId={panelId}
-                    isMobile={isMobile}
-                    isFocused={isFocused}
-                    isFaded={isFaded}
-                    onMobileTap={onMobileTap}
-                    reduceMotion={reduceMotion}
-                  />
-                );
-              })}
-            </ul>
-          </div>
+            {WORK_COLOR_ORDER.flatMap((group) => {
+              const items = workSections[sectionKey][group.key];
+              if (items.length === 0) return [];
+              return [
+                <li
+                  key={`${sectionKey}-label-${group.key}`}
+                  className="flex shrink-0 list-none"
+                  role="separator"
+                  aria-orientation="vertical"
+                >
+                  <span
+                    className={`${LABEL_INLINE_CLASS} pr-0.5`}
+                    id={`${sectionKey}-color-${group.key}`}
+                  >
+                    {group.label}
+                  </span>
+                </li>,
+                ...items.map((item, i) => {
+                  const capId = `${sectionKey}-${group.key}-cap-${i}`;
+                  const panelId = `${sectionKey}-${group.key}-${i}`;
+                  const isFocused = focusedPanelId === panelId;
+                  const isFaded = hasFocus && !isFocused;
+                  return (
+                    <StripItem
+                      key={`${sectionKey}-${group.key}-${i}-${item.src}`}
+                      item={item}
+                      groupLabel={group.label}
+                      capId={capId}
+                      panelId={panelId}
+                      isMobile={isMobile}
+                      isFocused={isFocused}
+                      isFaded={isFaded}
+                      onMobileTap={onMobileTap}
+                      reduceMotion={reduceMotion}
+                    />
+                  );
+                }),
+              ];
+            })}
+          </ul>
         </div>
       </div>
     </section>
@@ -439,12 +430,13 @@ export function WorkExperience() {
       >
         {WORK_SECTION_ORDER.map((section) => {
           if (!sectionHasItems(section.key)) return null;
+          const showSectionRule = sectionNeedsTopSpacer(section.key);
           return (
             <div
               key={section.key}
               className={
-                sectionNeedsTopSpacer(section.key)
-                  ? "mt-16 sm:mt-20 md:mt-24"
+                showSectionRule
+                  ? "mt-16 border-t border-charcoal/[0.05] pt-10 sm:mt-20 sm:pt-12 md:mt-24 md:pt-14"
                   : undefined
               }
             >
@@ -453,27 +445,14 @@ export function WorkExperience() {
                   {section.label}
                 </h2>
               </div>
-              {WORK_COLOR_ORDER.map((group) => {
-                const items = workSections[section.key][group.key];
-                if (items.length === 0) return null;
-                const isFirstStrip =
-                  FIRST_STRIP_KEY === `${section.key}|${group.key}`;
-                return (
-                  <ColorStrip
-                    key={`${section.key}-${group.key}`}
-                    sectionKey={section.key}
-                    sectionLabel={section.label}
-                    groupKey={group.key}
-                    label={group.label}
-                    items={items}
-                    isFirst={isFirstStrip}
-                    focusedPanelId={focusedPanelId}
-                    isMobile={isMobile}
-                    onMobileTap={onMobileTap}
-                    reduceMotion={reduceMotion}
-                  />
-                );
-              })}
+              <SectionWorkScroll
+                sectionKey={section.key}
+                sectionLabel={section.label}
+                focusedPanelId={focusedPanelId}
+                isMobile={isMobile}
+                onMobileTap={onMobileTap}
+                reduceMotion={reduceMotion}
+              />
             </div>
           );
         })}
