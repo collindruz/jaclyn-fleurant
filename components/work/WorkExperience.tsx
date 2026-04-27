@@ -90,7 +90,11 @@ function resolveWorkItem(
  */
 /** See `STRIP_EXPAND_SCROLL_MS`: same ms for width transition and post-expand rAF center scroll. */
 const STRIP_EXPAND_SCROLL_MS = 950;
-const STRIP_SCROLL_START_DELAY_MS = 120;
+/**
+ * Center-scroll runs after the md+ width transition has finished, then 2 rAFs for layout, so
+ * `scrollWidth` / padding / tile rects match the expanded strip.
+ */
+const STRIP_SCROLL_MEASURE_DELAY_MS = STRIP_EXPAND_SCROLL_MS;
 
 /** md+ uses one slow size transition; mobile keeps a shorter transition for horizontal strip reflow. */
 const stripItemClassBase =
@@ -177,13 +181,12 @@ function scrollLeftToCenterItem(
   scroller: HTMLUListElement,
   item: HTMLLIElement
 ): number {
-  const rS = scroller.getBoundingClientRect();
   const rI = item.getBoundingClientRect();
+  const rS = scroller.getBoundingClientRect();
   const itemLeftInContent = rI.left - rS.left + scroller.scrollLeft;
-  const target =
-    itemLeftInContent + rI.width / 2 - rS.width / 2;
-  const max = Math.max(0, scroller.scrollWidth - rS.width);
-  return Math.min(max, Math.max(0, target));
+  const rawTarget = itemLeftInContent + rI.width / 2 - scroller.clientWidth / 2;
+  const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+  return Math.max(0, Math.min(rawTarget, maxScroll));
 }
 
 type MobileImagePointerEnd = {
@@ -562,43 +565,50 @@ function SectionWorkScroll({
 
     const startDelay = window.setTimeout(() => {
       if (cancelled) return;
-      const item =
-        itemRefs.current.get(panelId) ??
-        (scroller.querySelector(
-          `[data-work-panel="${CSS.escape(panelId)}"]`
-        ) as HTMLLIElement | null);
-      if (!item) {
-        onStripExpandCenterConsumed();
-        return;
-      }
-
-      const target = scrollLeftToCenterItem(scroller, item);
-      if (reduceMotion) {
-        scroller.scrollLeft = target;
-        onStripExpandCenterConsumed();
-        return;
-      }
-
-      const from = scroller.scrollLeft;
-      const delta = target - from;
-      if (Math.abs(delta) < 0.5) {
-        onStripExpandCenterConsumed();
-        return;
-      }
-
-      const t0 = performance.now();
-      const tick = (now: number) => {
+      const measureAndRun = () => {
         if (cancelled) return;
-        const u = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
-        scroller.scrollLeft = from + delta * easeInOutQuad(u);
-        if (u < 1) {
-          rafId = requestAnimationFrame(tick);
-        } else {
+        const item =
+          itemRefs.current.get(panelId) ??
+          (scroller.querySelector(
+            `[data-work-panel="${CSS.escape(panelId)}"]`
+          ) as HTMLLIElement | null);
+        if (!item) {
           onStripExpandCenterConsumed();
+          return;
         }
+
+        const target = scrollLeftToCenterItem(scroller, item);
+        if (reduceMotion) {
+          scroller.scrollLeft = target;
+          onStripExpandCenterConsumed();
+          return;
+        }
+
+        const from = scroller.scrollLeft;
+        const delta = target - from;
+        if (Math.abs(delta) < 0.5) {
+          onStripExpandCenterConsumed();
+          return;
+        }
+
+        const t0 = performance.now();
+        const tick = (now: number) => {
+          if (cancelled) return;
+          const u = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
+          scroller.scrollLeft = from + delta * easeInOutQuad(u);
+          if (u < 1) {
+            rafId = requestAnimationFrame(tick);
+          } else {
+            onStripExpandCenterConsumed();
+          }
+        };
+        rafId = requestAnimationFrame(tick);
       };
-      rafId = requestAnimationFrame(tick);
-    }, STRIP_SCROLL_START_DELAY_MS);
+      requestAnimationFrame(() => {
+        if (cancelled) return;
+        requestAnimationFrame(measureAndRun);
+      });
+    }, STRIP_SCROLL_MEASURE_DELAY_MS);
 
     return () => {
       cancelled = true;
@@ -657,7 +667,11 @@ function SectionWorkScroll({
         <div className="-mx-3 min-w-0 px-3 md:mx-0 md:px-0">
           <ul
             ref={scrollerRef}
-            className="no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto overscroll-x-contain scroll-auto p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 md:gap-4 md:pl-2.5"
+            className={
+              "no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto " +
+              "overscroll-x-contain scroll-auto p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 " +
+              "md:gap-4 md:pl-[max(0.5rem,calc(50vw-9rem))] md:pr-[max(0.5rem,calc(50vw-9rem))] "
+            }
             data-cursor={isMobile ? undefined : "interactive"}
             style={{
               WebkitOverflowScrolling: "touch",

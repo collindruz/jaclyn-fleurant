@@ -79,6 +79,50 @@ const DRAG_MOVE_THRESHOLD_PX = 6;
 /** After a drag, ignore `onTap` for this long (Framer can fire tap after release). */
 const DRAG_TAP_SUPPRESS_MS = 120;
 
+function getClientPointFromPointerLike(e: unknown): { x: number; y: number } | null {
+  if (typeof e !== "object" || e === null) return null;
+  if ("clientX" in e && "clientY" in e) {
+    const p = e as { clientX: number; clientY: number };
+    if (Number.isFinite(p.clientX) && Number.isFinite(p.clientY)) {
+      return { x: p.clientX, y: p.clientY };
+    }
+  }
+  if ("changedTouches" in e) {
+    const t = (e as TouchEvent).changedTouches?.[0];
+    if (t) return { x: t.clientX, y: t.clientY };
+  }
+  return null;
+}
+
+/**
+ * `object-contain` letterboxes; the img layout box is still a full rect.
+ * Tests the drawn bitmap area inside the image container.
+ */
+function isPointInObjectContainImage(
+  containerEl: HTMLElement,
+  clientX: number,
+  clientY: number
+): boolean {
+  const img = containerEl.querySelector("img");
+  if (!img?.naturalWidth || !img.naturalHeight) return false;
+  const r = containerEl.getBoundingClientRect();
+  const w = r.width;
+  const h = r.height;
+  const nw = img.naturalWidth;
+  const nh = img.naturalHeight;
+  const scale = Math.min(w / nw, h / nh);
+  const dw = nw * scale;
+  const dh = nh * scale;
+  const left = r.left + (w - dw) / 2;
+  const top = r.top + (h - dh) / 2;
+  return (
+    clientX >= left &&
+    clientX <= left + dw &&
+    clientY >= top &&
+    clientY <= top + dh
+  );
+}
+
 /**
  * Per-print “random” but stable: same `src` + `index` always yields the same rotate/scale
  * (SSR-safe, no flicker; reset remount does not need to re-roll).
@@ -252,6 +296,8 @@ function DraggablePrint({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const printRef = useRef<HTMLDivElement>(null);
+  /** Bounds for `object-contain` hit-test (tighter than the motion / aspect box). */
+  const imageAreaRef = useRef<HTMLDivElement>(null);
   const didDragRef = useRef(false);
   /** `true` after movement past threshold — blocks tap until 120ms after drag end. */
   const sawOnDragRef = useRef(false);
@@ -366,6 +412,10 @@ function DraggablePrint({
       whileTap={{ scale: interactionScale, transition: whileDragTransition }}
       onTap={(e) => {
         if (didDragRef.current || postGestureTapBlockRef.current) return;
+        const pt = getClientPointFromPointerLike(e);
+        const area = imageAreaRef.current;
+        if (!pt || !area) return;
+        if (!isPointInObjectContainImage(area, pt.x, pt.y)) return;
         (e as Event | undefined)?.stopPropagation?.();
         onPrintTap();
       }}
@@ -381,15 +431,20 @@ function DraggablePrint({
         }
       }}
     >
-      <div className="relative aspect-[3/4] w-full max-w-[9.5rem] sm:max-w-[9rem] sm:aspect-[4/5] md:max-w-[8.5rem]">
+      <div
+        ref={imageAreaRef}
+        data-world-image=""
+        className="pointer-events-none relative aspect-[3/4] w-full max-w-[9.5rem] sm:max-w-[9rem] sm:aspect-[4/5] md:max-w-[8.5rem]"
+      >
         {/*
-            next/image: priority on first 2; lazy for rest. Borderless, no mat.
+            next/image: pointer-events none so the motion print receives drag; tap uses
+            object-contain geometry on this container, not the oversized hit box.
         */}
         <Image
           src={src}
           alt=""
           fill
-          className="pointer-events-none object-contain"
+          className="pointer-events-none select-none object-contain"
           sizes="(max-width: 768px) 36vw, 20vw"
           draggable={false}
           decoding="async"
