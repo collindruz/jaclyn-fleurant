@@ -5,6 +5,6 @@
     "site-042.jpg": "redCarpet",
     "site-118.webp": "costumeDesign"
   },
-  "excludeFilenames": [],
+  "excludeFilenames": ["site-040.jpg"],
   "featuredOrder": []
 }

@@ -50,7 +50,6 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
     { kind: "image" as const, src: "/images/work/site-pull/site-002.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-011.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-012.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-040.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-041.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-042.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-043.jpg" },
@@ -157,7 +156,6 @@ Classification log (last run):
   site-011.jpg → neutral
   site-012.jpg → neutral
   site-032.jpg → vivid
-  site-040.jpg → neutral
   site-041.jpg → neutral
   site-042.jpg → neutral
   site-043.jpg → neutral

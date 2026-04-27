@@ -140,7 +140,6 @@ export const HOMEPAGE_FRAME_FILENAMES: readonly string[] = [
   "site-001.jpg",
   "site-003.webp",
   "site-004.jpg",
-  "site-040.jpg",
   "site-044.png",
   "site-062.jpg",
 ];
