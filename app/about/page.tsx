@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { FadeIn } from "@/components/FadeIn";
 import { SiteFooter } from "@/components/SiteFooter";
+import { interiorMainTopClass } from "@/lib/site-nav";
 
 export const metadata: Metadata = {
   title: "Read",
@@ -20,7 +21,7 @@ const PRESS_LINKS: { publication: string; title: string; href: string }[] = [];
 export default function AboutPage() {
   return (
     <>
-      <main className="pt-40 sm:pt-28 md:pt-32">
+      <main className={interiorMainTopClass}>
         <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-10">
           <FadeIn>
             <h1 className="sr-only">Read</h1>

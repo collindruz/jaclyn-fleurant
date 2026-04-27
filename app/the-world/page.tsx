@@ -3,6 +3,7 @@ import { DraggableWorld } from "@/components/DraggableWorld";
 import { FadeIn } from "@/components/FadeIn";
 import { SiteFooter } from "@/components/SiteFooter";
 import { copy, getWorldStillsFromColorGroups } from "@/lib/placeholders";
+import { interiorMainTopClass } from "@/lib/site-nav";
 
 export const metadata: Metadata = {
   title: "World",
@@ -14,7 +15,7 @@ export default function TheWorldPage() {
 
   return (
     <>
-      <main className="pt-40 sm:pt-28 md:pt-32">
+      <main className={interiorMainTopClass}>
         <section className="px-5 sm:px-6 md:px-10">
           <div className="mx-auto max-w-3xl">
             <FadeIn slow>
