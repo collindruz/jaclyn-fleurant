@@ -670,7 +670,11 @@ function SectionWorkScroll({
             className={
               "no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto " +
               "overscroll-x-contain scroll-auto p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 " +
-              "md:gap-4 md:pl-[max(0.5rem,calc(50vw-9rem))] md:pr-[max(0.5rem,calc(50vw-9rem))] "
+              "md:gap-4 " +
+              /* Centering spacers only while expanded; collapsed uses normal strip inset. */
+              (isSectionDesktopExpanded
+                ? "md:pl-[max(0.5rem,calc(50vw-9rem))] md:pr-[max(0.5rem,calc(50vw-9rem))] "
+                : "md:pl-2.5 md:pr-0 ")
             }
             data-cursor={isMobile ? undefined : "interactive"}
             style={{

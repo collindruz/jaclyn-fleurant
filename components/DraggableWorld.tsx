@@ -7,7 +7,6 @@ import {
   useReducedMotion,
   type PanInfo,
 } from "framer-motion";
-import Image from "next/image";
 import { WORLD_STILLS_MAX } from "@/lib/world-stills-bounds";
 import type { RefObject } from "react";
 import {
@@ -78,50 +77,6 @@ const whileDragTransition = {
 const DRAG_MOVE_THRESHOLD_PX = 6;
 /** After a drag, ignore `onTap` for this long (Framer can fire tap after release). */
 const DRAG_TAP_SUPPRESS_MS = 120;
-
-function getClientPointFromPointerLike(e: unknown): { x: number; y: number } | null {
-  if (typeof e !== "object" || e === null) return null;
-  if ("clientX" in e && "clientY" in e) {
-    const p = e as { clientX: number; clientY: number };
-    if (Number.isFinite(p.clientX) && Number.isFinite(p.clientY)) {
-      return { x: p.clientX, y: p.clientY };
-    }
-  }
-  if ("changedTouches" in e) {
-    const t = (e as TouchEvent).changedTouches?.[0];
-    if (t) return { x: t.clientX, y: t.clientY };
-  }
-  return null;
-}
-
-/**
- * `object-contain` letterboxes; the img layout box is still a full rect.
- * Tests the drawn bitmap area inside the image container.
- */
-function isPointInObjectContainImage(
-  containerEl: HTMLElement,
-  clientX: number,
-  clientY: number
-): boolean {
-  const img = containerEl.querySelector("img");
-  if (!img?.naturalWidth || !img.naturalHeight) return false;
-  const r = containerEl.getBoundingClientRect();
-  const w = r.width;
-  const h = r.height;
-  const nw = img.naturalWidth;
-  const nh = img.naturalHeight;
-  const scale = Math.min(w / nw, h / nh);
-  const dw = nw * scale;
-  const dh = nh * scale;
-  const left = r.left + (w - dw) / 2;
-  const top = r.top + (h - dh) / 2;
-  return (
-    clientX >= left &&
-    clientX <= left + dw &&
-    clientY >= top &&
-    clientY <= top + dh
-  );
-}
 
 /**
  * Per-print “random” but stable: same `src` + `index` always yields the same rotate/scale
@@ -295,9 +250,7 @@ function DraggablePrint({
   );
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const printRef = useRef<HTMLDivElement>(null);
-  /** Bounds for `object-contain` hit-test (tighter than the motion / aspect box). */
-  const imageAreaRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef<HTMLButtonElement | null>(null);
   const didDragRef = useRef(false);
   /** `true` after movement past threshold — blocks tap until 120ms after drag end. */
   const sawOnDragRef = useRef(false);
@@ -378,80 +331,71 @@ function DraggablePrint({
   }, []);
 
   return (
-    <motion.div
-      ref={printRef}
-      className="absolute cursor-grab p-0 active:cursor-grabbing"
-      data-cursor="interactive"
-      data-world-print=""
-      data-index={index}
-      data-active={isActive || undefined}
-      style={{
-        top: L.t,
-        left: L.l,
-        width: L.w,
-        x,
-        y,
-        zIndex,
-        transformOrigin: "center",
-      }}
-      animate={{ scale: restScale, rotate }}
-      transition={scaleSpring}
-      drag
-      onDragStart={handleDragStart}
-      onDrag={handleDrag}
-      onDragEnd={handleDragEnd}
-      dragConstraints={dragConstraints}
-      dragElastic={0.04}
-      dragMomentum={!reduceMotion}
-      dragTransition={{
-        power: 0.1,
-        timeConstant: 200,
-        restDelta: 0.4,
-      }}
-      whileDrag={{ scale: interactionScale, transition: whileDragTransition }}
-      whileTap={{ scale: interactionScale, transition: whileDragTransition }}
-      onTap={(e) => {
-        if (didDragRef.current || postGestureTapBlockRef.current) return;
-        const pt = getClientPointFromPointerLike(e);
-        const area = imageAreaRef.current;
-        if (!pt || !area) return;
-        if (!isPointInObjectContainImage(area, pt.x, pt.y)) return;
-        (e as Event | undefined)?.stopPropagation?.();
-        onPrintTap();
-      }}
-      onFocus={onActivate}
-      tabIndex={0}
-      role="button"
-      aria-pressed={isEnlarged}
-      aria-label={`Still ${index + 1} of ${n}`}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onPrintTap();
-        }
-      }}
+    <div
+      className="absolute flex items-center justify-center pointer-events-none aspect-[3/4] max-w-[9.5rem] sm:aspect-[4/5] sm:max-w-[9rem] md:max-w-[8.5rem]"
+      style={{ top: L.t, left: L.l, width: L.w, zIndex }}
     >
-      <div
-        ref={imageAreaRef}
+      <motion.button
+        ref={printRef}
+        type="button"
+        className="m-0 inline-block cursor-grab border-0 bg-transparent p-0 focus:outline-none active:cursor-grabbing focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone"
+        data-cursor="interactive"
+        data-world-print=""
         data-world-image=""
-        className="pointer-events-none relative aspect-[3/4] w-full max-w-[9.5rem] sm:max-w-[9rem] sm:aspect-[4/5] md:max-w-[8.5rem]"
+        data-index={index}
+        data-active={isActive || undefined}
+        style={{
+          x,
+          y,
+          transformOrigin: "center",
+        }}
+        animate={{ scale: restScale, rotate }}
+        transition={scaleSpring}
+        drag
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        dragConstraints={dragConstraints}
+        dragElastic={0.04}
+        dragMomentum={!reduceMotion}
+        dragTransition={{
+          power: 0.1,
+          timeConstant: 200,
+          restDelta: 0.4,
+        }}
+        whileDrag={{ scale: interactionScale, transition: whileDragTransition }}
+        whileTap={{ scale: interactionScale, transition: whileDragTransition }}
+        onTap={(e) => {
+          if (didDragRef.current || postGestureTapBlockRef.current) return;
+          (e as Event | undefined)?.stopPropagation?.();
+          onPrintTap();
+        }}
+        onFocus={onActivate}
+        tabIndex={0}
+        aria-pressed={isEnlarged}
+        aria-label={`Still ${index + 1} of ${n}`}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onPrintTap();
+          }
+        }}
       >
         {/*
-            next/image: pointer-events none so the motion print receives drag; tap uses
-            object-contain geometry on this container, not the oversized hit box.
+            Native img with intrinsic box = visible pixels; no fill/letterbox hit slop.
+            Next/Image fill would force a larger interactive rect.
         */}
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={src}
           alt=""
-          fill
-          className="pointer-events-none select-none object-contain"
-          sizes="(max-width: 768px) 36vw, 20vw"
+          className="pointer-events-none block h-auto w-auto max-h-[12rem] max-w-[min(9.5rem,78vw)] select-none sm:max-w-[9rem] md:max-h-[11rem] md:max-w-[8.5rem]"
           draggable={false}
           decoding="async"
-          priority={index < 2}
-          loading={index < 2 ? undefined : "lazy"}
+          fetchPriority={index < 2 ? "high" : "auto"}
+          loading={index < 2 ? "eager" : "lazy"}
         />
-      </div>
-    </motion.div>
+      </motion.button>
+    </div>
   );
 }
