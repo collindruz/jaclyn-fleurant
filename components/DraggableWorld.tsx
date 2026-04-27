@@ -250,7 +250,7 @@ function DraggablePrint({
   );
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const printRef = useRef<HTMLButtonElement | null>(null);
+  const printRef = useRef<HTMLDivElement | null>(null);
   const didDragRef = useRef(false);
   /** `true` after movement past threshold — blocks tap until 120ms after drag end. */
   const sawOnDragRef = useRef(false);
@@ -331,60 +331,66 @@ function DraggablePrint({
   }, []);
 
   return (
-    <div
-      className="absolute flex items-center justify-center pointer-events-none aspect-[3/4] max-w-[9.5rem] sm:aspect-[4/5] sm:max-w-[9rem] md:max-w-[8.5rem]"
-      style={{ top: L.t, left: L.l, width: L.w, zIndex }}
-    >
-      <motion.button
-        ref={printRef}
-        type="button"
-        className="m-0 inline-block cursor-grab border-0 bg-transparent p-0 focus:outline-none active:cursor-grabbing focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone"
-        data-cursor="interactive"
-        data-world-print=""
-        data-world-image=""
-        data-index={index}
-        data-active={isActive || undefined}
-        style={{
-          x,
-          y,
-          transformOrigin: "center",
-        }}
-        animate={{ scale: restScale, rotate }}
-        transition={scaleSpring}
-        drag
-        onDragStart={handleDragStart}
-        onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
-        dragConstraints={dragConstraints}
-        dragElastic={0.04}
-        dragMomentum={!reduceMotion}
-        dragTransition={{
-          power: 0.1,
-          timeConstant: 200,
-          restDelta: 0.4,
-        }}
-        whileDrag={{ scale: interactionScale, transition: whileDragTransition }}
-        whileTap={{ scale: interactionScale, transition: whileDragTransition }}
-        onTap={(e) => {
-          if (didDragRef.current || postGestureTapBlockRef.current) return;
-          (e as Event | undefined)?.stopPropagation?.();
+    <motion.div
+      ref={printRef}
+      className="absolute flex cursor-grab items-center justify-center border-0 bg-transparent p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone active:cursor-grabbing aspect-[3/4] max-w-[9.5rem] sm:aspect-[4/5] sm:max-w-[9rem] md:max-w-[8.5rem]"
+      data-cursor="interactive"
+      data-world-print=""
+      data-index={index}
+      data-active={isActive || undefined}
+      style={{
+        top: L.t,
+        left: L.l,
+        width: L.w,
+        zIndex,
+        x,
+        y,
+        transformOrigin: "center",
+      }}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isEnlarged}
+      aria-label={`Still ${index + 1} of ${n}`}
+      animate={{ scale: restScale, rotate }}
+      transition={scaleSpring}
+      drag
+      dragConstraints={dragConstraints}
+      dragElastic={0.04}
+      dragMomentum={!reduceMotion}
+      dragTransition={{
+        power: 0.1,
+        timeConstant: 200,
+        restDelta: 0.4,
+      }}
+      onDragStart={handleDragStart}
+      onDrag={handleDrag}
+      onDragEnd={handleDragEnd}
+      whileDrag={{ scale: interactionScale, transition: whileDragTransition }}
+      whileTap={{ scale: interactionScale, transition: whileDragTransition }}
+      onTap={(e) => {
+        if (didDragRef.current || postGestureTapBlockRef.current) return;
+        const t = (e as unknown as { target: EventTarget | null }).target;
+        if (!(t instanceof Element) || !t.closest?.("[data-world-image]")) {
+          return;
+        }
+        onPrintTap();
+      }}
+      onFocus={onActivate}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
           onPrintTap();
-        }}
-        onFocus={onActivate}
-        tabIndex={0}
-        aria-pressed={isEnlarged}
-        aria-label={`Still ${index + 1} of ${n}`}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onPrintTap();
-          }
-        }}
+        }
+      }}
+    >
+      {/*
+        Tight box around the visible still only: tap toggles; flex padding of the frame does not.
+        Native img: intrinsic box, no extra hit slop.
+      */}
+      <div
+        data-world-image=""
+        className="pointer-events-auto inline-block max-w-full"
       >
-        {/*
-            Native img with intrinsic box = visible pixels; no fill/letterbox hit slop.
-            Next/Image fill would force a larger interactive rect.
-        */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
@@ -395,7 +401,7 @@ function DraggablePrint({
           fetchPriority={index < 2 ? "high" : "auto"}
           loading={index < 2 ? "eager" : "lazy"}
         />
-      </motion.button>
-    </div>
+      </div>
+    </motion.div>
   );
 }

@@ -90,8 +90,8 @@ function resolveWorkItem(
  */
 /** md+ expand: tile width transition and centering scroll share duration and in-out quad feel. */
 const STRIP_EXPAND_SCROLL_MS = 1200;
-/** Pause so tile transition has started before we measure and animate scroll. */
-const STRIP_SCROLL_START_DELAY_MS = 125;
+/** After expand, let tile width reflow; then rAF×2 and offset-based measure. */
+const STRIP_SCROLL_START_DELAY_MS = 100;
 
 /** easeInOutQuad; t ∈ [0,1] — same weight as scroll rAF; CSS uses a close cubic bezier. */
 function easeInOutQuad(t: number): number {
@@ -175,20 +175,33 @@ const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-10";
 const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-24";
 
 /**
- * `item.offsetLeft` is ambiguous for nested list items; use content-space X (rects + scrollLeft).
- * rawTargetScroll = itemLeft + w/2 - viewport/2; clamp to natural scroll range (no fake left padding).
+ * Cumulative x from `el` to `scroller` along `offsetParent` (strips are nested: outer ul > li > inner ul > li item).
+ * Do not use getBoundingClientRect for target scroll.
  */
-function scrollLeftToCenterItem(
+function offsetLeftInScroller(
+  scroller: HTMLElement,
+  el: HTMLElement
+): number {
+  let x = 0;
+  for (
+    let n: HTMLElement | null = el;
+    n && n !== scroller;
+    n = (n.offsetParent as HTMLElement | null) ?? null
+  ) {
+    x += n.offsetLeft;
+  }
+  return x;
+}
+
+function scrollLeftToClampedTarget(
   scroller: HTMLUListElement,
   item: HTMLLIElement
 ): number {
-  const rI = item.getBoundingClientRect();
-  const rS = scroller.getBoundingClientRect();
-  const itemLeftInContent = rI.left - rS.left + scroller.scrollLeft;
-  const rawTargetScroll =
-    itemLeftInContent + item.offsetWidth / 2 - scroller.clientWidth / 2;
+  const itemLeft = offsetLeftInScroller(scroller, item);
+  const itemCenter = itemLeft + item.offsetWidth / 2;
+  const targetScroll = itemCenter - scroller.clientWidth / 2;
   const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
-  return Math.max(0, Math.min(rawTargetScroll, maxScroll));
+  return Math.max(0, Math.min(targetScroll, maxScroll));
 }
 
 type MobileImagePointerEnd = {
@@ -564,59 +577,69 @@ function SectionWorkScroll({
     }
     let cancelled = false;
     let rafId = 0;
-    let startRaf = 0;
+    let raf0 = 0;
+    let raf1 = 0;
     let startTimer: number | undefined;
 
-    startTimer = window.setTimeout(() => {
-      startRaf = requestAnimationFrame(() => {
-        if (cancelled) return;
-        const item =
-          itemRefs.current.get(panelId) ??
-          (scroller.querySelector(
-            `[data-work-panel="${CSS.escape(panelId)}"]`
-          ) as HTMLLIElement | null);
-        if (!item) {
-          onStripExpandCenterConsumed();
-          return;
-        }
-
-        const targetScroll = scrollLeftToCenterItem(scroller, item);
-        if (reduceMotion) {
-          scroller.scrollLeft = targetScroll;
-          onStripExpandCenterConsumed();
-          return;
-        }
-
-        const from = scroller.scrollLeft;
-        const delta = targetScroll - from;
-        if (Math.abs(delta) < 0.5) {
-          onStripExpandCenterConsumed();
-          return;
-        }
-
-        const t0 = performance.now();
-        const tick = (now: number) => {
-          if (cancelled) return;
-          const u = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
-          scroller.scrollLeft = from + delta * easeInOutQuad(u);
-          if (u < 1) {
-            rafId = requestAnimationFrame(tick);
-          } else {
-            onStripExpandCenterConsumed();
-          }
-        };
-        rafId = requestAnimationFrame(tick);
-      });
-    }, STRIP_SCROLL_START_DELAY_MS);
-
-    return () => {
+    const cancel = () => {
       cancelled = true;
       if (startTimer !== undefined) {
         window.clearTimeout(startTimer);
       }
-      cancelAnimationFrame(startRaf);
+      cancelAnimationFrame(raf0);
+      cancelAnimationFrame(raf1);
       if (rafId) cancelAnimationFrame(rafId);
     };
+
+    const run = () => {
+      if (cancelled) return;
+      const item =
+        itemRefs.current.get(panelId) ??
+        (scroller.querySelector(
+          `[data-work-panel="${CSS.escape(panelId)}"]`
+        ) as HTMLLIElement | null);
+      if (!item) {
+        onStripExpandCenterConsumed();
+        return;
+      }
+
+      const clampedTarget = scrollLeftToClampedTarget(scroller, item);
+      if (reduceMotion) {
+        scroller.scrollLeft = clampedTarget;
+        onStripExpandCenterConsumed();
+        return;
+      }
+
+      const from = scroller.scrollLeft;
+      const delta = clampedTarget - from;
+      if (Math.abs(delta) < 0.5) {
+        onStripExpandCenterConsumed();
+        return;
+      }
+
+      const t0 = performance.now();
+      const tick = (now: number) => {
+        if (cancelled) return;
+        const u = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
+        scroller.scrollLeft = from + delta * easeInOutQuad(u);
+        if (u < 1) {
+          rafId = requestAnimationFrame(tick);
+        } else {
+          onStripExpandCenterConsumed();
+        }
+      };
+      rafId = requestAnimationFrame(tick);
+    };
+
+    startTimer = window.setTimeout(() => {
+      raf0 = requestAnimationFrame(() => {
+        raf1 = requestAnimationFrame(() => {
+          run();
+        });
+      });
+    }, STRIP_SCROLL_START_DELAY_MS);
+
+    return cancel;
   }, [
     isMobile,
     isSectionDesktopExpanded,
