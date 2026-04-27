@@ -3,7 +3,7 @@
  * Source: public/images/work/site-pull (see work-person-filtered.json when present; auto palette, no crop).
  * Curation: lib/work-curation.json → applyWorkCuration() in the app.
  * Images analyzed: 352
- * @generated 2026-04-27T05:31:21.478Z
+ * @generated 2026-04-27T16:17:07.526Z
  */
 
 import type { WorkItem } from "./work-types";
@@ -134,15 +134,15 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
     { kind: "image" as const, src: "/images/work/site-pull/site-001.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-002.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-005.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-006 2.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-006-2.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-006.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-007 2.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-007-2.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-007.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-008 2.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-008-2.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-008.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-009 2.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-009-2.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-009.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-010 2.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-010-2.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-010.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-011.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-012.jpg" },
@@ -316,29 +316,29 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
   vivid: [
     { kind: "image" as const, src: "/images/work/site-pull/site-003.webp" },
     { kind: "image" as const, src: "/images/work/site-pull/site-004.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-019 2.webp" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-019-2.webp" },
     { kind: "image" as const, src: "/images/work/site-pull/site-019.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-020 2.webp" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-020-2.webp" },
     { kind: "image" as const, src: "/images/work/site-pull/site-020.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-021 2.webp" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-021-2.webp" },
     { kind: "image" as const, src: "/images/work/site-pull/site-021.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-022 2.webp" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-022-2.webp" },
     { kind: "image" as const, src: "/images/work/site-pull/site-022.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-023 2.webp" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-023-2.webp" },
     { kind: "image" as const, src: "/images/work/site-pull/site-023.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-024 2.webp" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-024-2.webp" },
     { kind: "image" as const, src: "/images/work/site-pull/site-024.webp" },
     { kind: "image" as const, src: "/images/work/site-pull/site-025.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-026 2.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-026-2.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-026.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-027 2.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-027-2.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-027.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-028 2.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-028-2.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-028.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-029.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-030 2.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-030-2.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-030.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-031 2.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-031-2.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-031.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-032.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-046.jpg" },
@@ -383,15 +383,15 @@ Classification log (last run):
   site-003.webp → vivid
   site-004.jpg → vivid
   site-005.jpg → neutral
-  site-006 2.jpg → neutral
+  site-006-2.jpg → neutral
   site-006.jpg → neutral
-  site-007 2.jpg → neutral
+  site-007-2.jpg → neutral
   site-007.jpg → neutral
-  site-008 2.jpg → neutral
+  site-008-2.jpg → neutral
   site-008.jpg → neutral
-  site-009 2.jpg → neutral
+  site-009-2.jpg → neutral
   site-009.jpg → neutral
-  site-010 2.jpg → neutral
+  site-010-2.jpg → neutral
   site-010.jpg → neutral
   site-011.jpg → neutral
   site-012.jpg → neutral
@@ -401,29 +401,29 @@ Classification log (last run):
   site-016.jpg → neutral
   site-017.jpg → neutral
   site-018.jpg → neutral
-  site-019 2.webp → vivid
+  site-019-2.webp → vivid
   site-019.webp → vivid
-  site-020 2.webp → vivid
+  site-020-2.webp → vivid
   site-020.webp → vivid
-  site-021 2.webp → vivid
+  site-021-2.webp → vivid
   site-021.webp → vivid
-  site-022 2.webp → vivid
+  site-022-2.webp → vivid
   site-022.webp → vivid
-  site-023 2.webp → vivid
+  site-023-2.webp → vivid
   site-023.webp → vivid
-  site-024 2.webp → vivid
+  site-024-2.webp → vivid
   site-024.webp → vivid
   site-025.webp → vivid
-  site-026 2.jpg → vivid
+  site-026-2.jpg → vivid
   site-026.jpg → vivid
-  site-027 2.jpg → vivid
+  site-027-2.jpg → vivid
   site-027.jpg → vivid
-  site-028 2.jpg → vivid
+  site-028-2.jpg → vivid
   site-028.jpg → vivid
   site-029.jpg → vivid
-  site-030 2.jpg → vivid
+  site-030-2.jpg → vivid
   site-030.jpg → vivid
-  site-031 2.jpg → vivid
+  site-031-2.jpg → vivid
   site-031.jpg → vivid
   site-032.jpg → vivid
   site-040.jpg → neutral

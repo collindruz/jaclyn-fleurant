@@ -89,6 +89,14 @@ function main() {
     }
   }
 
+  const urlUnsafe = names.filter((n) => /[\s#%?]/.test(n));
+  if (urlUnsafe.length) {
+    console.warn(
+      `[work:sync-files] ${urlUnsafe.length} file(s) have spaces or special chars (break image src). ` +
+        `Rename e.g. \`site-010 2.jpg\` → \`site-010-2.jpg\`, then re-run this script and color:group.`
+    );
+  }
+
   writeSitePullFilesTs(names, oldHome);
   console.log(
     `[work:sync-files] Wrote ${names.length} filenames to ${path.relative(ROOT, SITE_PULL_FILES)}`
