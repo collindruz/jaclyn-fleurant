@@ -308,7 +308,10 @@ function StripItem({
         role="listitem"
         aria-describedby={showCaption ? capId : undefined}
       >
-        <div className="relative h-full w-full cursor-pointer overflow-hidden">
+        <div
+          className="relative h-full w-full cursor-pointer overflow-hidden"
+          data-cursor="interactive"
+        >
           {mediaInner}
         </div>
         {caption}
@@ -330,6 +333,7 @@ function StripItem({
       className={`${itemWidthClass} ${mobileCursorClass}`}
       role="listitem"
       aria-describedby={showCaption && !isFocused ? capId : undefined}
+      data-cursor={stripArmed && !isFaded ? "interactive" : undefined}
       initial={false}
       animate={{ opacity: isFaded ? FADED_WHEN_FOCUS : 1 }}
       transition={t}
@@ -526,6 +530,7 @@ function SectionWorkScroll({
         <div className="-mx-3 min-w-0 px-3 md:mx-0 md:px-0">
           <ul
             className="no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto overscroll-x-contain scroll-smooth p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 md:gap-4 md:pl-2.5"
+            data-cursor={isMobile ? undefined : "interactive"}
             style={{
               WebkitOverflowScrolling: "touch",
               ...(isMobile ? { touchAction: "pan-x pan-y" } : null),
@@ -745,6 +750,7 @@ export function WorkExperience() {
                         " focus-visible:outline-offset-[6px] focus-visible:outline-charcoal/20"
                       : "")
                   }
+                  data-cursor={isDesktop ? "interactive" : undefined}
                   onClick={onDesktopTitleToggle}
                   onKeyDown={onDesktopTitleKeyDown}
                   tabIndex={isDesktop ? 0 : undefined}
