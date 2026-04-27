@@ -88,12 +88,17 @@ function resolveWorkItem(
  * Mobile: larger cards (~1.5–2 per viewport).
  * md+ collapsed: several per view; md+ expanded (~1.5×): larger in-place archive read.
  */
+/** See `STRIP_EXPAND_SCROLL_MS`: same ms for width transition and post-expand rAF center scroll. */
+const STRIP_EXPAND_SCROLL_MS = 950;
+const STRIP_SCROLL_START_DELAY_MS = 120;
+
 /** md+ uses one slow size transition; mobile keeps a shorter transition for horizontal strip reflow. */
 const stripItemClassBase =
   "group relative aspect-[4/5] shrink-0 overflow-hidden " +
   "w-[min(52vw,21rem)] min-w-[11rem] " +
   "transition-[width,max-width] duration-200 ease-out " +
-  "md:duration-[550ms] md:ease-in-out " +
+  `md:duration-[${STRIP_EXPAND_SCROLL_MS}ms] ` +
+  "md:[transition-timing-function:cubic-bezier(0.45,0,0.55,1)] " +
   "motion-reduce:transition-none ";
 
 const stripItemClassMd = "md:w-[24vw] md:min-w-0 md:max-w-[10.5rem] lg:max-w-[12rem]";
@@ -163,8 +168,23 @@ const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-10";
 /** Vertical break between main sections (tighter on md+ only). */
 const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-24";
 
-/** After md+ tile `width` transition (`md:duration-[550ms]`), then center the anchor tile. */
-const STRIP_CENTER_AFTER_EXPAND_MS = 575;
+/** easeInOutQuad; t ∈ [0,1] */
+function easeInOutQuad(t: number): number {
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+}
+
+function scrollLeftToCenterItem(
+  scroller: HTMLUListElement,
+  item: HTMLLIElement
+): number {
+  const rS = scroller.getBoundingClientRect();
+  const rI = item.getBoundingClientRect();
+  const itemLeftInContent = rI.left - rS.left + scroller.scrollLeft;
+  const target =
+    itemLeftInContent + rI.width / 2 - rS.width / 2;
+  const max = Math.max(0, scroller.scrollWidth - rS.width);
+  return Math.min(max, Math.max(0, target));
+}
 
 type MobileImagePointerEnd = {
   dx: number;
@@ -532,28 +552,58 @@ function SectionWorkScroll({
   useEffect(() => {
     if (isMobile || !isSectionDesktopExpanded || !stripExpandCenter) return;
     const { panelId } = stripExpandCenter;
+    const scroller = scrollerRef.current;
+    if (!scroller) {
+      onStripExpandCenterConsumed();
+      return;
+    }
     let cancelled = false;
-    const scrollTimer = window.setTimeout(() => {
+    let rafId = 0;
+
+    const startDelay = window.setTimeout(() => {
       if (cancelled) return;
       const item =
         itemRefs.current.get(panelId) ??
-        (scrollerRef.current?.querySelector(
+        (scroller.querySelector(
           `[data-work-panel="${CSS.escape(panelId)}"]`
         ) as HTMLLIElement | null);
       if (!item) {
         onStripExpandCenterConsumed();
         return;
       }
-      item.scrollIntoView({
-        behavior: reduceMotion ? "auto" : "smooth",
-        block: "nearest",
-        inline: "center",
-      });
-      onStripExpandCenterConsumed();
-    }, STRIP_CENTER_AFTER_EXPAND_MS);
+
+      const target = scrollLeftToCenterItem(scroller, item);
+      if (reduceMotion) {
+        scroller.scrollLeft = target;
+        onStripExpandCenterConsumed();
+        return;
+      }
+
+      const from = scroller.scrollLeft;
+      const delta = target - from;
+      if (Math.abs(delta) < 0.5) {
+        onStripExpandCenterConsumed();
+        return;
+      }
+
+      const t0 = performance.now();
+      const tick = (now: number) => {
+        if (cancelled) return;
+        const u = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
+        scroller.scrollLeft = from + delta * easeInOutQuad(u);
+        if (u < 1) {
+          rafId = requestAnimationFrame(tick);
+        } else {
+          onStripExpandCenterConsumed();
+        }
+      };
+      rafId = requestAnimationFrame(tick);
+    }, STRIP_SCROLL_START_DELAY_MS);
+
     return () => {
       cancelled = true;
-      clearTimeout(scrollTimer);
+      clearTimeout(startDelay);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [
     isMobile,

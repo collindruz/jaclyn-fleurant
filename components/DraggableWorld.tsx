@@ -9,7 +9,7 @@ import {
 } from "framer-motion";
 import Image from "next/image";
 import { WORLD_STILLS_MAX } from "@/lib/world-stills-bounds";
-import type { MouseEvent, RefObject } from "react";
+import type { RefObject } from "react";
 import {
   useCallback,
   useEffect,
@@ -118,10 +118,15 @@ export function DraggableWorld({ srcs }: DraggableWorldProps) {
   );
   const n = list.length;
   const constraintsRef = useRef<HTMLDivElement>(null);
-  /** Top of stack when dragging, tapping, or not enlarged. */
+  /** Which still gets the "second tap" expand (two-step: first activate, then toggle). */
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  /** Single print enlarged, or `null` — no layout jump; `transform: scale` only. */
-  const [enlargedIndex, setEnlargedIndex] = useState<number | null>(null);
+  /**
+   * Enlarged state is per index: expanding or selecting one still does not clear others
+   * (only Escape resets all, or a second tap on a still toggles that still only).
+   */
+  const [expandedIndices, setExpandedIndices] = useState<Set<number>>(
+    () => new Set()
+  );
   /** Increments to trigger a smooth (spring) return of all drags to origin. */
   const [resetTick, setResetTick] = useState(0);
 
@@ -129,24 +134,26 @@ export function DraggableWorld({ srcs }: DraggableWorldProps) {
     setActiveIndex(i);
   }, []);
 
+  /** First tap: select (active for second tap). Second tap: toggle expand for that still only. */
   const onPrintTap = useCallback(
     (i: number) => {
-      if (enlargedIndex !== null) {
-        setEnlargedIndex(null);
-        return;
-      }
       if (activeIndex === i) {
-        setEnlargedIndex(i);
+        setExpandedIndices((prev) => {
+          const next = new Set(prev);
+          if (next.has(i)) next.delete(i);
+          else next.add(i);
+          return next;
+        });
       } else {
         setActiveIndex(i);
       }
     },
-    [enlargedIndex, activeIndex]
+    [activeIndex]
   );
 
   const reset = useCallback(() => {
     setActiveIndex(null);
-    setEnlargedIndex(null);
+    setExpandedIndices(new Set());
     setResetTick((t) => t + 1);
   }, []);
 
@@ -154,32 +161,16 @@ export function DraggableWorld({ srcs }: DraggableWorldProps) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.preventDefault();
-      if (enlargedIndex !== null) {
-        setEnlargedIndex(null);
-      } else {
-        reset();
-      }
+      reset();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [enlargedIndex, reset]);
-
-  const onWorldClick = useCallback(
-    (e: MouseEvent<HTMLDivElement>) => {
-      if (enlargedIndex === null) return;
-      if ((e.target as Element).closest?.("[data-world-print]")) return;
-      setEnlargedIndex(null);
-    },
-    [enlargedIndex]
-  );
+  }, [reset]);
 
   if (n === 0) return null;
 
   return (
-    <div
-      className="w-screen min-w-0 max-w-[100dvw] overflow-x-clip"
-      onClick={onWorldClick}
-    >
+    <div className="w-screen min-w-0 max-w-[100dvw] overflow-x-clip">
       {/*
         Drag bounds = this padded, viewport-tall box so stills stay mostly on screen.
         Replaces a very tall (130dvh) play area that let images drift far out of view.
@@ -194,10 +185,10 @@ export function DraggableWorld({ srcs }: DraggableWorldProps) {
         >
         {list.map((src, i) => {
           const L = PRINTS[i] ?? PRINTS[i % PRINTS.length]!;
-          const isEnl = enlargedIndex === i;
+          const isEnl = expandedIndices.has(i);
           const isAct = activeIndex === i;
-          const z =
-            isEnl ? 2000 : isAct ? 600 : 20 + i;
+          /** Enlarged above rest; the active (selected) still above unselected peers; +i for stable ties. */
+          const z = (isEnl ? 1_000_000 : 0) + (isAct ? 5_000 : 0) + 20 + i;
           return (
             <DraggablePrint
               key={`${i}-${src}`}
