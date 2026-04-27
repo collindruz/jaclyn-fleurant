@@ -10,7 +10,6 @@ import Image from "next/image";
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -94,7 +93,7 @@ const stripItemClassBase =
   "group relative aspect-[4/5] shrink-0 overflow-hidden " +
   "w-[min(52vw,21rem)] min-w-[11rem] " +
   "transition-[width,max-width] duration-200 ease-out " +
-  "md:duration-500 md:ease-in-out " +
+  "md:duration-[550ms] md:ease-in-out " +
   "motion-reduce:transition-none ";
 
 const stripItemClassMd = "md:w-[24vw] md:min-w-0 md:max-w-[10.5rem] lg:max-w-[12rem]";
@@ -164,8 +163,12 @@ const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-10";
 /** Vertical break between main sections (tighter on md+ only). */
 const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-24";
 
-/** rAF cap while tile width is transitioning. */
-const STRIP_ANCHOR_MAX_FRAMES = 40;
+/** Must match `md:duration-[550ms]` on strip tiles (one motion with center scroll). */
+const STRIP_EXPAND_SCROLL_MS = 550;
+
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
 type MobileImagePointerEnd = {
   dx: number;
@@ -189,6 +192,8 @@ type StripItemProps = {
   stripArmed: boolean;
   onMobileImagePointerEnd: (panelId: string, p: MobileImagePointerEnd) => void;
   reduceMotion: boolean;
+  /** Desktop: register tile root for center-scroll. */
+  registerDesktopItemRef?: (panelId: string, el: HTMLLIElement | null) => void;
 };
 
 function StripItem({
@@ -204,6 +209,7 @@ function StripItem({
   stripArmed,
   onMobileImagePointerEnd,
   reduceMotion,
+  registerDesktopItemRef,
 }: StripItemProps) {
   const mobilePtr = useRef<{
     x0: number;
@@ -317,6 +323,7 @@ function StripItem({
   if (!isMobile) {
     return (
       <li
+        ref={(el) => registerDesktopItemRef?.(panelId, el)}
         className={itemWidthClass}
         role="listitem"
         data-work-panel={panelId}
@@ -447,13 +454,10 @@ function sectionNeedsTopSpacer(key: WorkSectionKey): boolean {
   return false;
 }
 
-/** Desktop: preserve clicked tile’s viewport `left` after size transition. */
-type StripExpandClickContext = { panelId: string; targetTileLeft: number };
+/** Desktop: which tile to center when this section is / becomes expanded. */
+type StripExpandClickContext = { panelId: string };
 
-type StripExpandAnchor = {
-  panelId: string;
-  targetTileLeft: number;
-};
+type StripExpandCenterPayload = { panelId: string };
 
 type SectionWorkScrollProps = {
   sectionKey: WorkSectionKey;
@@ -463,8 +467,8 @@ type SectionWorkScrollProps = {
   /** md+: this section is expanded in place (larger tiles). */
   isSectionDesktopExpanded: boolean;
   onDesktopStripExpand: (ctx: StripExpandClickContext | null) => void;
-  stripExpandAnchor: StripExpandAnchor | null;
-  onStripExpandAnchorConsumed: () => void;
+  stripExpandCenter: StripExpandCenterPayload | null;
+  onStripExpandCenterConsumed: () => void;
   stripArmed: boolean;
   onStripHorizontal: (sk: WorkSectionKey) => void;
   onMobileImagePointerEnd: (panelId: string, p: MobileImagePointerEnd) => void;
@@ -483,8 +487,8 @@ function SectionWorkScroll({
   isMobile,
   isSectionDesktopExpanded,
   onDesktopStripExpand,
-  stripExpandAnchor,
-  onStripExpandAnchorConsumed,
+  stripExpandCenter,
+  onStripExpandCenterConsumed,
   stripArmed,
   onStripHorizontal,
   onMobileImagePointerEnd,
@@ -493,6 +497,15 @@ function SectionWorkScroll({
   const hasFocus = Boolean(focusedPanelId) && isMobile;
   const listId = `${sectionKey}-work-scroll`;
   const scrollerRef = useRef<HTMLUListElement | null>(null);
+  const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+  const registerDesktopItemRef = useCallback(
+    (panelId: string, el: HTMLLIElement | null) => {
+      const m = itemRefs.current;
+      if (el) m.set(panelId, el);
+      else m.delete(panelId);
+    },
+    []
+  );
   const hStripPtr = useRef<{
     x0: number;
     y0: number;
@@ -513,93 +526,91 @@ function SectionWorkScroll({
       const raw = (e.target as Element | null)?.closest?.("[data-work-panel]");
       if (raw instanceof HTMLElement) {
         const id = raw.getAttribute("data-work-panel");
-        if (id) {
-          ctx = { panelId: id, targetTileLeft: raw.getBoundingClientRect().left };
-        }
+        if (id) ctx = { panelId: id };
       }
       onDesktopStripExpand(ctx);
     },
     [isMobile, onDesktopStripExpand]
   );
 
-  useLayoutEffect(() => {
-    if (isMobile || !isSectionDesktopExpanded || !stripExpandAnchor) return;
-    const { panelId, targetTileLeft } = stripExpandAnchor;
-    const ul = scrollerRef.current;
-    if (!ul) {
-      onStripExpandAnchorConsumed();
-      return;
-    }
-    const sel = `[data-work-panel="${CSS.escape(panelId)}"]`;
-    const prevScrollBehavior = ul.style.scrollBehavior;
-    ul.style.scrollBehavior = "auto";
-    const applyDelta = () => {
-      const el = ul.querySelector(sel) as HTMLElement | null;
-      if (!el) return null;
-      const afterLeft = el.getBoundingClientRect().left;
-      const delta = afterLeft - targetTileLeft;
-      if (Math.abs(delta) > 0.5) {
-        ul.scrollLeft += delta;
-      }
-      return el;
+  useEffect(() => {
+    if (isMobile || !isSectionDesktopExpanded || !stripExpandCenter) return;
+    const { panelId } = stripExpandCenter;
+    let cancelled = false;
+    let rafChain0 = 0;
+    let rafChain1 = 0;
+    const scrollAnim = { id: 0 };
+
+    const getScrollerAndItem = () => {
+      const s = scrollerRef.current;
+      const it =
+        itemRefs.current.get(panelId) ??
+        (s?.querySelector(
+          `[data-work-panel="${CSS.escape(panelId)}"]`
+        ) as HTMLLIElement | null);
+      return { s, it };
     };
-    if (applyDelta() == null) {
-      ul.style.scrollBehavior = prevScrollBehavior;
-      onStripExpandAnchorConsumed();
-      return;
-    }
-    if (reduceMotion) {
-      const el = ul.querySelector(sel) as HTMLElement | null;
-      if (el) {
-        const err = el.getBoundingClientRect().left - targetTileLeft;
-        if (Math.abs(err) > 2) {
-          el.scrollIntoView({ block: "nearest", inline: "nearest" });
+
+    rafChain0 = requestAnimationFrame(() => {
+      rafChain1 = requestAnimationFrame(() => {
+        if (cancelled) return;
+        const { s, it: item } = getScrollerAndItem();
+        if (!s || !item) {
+          onStripExpandCenterConsumed();
+          return;
         }
-      }
-      ul.style.scrollBehavior = prevScrollBehavior;
-      onStripExpandAnchorConsumed();
-      return () => {
-        ul.style.scrollBehavior = prevScrollBehavior;
-      };
-    }
-    let raf = 0;
-    let frames = 0;
-    let stable = 0;
-    const run = () => {
-      const el = applyDelta();
-      if (!el) {
-        ul.style.scrollBehavior = prevScrollBehavior;
-        onStripExpandAnchorConsumed();
-        return;
-      }
-      const err = el.getBoundingClientRect().left - targetTileLeft;
-      if (Math.abs(err) <= 0.75) {
-        stable += 1;
-      } else {
-        stable = 0;
-      }
-      frames += 1;
-      if (stable >= 2 || frames >= STRIP_ANCHOR_MAX_FRAMES) {
-        const e2 = el.getBoundingClientRect().left - targetTileLeft;
-        if (Math.abs(e2) > 3) {
-          el.scrollIntoView({ block: "nearest", inline: "nearest" });
+        const scrollerRect = s.getBoundingClientRect();
+        const itemRect = item.getBoundingClientRect();
+        const currentScroll = s.scrollLeft;
+        const itemCenter =
+          itemRect.left - scrollerRect.left + currentScroll + itemRect.width / 2;
+        const maxScroll = Math.max(0, s.scrollWidth - s.clientWidth);
+        const targetScroll = Math.max(
+          0,
+          Math.min(itemCenter - s.clientWidth / 2, maxScroll)
+        );
+        const from = s.scrollLeft;
+        const delta = targetScroll - from;
+        if (Math.abs(delta) < 0.5) {
+          onStripExpandCenterConsumed();
+          return;
         }
-        ul.style.scrollBehavior = prevScrollBehavior;
-        onStripExpandAnchorConsumed();
-        return;
-      }
-      raf = requestAnimationFrame(run);
-    };
-    raf = requestAnimationFrame(run);
+        if (reduceMotion) {
+          s.scrollLeft = targetScroll;
+          onStripExpandCenterConsumed();
+          return;
+        }
+        const t0 = performance.now();
+        const tick = (now: number) => {
+          if (cancelled) return;
+          const sc = scrollerRef.current;
+          if (!sc) {
+            onStripExpandCenterConsumed();
+            return;
+          }
+          const t = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
+          sc.scrollLeft = from + delta * easeInOutCubic(t);
+          if (t < 1) {
+            scrollAnim.id = requestAnimationFrame(tick);
+          } else {
+            onStripExpandCenterConsumed();
+          }
+        };
+        scrollAnim.id = requestAnimationFrame(tick);
+      });
+    });
+
     return () => {
-      cancelAnimationFrame(raf);
-      ul.style.scrollBehavior = prevScrollBehavior;
+      cancelled = true;
+      cancelAnimationFrame(rafChain0);
+      cancelAnimationFrame(rafChain1);
+      cancelAnimationFrame(scrollAnim.id);
     };
   }, [
     isMobile,
     isSectionDesktopExpanded,
-    stripExpandAnchor,
-    onStripExpandAnchorConsumed,
+    stripExpandCenter,
+    onStripExpandCenterConsumed,
     reduceMotion,
   ]);
 
@@ -699,6 +710,9 @@ function SectionWorkScroll({
                           stripArmed={stripArmed}
                           onMobileImagePointerEnd={onMobileImagePointerEnd}
                           reduceMotion={reduceMotion}
+                          registerDesktopItemRef={
+                            isMobile ? undefined : registerDesktopItemRef
+                          }
                         />
                       );
                     })}
@@ -723,10 +737,9 @@ export function WorkExperience() {
   const [expandedSection, setExpandedSection] = useState<WorkSectionKey | null>(
     null
   );
-  const [stripExpandAnchor, setStripExpandAnchor] = useState<{
+  const [stripExpandCenter, setStripExpandCenter] = useState<{
     sectionKey: WorkSectionKey;
     panelId: string;
-    targetTileLeft: number;
   } | null>(null);
   const [focusedPanelId, setFocusedPanelId] = useState<string | null>(null);
   const [stripReady, setStripReady] = useState<
@@ -749,12 +762,12 @@ export function WorkExperience() {
     setStripReady((r) => ({ ...r, [sk]: true }));
   }, []);
 
-  const onStripExpandAnchorConsumed = useCallback(() => {
-    setStripExpandAnchor(null);
+  const onStripExpandCenterConsumed = useCallback(() => {
+    setStripExpandCenter(null);
   }, []);
 
   useEffect(() => {
-    if (expandedSection === null) setStripExpandAnchor(null);
+    if (expandedSection === null) setStripExpandCenter(null);
   }, [expandedSection]);
 
   const onMobileImagePointerEnd = useCallback(
@@ -837,7 +850,7 @@ export function WorkExperience() {
           const onDesktopTitleToggle = (e: React.MouseEvent) => {
             e.stopPropagation();
             if (isMobile) return;
-            setStripExpandAnchor(null);
+            setStripExpandCenter(null);
             setExpandedSection((prev) =>
               prev === section.key ? null : section.key
             );
@@ -846,7 +859,7 @@ export function WorkExperience() {
             if (isMobile) return;
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              setStripExpandAnchor(null);
+              setStripExpandCenter(null);
               setExpandedSection((prev) =>
                 prev === section.key ? null : section.key
               );
@@ -905,25 +918,21 @@ export function WorkExperience() {
                 isSectionDesktopExpanded={isChExpanded}
                 onDesktopStripExpand={(ctx) => {
                   if (ctx) {
-                    setStripExpandAnchor({
+                    setStripExpandCenter({
                       sectionKey: section.key,
                       panelId: ctx.panelId,
-                      targetTileLeft: ctx.targetTileLeft,
                     });
                   } else {
-                    setStripExpandAnchor(null);
+                    setStripExpandCenter(null);
                   }
                   setExpandedSection(section.key);
                 }}
-                stripExpandAnchor={
-                  stripExpandAnchor?.sectionKey === section.key
-                    ? {
-                        panelId: stripExpandAnchor.panelId,
-                        targetTileLeft: stripExpandAnchor.targetTileLeft,
-                      }
+                stripExpandCenter={
+                  stripExpandCenter?.sectionKey === section.key
+                    ? { panelId: stripExpandCenter.panelId }
                     : null
                 }
-                onStripExpandAnchorConsumed={onStripExpandAnchorConsumed}
+                onStripExpandCenterConsumed={onStripExpandCenterConsumed}
                 stripArmed={Boolean(stripReady[section.key])}
                 onStripHorizontal={onStripHorizontal}
                 onMobileImagePointerEnd={onMobileImagePointerEnd}
