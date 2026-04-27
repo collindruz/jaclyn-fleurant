@@ -189,10 +189,10 @@ export function DraggableWorld({ srcs }: DraggableWorldProps) {
         Drag bounds = this padded, viewport-tall box so stills stay mostly on screen.
         Replaces a very tall (130dvh) play area that let images drift far out of view.
       */}
-      <div className="mx-auto w-full max-w-6xl overflow-clip sm:px-0">
+      <div className="w-full max-w-none overflow-clip">
         <div
           ref={constraintsRef}
-          className="relative box-border w-full touch-manipulation select-none px-2 py-1 sm:px-3 sm:py-2 md:px-4 md:py-3"
+          className="relative box-border w-full touch-manipulation select-none px-0 py-1 sm:px-2 sm:py-2 md:px-3 md:py-3"
           style={{ height: "min(100dvh, 1100px)" }}
           role="group"
           aria-labelledby={`${areaId}-hint`}

@@ -24,7 +24,7 @@ export default function TheWorldPage() {
         </div>
       </section>
 
-      <section className="mt-20 px-2 pb-4 sm:mt-24 sm:px-4 md:mt-28 md:px-6">
+      <section className="mt-20 px-0 pb-4 sm:mt-24 md:mt-28">
         <DraggableWorld srcs={stills} />
       </section>
 
