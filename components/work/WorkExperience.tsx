@@ -2,7 +2,6 @@
 
 import {
   AnimatePresence,
-  cubicBezier,
   LayoutGroup,
   motion,
   useReducedMotion,
@@ -89,10 +88,15 @@ function resolveWorkItem(
  * Mobile: larger cards (~1.5–2 per viewport).
  * md+ collapsed: several per view; md+ expanded (~1.5×): larger in-place archive read.
  */
-/** Same ms and easing as md+ tile `width` transition; scroll rAF runs in parallel from first paint. */
-const STRIP_EXPAND_SCROLL_MS = 950;
-/** Matches `stripItemClassBase` → `cubic-bezier(0.45,0,0.55,1)` */
-const stripExpandScrollEase = cubicBezier(0.45, 0, 0.55, 1);
+/** md+ expand: tile width transition and centering scroll share duration and in-out quad feel. */
+const STRIP_EXPAND_SCROLL_MS = 1200;
+/** Pause so tile transition has started before we measure and animate scroll. */
+const STRIP_SCROLL_START_DELAY_MS = 125;
+
+/** easeInOutQuad; t ∈ [0,1] — same weight as scroll rAF; CSS uses a close cubic bezier. */
+function easeInOutQuad(t: number): number {
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+}
 
 /** md+ uses one slow size transition; mobile keeps a shorter transition for horizontal strip reflow. */
 const stripItemClassBase =
@@ -100,7 +104,7 @@ const stripItemClassBase =
   "w-[min(52vw,21rem)] min-w-[11rem] " +
   "transition-[width,max-width] duration-200 ease-out " +
   `md:duration-[${STRIP_EXPAND_SCROLL_MS}ms] ` +
-  "md:[transition-timing-function:cubic-bezier(0.45,0,0.55,1)] " +
+  "md:[transition-timing-function:cubic-bezier(0.5,0,0.5,1)] " +
   "motion-reduce:transition-none ";
 
 const stripItemClassMd = "md:w-[24vw] md:min-w-0 md:max-w-[10.5rem] lg:max-w-[12rem]";
@@ -171,8 +175,8 @@ const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-10";
 const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-24";
 
 /**
- * Best-effort center: clamped to [0, maxScroll] so lead images stay at scrollLeft 0
- * (no forced centering) when rawTarget is negative; trailing images when rawTarget is large.
+ * `item.offsetLeft` is ambiguous for nested list items; use content-space X (rects + scrollLeft).
+ * rawTargetScroll = itemLeft + w/2 - viewport/2; clamp to natural scroll range (no fake left padding).
  */
 function scrollLeftToCenterItem(
   scroller: HTMLUListElement,
@@ -181,9 +185,10 @@ function scrollLeftToCenterItem(
   const rI = item.getBoundingClientRect();
   const rS = scroller.getBoundingClientRect();
   const itemLeftInContent = rI.left - rS.left + scroller.scrollLeft;
-  const rawTarget = itemLeftInContent + rI.width / 2 - scroller.clientWidth / 2;
+  const rawTargetScroll =
+    itemLeftInContent + item.offsetWidth / 2 - scroller.clientWidth / 2;
   const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
-  return Math.max(0, Math.min(rawTarget, maxScroll));
+  return Math.max(0, Math.min(rawTargetScroll, maxScroll));
 }
 
 type MobileImagePointerEnd = {
@@ -559,11 +564,11 @@ function SectionWorkScroll({
     }
     let cancelled = false;
     let rafId = 0;
-    let rafSync0 = 0;
-    let rafSync1 = 0;
+    let startRaf = 0;
+    let startTimer: number | undefined;
 
-    rafSync0 = requestAnimationFrame(() => {
-      rafSync1 = requestAnimationFrame(() => {
+    startTimer = window.setTimeout(() => {
+      startRaf = requestAnimationFrame(() => {
         if (cancelled) return;
         const item =
           itemRefs.current.get(panelId) ??
@@ -575,15 +580,15 @@ function SectionWorkScroll({
           return;
         }
 
-        const target = scrollLeftToCenterItem(scroller, item);
+        const targetScroll = scrollLeftToCenterItem(scroller, item);
         if (reduceMotion) {
-          scroller.scrollLeft = target;
+          scroller.scrollLeft = targetScroll;
           onStripExpandCenterConsumed();
           return;
         }
 
         const from = scroller.scrollLeft;
-        const delta = target - from;
+        const delta = targetScroll - from;
         if (Math.abs(delta) < 0.5) {
           onStripExpandCenterConsumed();
           return;
@@ -593,7 +598,7 @@ function SectionWorkScroll({
         const tick = (now: number) => {
           if (cancelled) return;
           const u = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
-          scroller.scrollLeft = from + delta * stripExpandScrollEase(u);
+          scroller.scrollLeft = from + delta * easeInOutQuad(u);
           if (u < 1) {
             rafId = requestAnimationFrame(tick);
           } else {
@@ -602,12 +607,14 @@ function SectionWorkScroll({
         };
         rafId = requestAnimationFrame(tick);
       });
-    });
+    }, STRIP_SCROLL_START_DELAY_MS);
 
     return () => {
       cancelled = true;
-      cancelAnimationFrame(rafSync0);
-      cancelAnimationFrame(rafSync1);
+      if (startTimer !== undefined) {
+        window.clearTimeout(startTimer);
+      }
+      cancelAnimationFrame(startRaf);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [
