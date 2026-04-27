@@ -11,7 +11,7 @@ export const INFO_PAGE_STILL_SRC =
 export function InfoPageStill() {
   return (
     <div
-      className="pointer-events-none relative z-0 -translate-y-0.5 opacity-[0.93] sm:translate-y-0"
+      className="pointer-events-none relative z-0 shrink-0 opacity-[0.93]"
       aria-hidden
     >
       <div

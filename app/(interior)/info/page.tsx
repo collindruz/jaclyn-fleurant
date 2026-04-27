@@ -22,37 +22,38 @@ export default function InfoPage() {
         <FadeIn>
           <h1 className="font-serif text-2xl font-light text-charcoal/88 sm:text-3xl">Info</h1>
 
-          <div className="relative z-0 mt-10 sm:mt-12 lg:mt-12">
-            <div className="flex flex-col gap-8 sm:gap-10 lg:flex-row lg:items-start lg:gap-10 lg:pl-0 xl:gap-14">
-              <div
-                className="relative z-10 order-2 min-w-0 max-w-xl flex-1 space-y-6 text-left font-sans text-[0.92rem] leading-[1.85] text-charcoal/55 sm:space-y-7 sm:text-[0.95rem] sm:leading-[1.9] lg:order-1"
-              >
-                <p>
-                  Jaclyn Fleurant is a stylist and costume designer with a clear
-                  and intentional point of view. Her work is guided by both instinct and precision,
-                  shaped by a sensitivity to silhouette, texture, and mood. Clothing is never
-                  incidental. It is used to define character, build identity, and create a sense of
-                  presence within an image.
-                </p>
-                <p>
-                  She studied Design and Merchandising at Drexel University and later Fashion
-                  Marketing and Business at the London College of Fashion, developing a foundation
-                  that blends both creative and structural thinking. Early time spent within the
-                  studio of Marc Jacobs in New York refined her eye for proportion and detail,
-                  grounding her approach in the craft of construction as much as in image making.
-                </p>
-                <p>
-                  Jaclyn works across editorial, advertising, performance, and red carpet. Her work
-                  reflects a balance of control and intuition, with an emphasis on clarity and
-                  restraint. The result is imagery that feels considered, elevated, and quietly
-                  confident.
-                </p>
-              </div>
-              <div
-                className="order-1 -mr-1 flex w-full min-w-0 justify-end pl-0 sm:-mr-0 md:pl-0 lg:order-2 lg:ml-auto lg:mt-0.5 lg:w-auto lg:max-w-none lg:shrink-0 lg:justify-end"
-              >
-                <InfoPageStill />
-              </div>
+          <div
+            className="relative z-0 mt-10 min-h-[min(70vh,36rem)] sm:mt-12 sm:min-h-[min(65vh,38rem)] md:min-h-[min(62vh,40rem)]"
+          >
+            <div
+              className="relative z-10 w-full max-w-xl space-y-6 pl-0 pr-[min(9.25rem,32vw)] text-left font-sans text-[0.92rem] leading-[1.85] text-charcoal/55 sm:space-y-7 sm:pr-40 sm:text-[0.95rem] sm:leading-[1.9] md:pr-44 lg:pr-48"
+            >
+              <p>
+                Jaclyn Fleurant is a stylist and costume designer with a clear
+                and intentional point of view. Her work is guided by both instinct and precision,
+                shaped by a sensitivity to silhouette, texture, and mood. Clothing is never
+                incidental. It is used to define character, build identity, and create a sense of
+                presence within an image.
+              </p>
+              <p>
+                She studied Design and Merchandising at Drexel University and later Fashion
+                Marketing and Business at the London College of Fashion, developing a foundation
+                that blends both creative and structural thinking. Early time spent within the
+                studio of Marc Jacobs in New York refined her eye for proportion and detail,
+                grounding her approach in the craft of construction as much as in image making.
+              </p>
+              <p>
+                Jaclyn works across editorial, advertising, performance, and red carpet. Her work
+                reflects a balance of control and intuition, with an emphasis on clarity and
+                restraint. The result is imagery that feels considered, elevated, and quietly
+                confident.
+              </p>
+            </div>
+            <div
+              className="pointer-events-none absolute inset-0 z-0 flex items-center justify-end"
+              aria-hidden
+            >
+              <InfoPageStill />
             </div>
           </div>
 
