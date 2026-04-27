@@ -86,12 +86,22 @@ function resolveWorkItem(
 /**
  * 4:5 stills, horizontal strip.
  * Mobile: larger cards (~1.5–2 per viewport).
- * md+: several per view, consistent editorial sizing.
+ * md+ collapsed: several per view; md+ expanded (~1.5×): larger in-place archive read.
  */
-const stripItemClass =
-  "group relative aspect-[4/5] shrink-0 overflow-hidden " +
-  "w-[min(52vw,21rem)] min-w-[11rem] " +
-  "md:w-[24vw] md:min-w-0 md:max-w-[10.5rem] lg:max-w-[12rem]";
+const stripItemClassBase =
+  "group relative aspect-[4/5] shrink-0 overflow-hidden transition-[width,max-width] duration-300 ease-out motion-reduce:transition-none " +
+  "w-[min(52vw,21rem)] min-w-[11rem] ";
+
+const stripItemClassMd = "md:w-[24vw] md:min-w-0 md:max-w-[10.5rem] lg:max-w-[12rem]";
+
+const stripItemClassMdExpanded =
+  "md:w-[36vw] md:min-w-0 md:max-w-[16rem] lg:max-w-[18rem]";
+
+function stripItemWidthClass(isMobile: boolean, isDesktopExpanded: boolean): string {
+  if (isMobile) return stripItemClassBase;
+  if (isDesktopExpanded) return stripItemClassBase + stripItemClassMdExpanded;
+  return stripItemClassBase + stripItemClassMd;
+}
 
 /** Horizontal scroll: `w-0` + `overflow-visible` keeps group width to the image row; label sticks in scrollport. */
 const COLOR_GROUP_STICKY_LABEL =
@@ -160,6 +170,8 @@ type StripItemProps = {
   panelId: string;
   sectionKey: WorkSectionKey;
   isMobile: boolean;
+  /** md+ only: this top-level section is expanded in place. */
+  isDesktopExpanded: boolean;
   isFocused: boolean;
   isFaded: boolean;
   /** Mobile: strip is “armed” (horizontal or first tap) — second tap can open focus. */
@@ -175,6 +187,7 @@ function StripItem({
   panelId,
   sectionKey,
   isMobile,
+  isDesktopExpanded,
   isFocused,
   isFaded,
   stripArmed,
@@ -240,9 +253,11 @@ function StripItem({
     ]
   );
 
+  const itemWidthClass = stripItemWidthClass(isMobile, isDesktopExpanded);
+
   // Mobile: source slot while this item is shown in the focus layer
   if (isMobile && isFocused) {
-    return <li className={stripItemClass} aria-hidden />;
+    return <li className={itemWidthClass} aria-hidden />;
   }
 
   const mediaInner = (() => {
@@ -270,7 +285,13 @@ function StripItem({
             src={item.src}
             alt={imageAlt}
             fill
-            sizes="(max-width: 767px) 55vw, (max-width: 1024px) 20vw, 12vw"
+            sizes={
+              isMobile
+                ? "(max-width: 767px) 55vw, (max-width: 1024px) 20vw, 12vw"
+                : isDesktopExpanded
+                  ? "(max-width: 1023px) 32vw, (max-width: 1279px) 24vw, 20vw"
+                  : "(max-width: 1024px) 20vw, 12vw"
+            }
             className={mediaClass}
             draggable={false}
           />
@@ -283,7 +304,7 @@ function StripItem({
   if (!isMobile) {
     return (
       <li
-        className={stripItemClass}
+        className={itemWidthClass}
         role="listitem"
         aria-describedby={showCaption ? capId : undefined}
       >
@@ -306,7 +327,7 @@ function StripItem({
   return (
     <motion.li
       layout={false}
-      className={`${stripItemClass} ${mobileCursorClass}`}
+      className={`${itemWidthClass} ${mobileCursorClass}`}
       role="listitem"
       aria-describedby={showCaption && !isFocused ? capId : undefined}
       initial={false}
@@ -412,6 +433,9 @@ type SectionWorkScrollProps = {
   sectionLabel: string;
   focusedPanelId: string | null;
   isMobile: boolean;
+  /** md+: this section is expanded in place (larger tiles). */
+  isSectionDesktopExpanded: boolean;
+  onDesktopStripExpand: () => void;
   stripArmed: boolean;
   onStripHorizontal: (sk: WorkSectionKey) => void;
   onMobileImagePointerEnd: (panelId: string, p: MobileImagePointerEnd) => void;
@@ -428,6 +452,8 @@ function SectionWorkScroll({
   sectionLabel,
   focusedPanelId,
   isMobile,
+  isSectionDesktopExpanded,
+  onDesktopStripExpand,
   stripArmed,
   onStripHorizontal,
   onMobileImagePointerEnd,
@@ -440,10 +466,28 @@ function SectionWorkScroll({
     y0: number;
     id: number;
   } | null>(null);
+  const desktopStripTapRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handleDesktopStripClick = useCallback(
+    (e: React.MouseEvent<HTMLUListElement>) => {
+      if (isMobile) return;
+      const start = desktopStripTapRef.current;
+      desktopStripTapRef.current = null;
+      if (start) {
+        const d = Math.hypot(e.clientX - start.x, e.clientY - start.y);
+        if (d > 20) return;
+      }
+      onDesktopStripExpand();
+    },
+    [isMobile, onDesktopStripExpand]
+  );
 
   const handleHStripPointerDown = useCallback(
     (e: React.PointerEvent<HTMLUListElement>) => {
-      if (!isMobile) return;
+      if (!isMobile) {
+        desktopStripTapRef.current = { x: e.clientX, y: e.clientY };
+        return;
+      }
       hStripPtr.current = {
         x0: e.clientX,
         y0: e.clientY,
@@ -481,7 +525,10 @@ function SectionWorkScroll({
       <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
         <div className="-mx-3 min-w-0 px-3 md:mx-0 md:px-0">
           <ul
-            className="no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto overscroll-x-contain scroll-smooth p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 md:gap-4 md:pl-2.5"
+            className={
+              "no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto overscroll-x-contain scroll-smooth p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 md:gap-4 md:pl-2.5 " +
+              (isMobile ? "" : "md:cursor-pointer")
+            }
             style={{
               WebkitOverflowScrolling: "touch",
               ...(isMobile ? { touchAction: "pan-x pan-y" } : null),
@@ -490,6 +537,7 @@ function SectionWorkScroll({
             onPointerMove={handleHStripPointerMove}
             onPointerUpCapture={clearHStripPtr}
             onPointerCancelCapture={clearHStripPtr}
+            onClick={handleDesktopStripClick}
             aria-label={`${sectionLabel} — all color groups`}
           >
             {WORK_COLOR_ORDER.flatMap((group) => {
@@ -525,6 +573,7 @@ function SectionWorkScroll({
                           panelId={panelId}
                           sectionKey={sectionKey}
                           isMobile={isMobile}
+                          isDesktopExpanded={isSectionDesktopExpanded}
                           isFocused={isFocused}
                           isFaded={isFaded}
                           stripArmed={stripArmed}
@@ -549,6 +598,10 @@ export function WorkExperience() {
     subscribeMobile,
     getMobileSnapshot,
     getServerMobileSnapshot
+  );
+  const isDesktop = !isMobile;
+  const [expandedSection, setExpandedSection] = useState<WorkSectionKey | null>(
+    null
   );
   const [focusedPanelId, setFocusedPanelId] = useState<string | null>(null);
   const [stripReady, setStripReady] = useState<
@@ -590,6 +643,22 @@ export function WorkExperience() {
   }, [isMobile, closeFocus]);
 
   useEffect(() => {
+    if (isMobile) setExpandedSection(null);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isMobile || expandedSection === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setExpandedSection(null);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isMobile, expandedSection]);
+
+  useEffect(() => {
     if (!isMobile || focusedPanelId === null) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -617,6 +686,37 @@ export function WorkExperience() {
           const sectionNum =
             WORK_SECTION_ORDER.findIndex((s) => s.key === section.key) + 1;
           const sectionIndexLabel = String(sectionNum).padStart(2, "0");
+          const isChExpanded = isDesktop && expandedSection === section.key;
+          const onDesktopTitleToggle = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            if (isMobile) return;
+            setExpandedSection((prev) =>
+              prev === section.key ? null : section.key
+            );
+          };
+          const onDesktopTitleKeyDown = (e: React.KeyboardEvent) => {
+            if (isMobile) return;
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setExpandedSection((prev) =>
+                prev === section.key ? null : section.key
+              );
+            }
+          };
+          const indexTitleClass =
+            workChapterIndexClass +
+            (isChExpanded
+              ? " md:opacity-100 md:text-charcoal/40"
+              : isDesktop
+                ? " md:opacity-90"
+                : "");
+          const labelTitleClass =
+            workChapterTitleTextClass +
+            (isChExpanded
+              ? " md:opacity-100 md:text-charcoal/62"
+              : isDesktop
+                ? " md:opacity-90"
+                : "");
           return (
             <div
               key={section.key}
@@ -624,12 +724,24 @@ export function WorkExperience() {
             >
               <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
                 <h2
-                  className={`pl-0.5 pr-1 sm:pl-1 sm:pr-1 ${workChapterTitleGapClass}`}
+                  className={
+                    `pl-0.5 pr-1 sm:pl-1 sm:pr-1 transition-[opacity] duration-300 ` +
+                    workChapterTitleGapClass +
+                    (isDesktop
+                      ? " cursor-pointer select-none " +
+                        " focus-visible:outline focus-visible:outline-1 " +
+                        " focus-visible:outline-offset-[6px] focus-visible:outline-charcoal/20"
+                      : "")
+                  }
+                  onClick={onDesktopTitleToggle}
+                  onKeyDown={onDesktopTitleKeyDown}
+                  tabIndex={isDesktop ? 0 : undefined}
+                  aria-expanded={isDesktop ? isChExpanded : undefined}
                 >
-                  <span className={workChapterIndexClass}>
+                  <span className={indexTitleClass}>
                     {sectionIndexLabel}
                   </span>
-                  <span className={workChapterTitleTextClass}>
+                  <span className={labelTitleClass}>
                     {section.label}
                   </span>
                 </h2>
@@ -639,6 +751,8 @@ export function WorkExperience() {
                 sectionLabel={section.label}
                 focusedPanelId={focusedPanelId}
                 isMobile={isMobile}
+                isSectionDesktopExpanded={isChExpanded}
+                onDesktopStripExpand={() => setExpandedSection(section.key)}
                 stripArmed={Boolean(stripReady[section.key])}
                 onStripHorizontal={onStripHorizontal}
                 onMobileImagePointerEnd={onMobileImagePointerEnd}
