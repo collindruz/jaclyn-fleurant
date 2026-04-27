@@ -13,9 +13,7 @@
     "work:rebuild:groups": "npm run work:filter:person && npm run color:group",
     "work:sync-files": "node scripts/sync-site-pull-files.mjs",
     "work:dedupe": "node scripts/dedupe-work-images.mjs",
-    "dedupe:work": "node scripts/dedupe-work-images.mjs",
-    "color:group": "node scripts/group-work-by-color.mjs",
-    "crop:people": "node scripts/crop-work-people.mjs"
+    "color:group": "node scripts/group-work-by-color.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.15.0",

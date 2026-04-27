@@ -100,9 +100,6 @@ export const workSections: WorkSections = buildWorkSections(
 export const workColorGroups: Record<WorkColorKey, WorkItem[]> =
   mergeWorkSectionsToFlatColorGroups(workSections);
 
-/** @deprecated Use workColorGroups — kept as alias for existing imports. */
-export const workAssets: Record<WorkColorKey, WorkItem[]> = workColorGroups;
-
 export type { WorkSections };
 
 /**
