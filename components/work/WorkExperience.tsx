@@ -103,6 +103,17 @@ const reducedT = { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] as const };
 
 const FADED_WHEN_FOCUS = 0.2;
 
+/** Top-level work sections (Editorial, Red Carpet, …) — chapter opener, not a list row. */
+const workChapterTitleClass =
+  "pl-0.5 sm:pl-1 pr-1 font-serif text-[1.4rem] font-light leading-[1.2] tracking-[-0.01em] " +
+  "text-charcoal/48 sm:text-[1.5rem] md:text-[1.65rem]";
+
+/** Space after chapter title before the lookbook strip (visual “pause”). */
+const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-14";
+
+/** Vertical break between main sections: larger than internal color groups, no rules or boxes. */
+const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-36";
+
 type StripItemProps = {
   item: WorkItem;
   groupLabel: string;
@@ -338,7 +349,7 @@ function SectionWorkScroll({
       <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
         <div className="-mx-3 min-w-0 px-3 md:mx-0 md:px-0">
           <ul
-            className="no-scrollbar m-0 flex list-none touch-pan-x items-center gap-4 overflow-x-auto overscroll-x-contain scroll-smooth p-0 pb-1.5 pr-0 sm:gap-5 sm:pr-0 md:gap-5"
+            className="no-scrollbar m-0 flex list-none touch-pan-x items-center gap-3.5 overflow-x-auto overscroll-x-contain scroll-smooth p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 md:gap-4 md:pl-2.5"
             style={{ WebkitOverflowScrolling: "touch" }}
             aria-label={`${sectionLabel} — all color groups`}
           >
@@ -357,7 +368,7 @@ function SectionWorkScroll({
                     {group.label}
                   </span>
                   <ul
-                    className="m-0 flex min-w-0 list-none items-center gap-4 p-0 sm:gap-5 md:gap-5"
+                    className="m-0 flex min-w-0 list-none items-center gap-3.5 p-0 sm:gap-4 md:gap-4"
                     role="list"
                     aria-label={group.label}
                   >
@@ -442,14 +453,12 @@ export function WorkExperience() {
           return (
             <div
               key={section.key}
-              className={
-                showSectionRule
-                  ? "mt-16 border-t border-charcoal/[0.05] pt-10 sm:mt-20 sm:pt-12 md:mt-24 md:pt-14"
-                  : undefined
-              }
+              className={showSectionRule ? workSectionChapterBreakClass : undefined}
             >
               <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
-                <h2 className="mb-8 font-serif text-[1.15rem] font-light leading-snug text-charcoal/70 sm:mb-10 sm:text-[1.2rem] md:text-[1.35rem]">
+                <h2
+                  className={`${workChapterTitleClass} ${workChapterTitleGapClass}`}
+                >
                   {section.label}
                 </h2>
               </div>
