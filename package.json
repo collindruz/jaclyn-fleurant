@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "pull:site-images": "node scripts/pull-jaclyn-site-images.mjs",
+    "sync:site-pull": "npm run pull:site-images && npm run work:sync-files",
     "work:filter:person": "node scripts/filter-work-by-person.mjs",
     "work:rebuild:groups": "npm run work:filter:person && npm run color:group",
     "work:sync-files": "node scripts/sync-site-pull-files.mjs",
