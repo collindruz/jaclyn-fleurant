@@ -108,7 +108,13 @@ type StripItemProps = {
   isFaded: boolean;
   onMobileTap: (panelId: string) => void;
   reduceMotion: boolean;
+  /** Shown on the first image of each color group in the section scroll. */
+  colorLabelOverlay?: string;
 };
+
+const STRIP_COLOR_LABEL_OVERLAY_CLASS =
+  "pointer-events-none absolute left-2 top-2 z-[2] font-sans text-[0.5rem] font-normal uppercase " +
+  "leading-none tracking-[0.22em] text-charcoal/25";
 
 function StripItem({
   item,
@@ -120,6 +126,7 @@ function StripItem({
   isFaded,
   onMobileTap,
   reduceMotion,
+  colorLabelOverlay,
 }: StripItemProps) {
   const showCaption = Boolean(item.caption);
   const imageAlt = item.caption || `${groupLabel} photograph`;
@@ -182,6 +189,13 @@ function StripItem({
     );
   })();
 
+  const colorLabelEl =
+    colorLabelOverlay != null && colorLabelOverlay !== "" ? (
+      <span className={STRIP_COLOR_LABEL_OVERLAY_CLASS} aria-hidden>
+        {colorLabelOverlay}
+      </span>
+    ) : null;
+
   // Desktop / tablet: static list item, no tap focus
   if (!isMobile) {
     return (
@@ -190,6 +204,7 @@ function StripItem({
         role="listitem"
         aria-describedby={showCaption ? capId : undefined}
       >
+        {colorLabelEl}
         {mediaInner}
         {caption}
       </li>
@@ -214,6 +229,7 @@ function StripItem({
         className="relative h-full w-full overflow-hidden bg-transparent"
         transition={reduceMotion ? reducedT : { ...layoutSpring, layout: layoutSpring }}
       >
+        {colorLabelEl}
         {mediaInner}
       </motion.div>
       {caption}
@@ -298,10 +314,6 @@ function sectionNeedsTopSpacer(key: WorkSectionKey): boolean {
   return false;
 }
 
-const LABEL_INLINE_CLASS =
-  "whitespace-nowrap font-sans text-[0.52rem] font-normal uppercase leading-snug " +
-  "tracking-[0.22em] text-charcoal/30 select-none";
-
 type SectionWorkScrollProps = {
   sectionKey: WorkSectionKey;
   sectionLabel: string;
@@ -312,8 +324,8 @@ type SectionWorkScrollProps = {
 };
 
 /**
- * One horizontal scroller: for each color with items, inline label + that group’s images
- * (Black → … → Vivid).
+ * One horizontal scroller: walk colors in order; only images as list items, first per group gets a
+ * top-left color label overlay.
  */
 function SectionWorkScroll({
   sectionKey,
@@ -341,41 +353,27 @@ function SectionWorkScroll({
             {WORK_COLOR_ORDER.flatMap((group) => {
               const items = workSections[sectionKey][group.key];
               if (items.length === 0) return [];
-              return [
-                <li
-                  key={`${sectionKey}-label-${group.key}`}
-                  className="flex shrink-0 list-none"
-                  role="separator"
-                  aria-orientation="vertical"
-                >
-                  <span
-                    className={`${LABEL_INLINE_CLASS} pr-0.5`}
-                    id={`${sectionKey}-color-${group.key}`}
-                  >
-                    {group.label}
-                  </span>
-                </li>,
-                ...items.map((item, i) => {
-                  const capId = `${sectionKey}-${group.key}-cap-${i}`;
-                  const panelId = `${sectionKey}-${group.key}-${i}`;
-                  const isFocused = focusedPanelId === panelId;
-                  const isFaded = hasFocus && !isFocused;
-                  return (
-                    <StripItem
-                      key={`${sectionKey}-${group.key}-${i}-${item.src}`}
-                      item={item}
-                      groupLabel={group.label}
-                      capId={capId}
-                      panelId={panelId}
-                      isMobile={isMobile}
-                      isFocused={isFocused}
-                      isFaded={isFaded}
-                      onMobileTap={onMobileTap}
-                      reduceMotion={reduceMotion}
-                    />
-                  );
-                }),
-              ];
+              return items.map((item, i) => {
+                const capId = `${sectionKey}-${group.key}-cap-${i}`;
+                const panelId = `${sectionKey}-${group.key}-${i}`;
+                const isFocused = focusedPanelId === panelId;
+                const isFaded = hasFocus && !isFocused;
+                return (
+                  <StripItem
+                    key={`${sectionKey}-${group.key}-${i}-${item.src}`}
+                    item={item}
+                    groupLabel={group.label}
+                    capId={capId}
+                    panelId={panelId}
+                    isMobile={isMobile}
+                    isFocused={isFocused}
+                    isFaded={isFaded}
+                    onMobileTap={onMobileTap}
+                    reduceMotion={reduceMotion}
+                    colorLabelOverlay={i === 0 ? group.label : undefined}
+                  />
+                );
+              });
             })}
           </ul>
         </div>
