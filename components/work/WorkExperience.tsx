@@ -2,6 +2,7 @@
 
 import {
   AnimatePresence,
+  cubicBezier,
   LayoutGroup,
   motion,
   useReducedMotion,
@@ -88,13 +89,10 @@ function resolveWorkItem(
  * Mobile: larger cards (~1.5–2 per viewport).
  * md+ collapsed: several per view; md+ expanded (~1.5×): larger in-place archive read.
  */
-/** See `STRIP_EXPAND_SCROLL_MS`: same ms for width transition and post-expand rAF center scroll. */
+/** Same ms and easing as md+ tile `width` transition; scroll rAF runs in parallel from first paint. */
 const STRIP_EXPAND_SCROLL_MS = 950;
-/**
- * Center-scroll runs after the md+ width transition has finished, then 2 rAFs for layout, so
- * `scrollWidth` / padding / tile rects match the expanded strip.
- */
-const STRIP_SCROLL_MEASURE_DELAY_MS = STRIP_EXPAND_SCROLL_MS;
+/** Matches `stripItemClassBase` → `cubic-bezier(0.45,0,0.55,1)` */
+const stripExpandScrollEase = cubicBezier(0.45, 0, 0.55, 1);
 
 /** md+ uses one slow size transition; mobile keeps a shorter transition for horizontal strip reflow. */
 const stripItemClassBase =
@@ -172,11 +170,10 @@ const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-10";
 /** Vertical break between main sections (tighter on md+ only). */
 const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-24";
 
-/** easeInOutQuad; t ∈ [0,1] */
-function easeInOutQuad(t: number): number {
-  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-}
-
+/**
+ * Best-effort center: clamped to [0, maxScroll] so lead images stay at scrollLeft 0
+ * (no forced centering) when rawTarget is negative; trailing images when rawTarget is large.
+ */
 function scrollLeftToCenterItem(
   scroller: HTMLUListElement,
   item: HTMLLIElement
@@ -562,10 +559,11 @@ function SectionWorkScroll({
     }
     let cancelled = false;
     let rafId = 0;
+    let rafSync0 = 0;
+    let rafSync1 = 0;
 
-    const startDelay = window.setTimeout(() => {
-      if (cancelled) return;
-      const measureAndRun = () => {
+    rafSync0 = requestAnimationFrame(() => {
+      rafSync1 = requestAnimationFrame(() => {
         if (cancelled) return;
         const item =
           itemRefs.current.get(panelId) ??
@@ -595,7 +593,7 @@ function SectionWorkScroll({
         const tick = (now: number) => {
           if (cancelled) return;
           const u = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
-          scroller.scrollLeft = from + delta * easeInOutQuad(u);
+          scroller.scrollLeft = from + delta * stripExpandScrollEase(u);
           if (u < 1) {
             rafId = requestAnimationFrame(tick);
           } else {
@@ -603,16 +601,13 @@ function SectionWorkScroll({
           }
         };
         rafId = requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(() => {
-        if (cancelled) return;
-        requestAnimationFrame(measureAndRun);
       });
-    }, STRIP_SCROLL_MEASURE_DELAY_MS);
+    });
 
     return () => {
       cancelled = true;
-      clearTimeout(startDelay);
+      cancelAnimationFrame(rafSync0);
+      cancelAnimationFrame(rafSync1);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [
@@ -670,11 +665,7 @@ function SectionWorkScroll({
             className={
               "no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto " +
               "overscroll-x-contain scroll-auto p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 " +
-              "md:gap-4 " +
-              /* Centering spacers only while expanded; collapsed uses normal strip inset. */
-              (isSectionDesktopExpanded
-                ? "md:pl-[max(0.5rem,calc(50vw-9rem))] md:pr-[max(0.5rem,calc(50vw-9rem))] "
-                : "md:pl-2.5 md:pr-0 ")
+              "md:gap-4 md:pl-2.5 md:pr-0 "
             }
             data-cursor={isMobile ? undefined : "interactive"}
             style={{

@@ -59,11 +59,7 @@ export default function InfoPage() {
 
           <div className="mt-12 max-w-md sm:mt-16">
             <h2 className="sr-only">Contact</h2>
-            <p className="font-sans text-[0.85rem] leading-7 text-charcoal/45 sm:leading-8 md:text-[0.9rem]">
-              A short note in email is enough to begin. Further materials are welcome when they
-              help describe the work. I read each message and respond when the project is a fit.
-            </p>
-            <ul className="mt-8 list-none space-y-4 p-0 sm:mt-10 sm:space-y-5">
+            <ul className="m-0 list-none space-y-4 p-0 sm:space-y-5">
               <li>
                 <a
                   href="mailto:jaclyn.fleurant@gmail.com"
