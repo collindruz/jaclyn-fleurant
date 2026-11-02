@@ -78,7 +78,7 @@ export function DebugImagesClient({ rows }: { rows: Row[] }) {
     <div className="p-4 font-mono text-sm">
       <h1 className="text-lg font-bold">Debug images (Work data)</h1>
       <p className="text-neutral-600">
-        Rows from <code>workSections</code> (same as Work). Load state in browser only.
+        Rows from <code>workProjectSections</code> (same as Work). Load state in browser only.
       </p>
       <p className="mb-2">
         ok: {summary.ok} · error: {summary.err} · pending: {summary.pending} ·

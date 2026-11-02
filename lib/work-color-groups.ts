@@ -12,13 +12,12 @@ import type { WorkColorKey } from "./work-types";
 export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
   black: [
     { kind: "image" as const, src: "/images/work/site-pull/site-080.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-165.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-228.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-183.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-199.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-213.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-214.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-217.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-228.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-244.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-246.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-281.jpg" },
@@ -28,7 +27,7 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
     { kind: "image" as const, src: "/images/work/site-pull/site-353.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-352.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-351.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-322.png" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-265.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-321.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-307.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-317.png" },
@@ -76,7 +75,6 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
     { kind: "image" as const, src: "/images/work/site-pull/site-311.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-313.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-315.png" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-379.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-367.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-366.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-365.jpg" },
@@ -86,7 +84,6 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
     { kind: "image" as const, src: "/images/work/site-pull/site-360.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-356.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-354.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-380.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-325.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-324.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-318.jpg" },
@@ -133,25 +130,6 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
   neutral: [
     { kind: "image" as const, src: "/images/work/site-pull/site-001.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-002.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-005.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-006-2.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-006.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-007-2.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-007.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-008-2.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-008.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-009-2.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-009.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-010-2.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-010.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-011.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-012.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-013.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-014.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-015.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-016.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-017.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-018.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-040.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-041.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-042.jpg" },
@@ -208,7 +186,6 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
     { kind: "image" as const, src: "/images/work/site-pull/site-284.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-287.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-289.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-323.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-357.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-358.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-310.jpg" },
@@ -259,12 +236,11 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
     { kind: "image" as const, src: "/images/work/site-pull/site-056.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-057.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-060.png" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-081.jpg" },
+    { kind: "image" as const, src: "/images/work/site-pull/site-146.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-082.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-096.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-129.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-133.png" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-146.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-161.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-166.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-168.jpg" },
@@ -286,7 +262,6 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
     { kind: "image" as const, src: "/images/work/site-pull/site-306.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-326.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-269.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-265.png" },
     { kind: "image" as const, src: "/images/work/site-pull/site-263.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-261.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-259.jpg" },
@@ -299,7 +274,6 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
     { kind: "image" as const, src: "/images/work/site-pull/site-219.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-212.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-200.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-187.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-177.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-172.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-160.jpg" },
@@ -316,31 +290,6 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
   vivid: [
     { kind: "image" as const, src: "/images/work/site-pull/site-003.webp" },
     { kind: "image" as const, src: "/images/work/site-pull/site-004.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-019-2.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-019.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-020-2.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-020.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-021-2.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-021.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-022-2.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-022.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-023-2.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-023.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-024-2.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-024.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-025.webp" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-026-2.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-026.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-027-2.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-027.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-028-2.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-028.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-029.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-030-2.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-030.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-031-2.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-031.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-032.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-046.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-047.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-054.jpg" },
@@ -364,7 +313,6 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> = {
     { kind: "image" as const, src: "/images/work/site-pull/site-115.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-116.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-117.jpg" },
-    { kind: "image" as const, src: "/images/work/site-pull/site-118.webp" },
     { kind: "image" as const, src: "/images/work/site-pull/site-119.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-121.jpg" },
     { kind: "image" as const, src: "/images/work/site-pull/site-124.jpg" },
@@ -382,50 +330,50 @@ Classification log (last run):
   site-002.jpg → neutral
   site-003.webp → vivid
   site-004.jpg → vivid
-  site-005.jpg → neutral
-  site-006-2.jpg → neutral
-  site-006.jpg → neutral
-  site-007-2.jpg → neutral
-  site-007.jpg → neutral
-  site-008-2.jpg → neutral
-  site-008.jpg → neutral
-  site-009-2.jpg → neutral
-  site-009.jpg → neutral
-  site-010-2.jpg → neutral
-  site-010.jpg → neutral
-  site-011.jpg → neutral
-  site-012.jpg → neutral
-  site-013.jpg → neutral
-  site-014.jpg → neutral
-  site-015.jpg → neutral
-  site-016.jpg → neutral
-  site-017.jpg → neutral
-  site-018.jpg → neutral
-  site-019-2.webp → vivid
-  site-019.webp → vivid
-  site-020-2.webp → vivid
-  site-020.webp → vivid
-  site-021-2.webp → vivid
-  site-021.webp → vivid
-  site-022-2.webp → vivid
-  site-022.webp → vivid
-  site-023-2.webp → vivid
-  site-023.webp → vivid
-  site-024-2.webp → vivid
-  site-024.webp → vivid
-  site-025.webp → vivid
-  site-026-2.jpg → vivid
-  site-026.jpg → vivid
-  site-027-2.jpg → vivid
-  site-027.jpg → vivid
-  site-028-2.jpg → vivid
-  site-028.jpg → vivid
-  site-029.jpg → vivid
-  site-030-2.jpg → vivid
-  site-030.jpg → vivid
-  site-031-2.jpg → vivid
-  site-031.jpg → vivid
-  site-032.jpg → vivid
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-001.jpg → neutral
+  site-002.jpg → neutral
+  site-002.jpg → neutral
+  site-002.jpg → neutral
+  site-002.jpg → neutral
+  site-002.jpg → neutral
+  site-002.jpg → neutral
+  site-002.jpg → neutral
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-003.webp → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
+  site-004.jpg → vivid
   site-040.jpg → neutral
   site-041.jpg → neutral
   site-042.jpg → neutral
@@ -467,7 +415,7 @@ Classification log (last run):
   site-078.jpg → neutral
   site-079.jpg → vivid
   site-080.jpg → black
-  site-081.jpg → cool
+  site-146.jpg → cool
   site-082.jpg → cool
   site-083.jpg → neutral
   site-084.jpg → neutral
@@ -504,7 +452,7 @@ Classification log (last run):
   site-115.jpg → vivid
   site-116.jpg → vivid
   site-117.jpg → vivid
-  site-118.webp → vivid
+  site-003.webp → vivid
   site-119.jpg → vivid
   site-120.jpg → neutral
   site-121.jpg → vivid
@@ -549,7 +497,7 @@ Classification log (last run):
   site-162.jpg → vivid
   site-163.jpg → vivid
   site-164.jpg → neutral
-  site-165.jpg → black
+  site-228.jpg → black
   site-166.jpg → cool
   site-167.jpg → vivid
   site-168.jpg → cool
@@ -571,7 +519,7 @@ Classification log (last run):
   site-184.jpg → vivid
   site-185.jpg → neutral
   site-186.jpg → vivid
-  site-187.jpg → neutral
+  site-002.jpg → neutral
   site-188.jpg → vivid
   site-189.jpg → white
   site-190.jpg → vivid
@@ -706,8 +654,8 @@ Classification log (last run):
   site-319.jpg → neutral
   site-320.jpg → neutral
   site-321.jpg → neutral
-  site-322.png → neutral
-  site-323.png → warm
+  site-265.png → neutral
+  site-266.png → warm
   site-324.png → vivid
   site-325.png → vivid
   site-326.png → cool
@@ -728,6 +676,4 @@ Classification log (last run):
   site-365.jpg → neutral
   site-366.jpg → neutral
   site-367.jpg → neutral
-  site-379.jpg → neutral
-  site-380.jpg → vivid
 */

@@ -43,7 +43,8 @@ export default function InfoPage() {
                 grounding her approach in the craft of construction as much as in image making.
               </p>
               <p>
-                Jaclyn works across editorial, advertising, performance, and red carpet. Her work
+                Jaclyn works across editorial, costume design, advertising, music videos, and red
+                carpet. Her work
                 reflects a balance of control and intuition, with an emphasis on clarity and
                 restraint. The result is imagery that feels considered, elevated, and quietly
                 confident.

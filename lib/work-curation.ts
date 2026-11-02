@@ -17,7 +17,7 @@ export const workCuration: WorkCurationConfig = curationJson;
 
 /** Basename → target group. Same as `workCuration.colorOverrides`. */
 export const COLOR_OVERRIDES: Partial<Record<string, string>> = workCuration.colorOverrides;
-/** Basename → work section (editorial, redCarpet, …). See `normalizeWorkSectionKey` in `build-work-sections.ts`. */
+/** Basename → work section (editorial, events, …). See `normalizeWorkSectionKey` in `build-work-sections.ts`. */
 export const SECTION_OVERRIDES: Readonly<Partial<Record<string, string>>> =
   workCuration.sectionOverrides ?? {};
 /** Hidden from Work. */

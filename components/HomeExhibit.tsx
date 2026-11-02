@@ -4,32 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
-import { getHomeFrameSlides } from "@/lib/home-frame-slides";
-import type { WorkMediaKind } from "@/lib/work-types";
+import { getHomeFrameSlides, type HomeFrameSlide } from "@/lib/home-frame-slides";
 
 /** Soft crossfade duration (ease-in-out; overlap reads as a gentle blend). */
 const FADE_MS = 1400;
 /** Time each slide is fully legible before the next crossfade. */
 const HOLD_MS = 2500;
 
-type Slide = { kind: WorkMediaKind; src: string };
+type Slide = HomeFrameSlide;
 
 function SlideMedia({ slide }: { slide: Slide }) {
-  if (slide.kind === "video") {
-    return (
-      <div className="absolute inset-0" key={slide.src}>
-        <video
-          className="h-full w-full object-cover"
-          src={slide.src}
-          muted
-          loop
-          playsInline
-          autoPlay
-          aria-hidden
-        />
-      </div>
-    );
-  }
   return (
     <div className="absolute inset-0">
       <Image
@@ -37,16 +21,28 @@ function SlideMedia({ slide }: { slide: Slide }) {
         alt=""
         fill
         className="object-contain object-center"
-        sizes="(max-width: 640px) 40vw, 200px"
+        sizes="(max-width: 640px) 40vw, 384px"
+        quality={90}
+        priority
         draggable={false}
       />
     </div>
   );
 }
 
-/** Borderless float: ~7–9rem mobile, ~9–12rem desktop. */
+/** Borderless float: smaller on phone so it does not cover the centered name. */
 const stillClass =
-  "relative w-[min(8.5rem,78vw)] shrink-0 overflow-hidden bg-transparent sm:w-[8.5rem] md:w-[10rem] lg:w-[11rem] xl:w-[12rem] xl:max-w-[12rem]";
+  "relative w-[min(6.25rem,36vw)] shrink-0 overflow-visible bg-transparent sm:w-[8.5rem] md:w-[10rem] lg:w-[11rem] xl:w-[12rem] xl:max-w-[12rem]";
+
+function stillBoxStyle(slides: Slide[]) {
+  const first = slides[0];
+  const w = first?.width && first.width > 0 ? first.width : 4;
+  const maxH = Math.max(
+    ...slides.map((s) => (s.height / Math.max(s.width, 1)) * w),
+    5
+  );
+  return { aspectRatio: `${w} / ${maxH}` };
+}
 
 /**
  * Crossfading stills. Timing: HOLD_MS / FADE_MS.
@@ -80,7 +76,7 @@ function HomeStillsCrossfade({ slides }: { slides: Slide[] }) {
 
   if (n === 1 || reduce) {
     return (
-      <div className={stillClass} style={{ aspectRatio: "4 / 5" }}>
+      <div className={stillClass} style={stillBoxStyle(slides)}>
         <div className="absolute inset-0 z-[1]">
           <SlideMedia slide={slides[0]} />
         </div>
@@ -104,7 +100,7 @@ function HomeStillsCrossfade({ slides }: { slides: Slide[] }) {
   const ease = "cubic-bezier(0.45, 0, 0.2, 1)";
 
   return (
-    <div className={stillClass} style={{ aspectRatio: "4 / 5" }}>
+    <div className={stillClass} style={stillBoxStyle(slides)}>
       <div
         className="absolute inset-0 z-[1] will-change-[opacity]"
         style={{
@@ -147,7 +143,7 @@ const nameLinkClass =
 
 /**
  * Center name + right floating stills only (no site nav; interior pages use the global header).
- * Both the title and the stills link to /work.
+ * Both the title and the stills link to / (work index).
  */
 export function HomeExhibit() {
   const slides = useMemo(() => getHomeFrameSlides(), []);
@@ -155,7 +151,7 @@ export function HomeExhibit() {
   return (
     <div className="absolute inset-0 z-10 pointer-events-none">
       <h1 className="pointer-events-auto absolute left-1/2 top-1/2 z-20 m-0 -translate-x-1/2 -translate-y-1/2 p-0 text-center">
-        <Link href="/work" className={nameLinkClass} aria-label="JACLYN FLEURANT — work">
+        <Link href="/" className={nameLinkClass} aria-label="JACLYN FLEURANT — work">
           JACLYN FLEURANT
         </Link>
       </h1>
@@ -163,7 +159,7 @@ export function HomeExhibit() {
       {slides.length > 0 ? (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-end px-5 sm:px-6 md:px-10">
           <div className="pointer-events-auto w-max">
-            <Link href="/work" className={workLinkClass} aria-label="View work">
+            <Link href="/" className={workLinkClass} aria-label="View work">
               <HomeStillsCrossfade slides={slides} />
             </Link>
           </div>

@@ -13,14 +13,20 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type CSSProperties,
 } from "react";
 import {
-  workSections,
-  WORK_COLOR_ORDER,
+  workProjectSections,
   WORK_SECTION_ORDER,
   type WorkItem,
 } from "@/lib/placeholders";
-import type { WorkColorKey, WorkSectionKey } from "@/lib/work-types";
+import type { WorkSectionKey } from "@/lib/work-types";
+import {
+  WorkExternalVideo,
+  WorkLocalVideo,
+  itemAspect,
+  posterAspect,
+} from "@/components/work/WorkMedia";
 
 const MOBILE_MQ = "(max-width: 767px)";
 
@@ -44,20 +50,15 @@ function workFocusLayoutId(panelId: string) {
 }
 
 /**
- * `panelId` = `{sectionKey}-{colorKey}-{index}` (e.g. `editorial-black-0`).
- * Section and color keys are unambiguous (fixed vocab).
+ * `panelId` = `{sectionKey}-{projectId}-{index}` (e.g. `editorial-ed-ugg-season-0`).
  */
-const PANEL_RE =
-  /^(editorial|redCarpet|advertising|costumeDesign)-(black|white|neutral|warm|cool|vivid)-(\d+)$/;
-
-function getColorGroupLabel(key: WorkColorKey): string {
-  const g = WORK_COLOR_ORDER.find((x) => x.key === key);
-  return g?.label ?? key;
-}
+const PANEL_RE = new RegExp(
+  `^(${WORK_SECTION_ORDER.map((s) => s.key).join("|")})-(.+)-(\\d+)$`
+);
 
 function parseWorkPanelId(panelId: string): {
   sectionKey: WorkSectionKey;
-  colorKey: WorkColorKey;
+  projectId: string;
   index: number;
 } | null {
   const m = panelId.match(PANEL_RE);
@@ -66,7 +67,7 @@ function parseWorkPanelId(panelId: string): {
   }
   return {
     sectionKey: m[1] as WorkSectionKey,
-    colorKey: m[2] as WorkColorKey,
+    projectId: m[2],
     index: parseInt(m[3], 10),
   };
 }
@@ -76,11 +77,13 @@ function resolveWorkItem(
 ): { item: WorkItem; groupLabel: string } | null {
   const parsed = parseWorkPanelId(panelId);
   if (!parsed) return null;
-  const { sectionKey, colorKey, index } = parsed;
+  const { sectionKey, projectId, index } = parsed;
   if (Number.isNaN(index) || index < 0) return null;
-  const item = workSections[sectionKey][colorKey][index];
+  const project = workProjectSections[sectionKey].find((p) => p.id === projectId);
+  if (!project) return null;
+  const item = project.items[index];
   if (!item) return null;
-  return { item, groupLabel: getColorGroupLabel(colorKey) };
+  return { item, groupLabel: project.title };
 }
 
 /**
@@ -98,28 +101,31 @@ function easeInOutQuad(t: number): number {
   return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
 
-/** md+ uses one slow size transition; mobile keeps a shorter transition for horizontal strip reflow. */
+/** Shared row height; width follows each asset’s natural aspect ratio (no 4:5 crop). */
 const stripItemClassBase =
-  "group relative aspect-[4/5] shrink-0 overflow-hidden " +
-  "w-[min(52vw,21rem)] min-w-[11rem] " +
-  "transition-[width,max-width] duration-200 ease-out " +
+  "group relative shrink-0 overflow-hidden " +
+  "h-[12.5rem] max-w-[min(92vw,42rem)] " +
+  "transition-[height] duration-200 ease-out " +
   `md:duration-[${STRIP_EXPAND_SCROLL_MS}ms] ` +
   "md:[transition-timing-function:cubic-bezier(0.5,0,0.5,1)] " +
   "motion-reduce:transition-none ";
 
-const stripItemClassMd = "md:w-[24vw] md:min-w-0 md:max-w-[10.5rem] lg:max-w-[12rem]";
-
-const stripItemClassMdExpanded =
-  "md:w-[36vw] md:min-w-0 md:max-w-[16rem] lg:max-w-[18rem] md:transform-none";
+const stripItemClassMd = "md:h-[14.5rem]";
+const stripItemClassMdExpanded = "md:h-[22rem] md:transform-none";
 
 function stripItemWidthClass(isMobile: boolean, isDesktopExpanded: boolean): string {
   if (isMobile) return stripItemClassBase;
-  if (isDesktopExpanded) return stripItemClassBase + stripItemClassMdExpanded;
+  if (isDesktopExpanded) return stripItemClassBase + stripItemClassMd + " " + stripItemClassMdExpanded;
   return stripItemClassBase + stripItemClassMd;
 }
 
+function stripItemStyle(item: WorkItem): CSSProperties {
+  const { w, h } = item.kind === "video" && item.external ? posterAspect(item) : itemAspect(item);
+  return { aspectRatio: `${w} / ${h}`, width: "auto" };
+}
+
 /** Horizontal scroll: `w-0` + `overflow-visible` keeps group width to the image row; label sticks in scrollport. */
-const COLOR_GROUP_STICKY_LABEL =
+const PROJECT_STICKY_LABEL =
   "pointer-events-none sticky left-3 top-3 z-20 w-0 shrink-0 self-start overflow-visible " +
   "font-sans text-[0.5rem] font-normal leading-none uppercase tracking-[0.22em] text-charcoal/30 whitespace-nowrap";
 
@@ -157,6 +163,12 @@ function isLightTapGesture(dx: number, dy: number, dt: number) {
   return (
     Math.hypot(dx, dy) < TAP_MAX_PX && dt < TAP_MAX_MS
   );
+}
+
+function eventFromWorkPlayer(e: { target: EventTarget | null }) {
+  const t = e.target;
+  if (!(t instanceof Element)) return false;
+  return Boolean(t.closest("[data-work-player]") || t.tagName === "IFRAME");
 }
 
 /** Muted two-digit index (01–04) — tiny, not a graphic treatment. */
@@ -228,6 +240,7 @@ type StripItemProps = {
   reduceMotion: boolean;
   /** Desktop: register tile root for center-scroll. */
   registerDesktopItemRef?: (panelId: string, el: HTMLLIElement | null) => void;
+  onDesktopVideoActivate?: (panelId: string) => void;
 };
 
 function StripItem({
@@ -244,6 +257,7 @@ function StripItem({
   onMobileImagePointerEnd,
   reduceMotion,
   registerDesktopItemRef,
+  onDesktopVideoActivate,
 }: StripItemProps) {
   const mobilePtr = useRef<{
     x0: number;
@@ -253,7 +267,7 @@ function StripItem({
   } | null>(null);
   const showCaption = Boolean(item.caption);
   const imageAlt = item.caption || `${groupLabel} photograph`;
-  const mediaClass = "absolute inset-0 h-full w-full object-cover object-center";
+  const mediaClass = "h-full w-full object-contain object-center";
   const layoutId = workFocusLayoutId(panelId);
   const t = reduceMotion ? reducedT : layoutSpring;
 
@@ -273,6 +287,7 @@ function StripItem({
   const handleMobilePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!isMobile || isFaded) return;
+      if (eventFromWorkPlayer(e)) return;
       mobilePtr.current = {
         x0: e.clientX,
         y0: e.clientY,
@@ -286,12 +301,17 @@ function StripItem({
   const handleMobilePointerEnd = useCallback(
     (e: React.PointerEvent) => {
       if (!isMobile || isFaded) return;
+      if (eventFromWorkPlayer(e)) {
+        clearMobilePtr();
+        return;
+      }
       const start = mobilePtr.current;
       if (!start || e.pointerId !== start.id) return;
       const dx = e.clientX - start.x0;
       const dy = e.clientY - start.y0;
       const dt = Date.now() - start.t0;
       clearMobilePtr();
+      if (item.kind === "video") return;
       onMobileImagePointerEnd(panelId, { dx, dy, dt, sectionKey });
     },
     [
@@ -301,6 +321,7 @@ function StripItem({
       sectionKey,
       onMobileImagePointerEnd,
       clearMobilePtr,
+      item.kind,
     ]
   );
 
@@ -313,42 +334,55 @@ function StripItem({
     return <li className={itemWidthClass} aria-hidden />;
   }
 
+  const { w: natW, h: natH } = itemAspect(item);
+  const activateDesktop =
+    isMobile || isDesktopExpanded
+      ? undefined
+      : () => onDesktopVideoActivate?.(panelId);
   const mediaInner = (() => {
+    if (item.kind === "video" && item.external) {
+      return (
+        <div className={lift}>
+          <WorkExternalVideo
+            item={item}
+            className={mediaClass}
+            onDesktopActivate={activateDesktop}
+          />
+        </div>
+      );
+    }
     if (item.kind === "video") {
       return (
         <div className={lift}>
-          <div className="absolute inset-0 h-full w-full">
-            <video
-              className={mediaClass}
-              src={item.src}
-              muted
-              loop
-              playsInline
-              autoPlay
-              title={item.caption || `${groupLabel} video`}
-            />
-          </div>
+          <WorkLocalVideo
+            src={item.src}
+            title={item.caption || `${groupLabel} video`}
+            poster={item.poster}
+            posterWidth={item.posterWidth}
+            posterHeight={item.posterHeight}
+            className={mediaClass}
+            onDesktopActivate={activateDesktop}
+          />
         </div>
       );
     }
     return (
       <div className={lift}>
-        <div className="absolute inset-0 h-full w-full">
-          <Image
-            src={item.src}
-            alt={imageAlt}
-            fill
-            sizes={
-              isMobile
-                ? "(max-width: 767px) 55vw, (max-width: 1024px) 20vw, 12vw"
-                : isDesktopExpanded
-                  ? "(max-width: 1023px) 32vw, (max-width: 1279px) 24vw, 20vw"
-                  : "(max-width: 1024px) 20vw, 12vw"
-            }
-            className={mediaClass}
-            draggable={false}
-          />
-        </div>
+        <Image
+          src={item.src}
+          alt={imageAlt}
+          width={natW}
+          height={natH}
+          sizes={
+            isMobile
+              ? "(max-width: 767px) 80vw, 40vw"
+              : isDesktopExpanded
+                ? "(max-width: 1023px) 50vw, 36vw"
+                : "(max-width: 1024px) 40vw, 28vw"
+          }
+          className={mediaClass}
+          draggable={false}
+        />
       </div>
     );
   })();
@@ -359,6 +393,7 @@ function StripItem({
       <li
         ref={(el) => registerDesktopItemRef?.(panelId, el)}
         className={itemWidthClass}
+        style={stripItemStyle(item)}
         role="listitem"
         data-work-panel={panelId}
         aria-describedby={showCaption ? capId : undefined}
@@ -386,6 +421,7 @@ function StripItem({
     <motion.li
       layout={false}
       className={`${itemWidthClass} ${mobileCursorClass}`}
+      style={stripItemStyle(item)}
       role="listitem"
       data-work-panel={panelId}
       aria-describedby={showCaption && !isFocused ? capId : undefined}
@@ -431,10 +467,11 @@ function MobileFocusLayer({
   const t = reduceMotion ? reducedT : layoutSpring;
   const imageAlt = item.caption || `${groupLabel} photograph`;
   const title = item.caption || `${groupLabel} ${item.kind === "video" ? "video" : "image"}`;
+  const { w, h } = itemAspect(item);
 
   return (
     <motion.div
-      className="pointer-events-auto fixed left-0 top-0 z-[200] h-[100dvh] w-full flex items-center justify-center p-0"
+      className="pointer-events-auto fixed left-0 top-0 z-[200] h-[100dvh] w-full flex items-center justify-center p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -443,27 +480,39 @@ function MobileFocusLayer({
       <motion.div
         layout={false}
         layoutId={layoutId}
-        className="relative w-[min(90vw,92vw)] max-w-[min(92vw,calc(88dvh*0.8))] max-h-[88dvh] min-h-0 aspect-[4/5] cursor-pointer overflow-hidden bg-transparent"
+        className="relative max-h-[88dvh] max-w-[min(92vw,72rem)] min-h-0 cursor-pointer overflow-hidden bg-transparent"
+        style={{ aspectRatio: `${w} / ${h}`, width: "min(92vw, 72rem)", height: "auto" }}
         transition={reduceMotion ? reducedT : { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
         data-cursor="interactive"
       >
-        {item.kind === "video" ? (
-          <video
-            className="absolute inset-0 h-full w-full object-cover object-center"
+        {item.kind === "video" && item.external ? (
+          <div
+            className="h-full w-full"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <WorkExternalVideo
+              item={item}
+              className="h-full w-full object-contain object-center"
+            />
+          </div>
+        ) : item.kind === "video" ? (
+          <WorkLocalVideo
             src={item.src}
-            muted
-            loop
-            playsInline
-            autoPlay
             title={title}
+            poster={item.poster}
+            posterWidth={item.posterWidth}
+            posterHeight={item.posterHeight}
+            className="h-full w-full object-contain object-center"
           />
         ) : (
           <Image
             src={item.src}
             alt={imageAlt}
-            fill
+            width={w}
+            height={h}
             sizes="100vw"
-            className="object-cover object-center"
+            className="h-full w-full object-contain object-center"
             priority
             draggable={false}
           />
@@ -474,9 +523,7 @@ function MobileFocusLayer({
 }
 
 function sectionHasItems(sectionKey: WorkSectionKey): boolean {
-  return WORK_COLOR_ORDER.some(
-    (c) => workSections[sectionKey][c.key].length > 0
-  );
+  return workProjectSections[sectionKey].some((p) => p.items.length > 0);
 }
 
 /** `true` if a section with content appears before this one in `WORK_SECTION_ORDER` (for spacing). */
@@ -510,9 +557,9 @@ type SectionWorkScrollProps = {
 };
 
 /**
- * One horizontal scroller per section. Each color group is an `li` with real width = its image row;
- * a sticky top-left label sits in that segment so it stays visible for the full group, then the next
- * group’s label takes over as it reaches the left edge.
+ * One horizontal scroller per section. Each project is an `li` with real width = its image row;
+ * a sticky top-left label sits in that segment so it stays visible for the full project, then the next
+ * project’s label takes over as it reaches the left edge.
  */
 function SectionWorkScroll({
   sectionKey,
@@ -550,6 +597,7 @@ function SectionWorkScroll({
   const handleDesktopStripClick = useCallback(
     (e: React.MouseEvent<HTMLUListElement>) => {
       if (isMobile) return;
+      if (eventFromWorkPlayer(e)) return;
       const start = desktopStripTapRef.current;
       desktopStripTapRef.current = null;
       if (start) {
@@ -650,6 +698,7 @@ function SectionWorkScroll({
 
   const handleHStripPointerDown = useCallback(
     (e: React.PointerEvent<HTMLUListElement>) => {
+      if (eventFromWorkPlayer(e)) return;
       if (!isMobile) {
         desktopStripTapRef.current = { x: e.clientX, y: e.clientY };
         return;
@@ -666,6 +715,7 @@ function SectionWorkScroll({
   const handleHStripPointerMove = useCallback(
     (e: React.PointerEvent<HTMLUListElement>) => {
       if (!isMobile) return;
+      if (eventFromWorkPlayer(e)) return;
       const s = hStripPtr.current;
       if (!s || e.pointerId !== s.id) return;
       const dx = e.clientX - s.x0;
@@ -707,37 +757,37 @@ function SectionWorkScroll({
             onPointerUpCapture={clearHStripPtr}
             onPointerCancelCapture={clearHStripPtr}
             onClick={handleDesktopStripClick}
-            aria-label={`${sectionLabel} — all color groups`}
+            aria-label={`${sectionLabel} — projects`}
           >
-            {WORK_COLOR_ORDER.flatMap((group) => {
-              const items = workSections[sectionKey][group.key];
+            {workProjectSections[sectionKey].flatMap((group) => {
+              const items = group.items;
               if (items.length === 0) return [];
               return [
                 <li
-                  key={`${sectionKey}-color-group-${group.key}`}
+                  key={`${sectionKey}-project-${group.id}`}
                   className="flex min-w-0 shrink-0 list-none"
                 >
                   <span
-                    className={COLOR_GROUP_STICKY_LABEL}
+                    className={PROJECT_STICKY_LABEL}
                     aria-hidden
                   >
-                    {group.label}
+                    {group.title}
                   </span>
                   <ul
                     className="m-0 flex min-w-0 list-none items-center gap-3.5 p-0 sm:gap-4 md:gap-4"
                     role="list"
-                    aria-label={group.label}
+                    aria-label={group.title}
                   >
                     {items.map((item, i) => {
-                      const capId = `${sectionKey}-${group.key}-cap-${i}`;
-                      const panelId = `${sectionKey}-${group.key}-${i}`;
+                      const capId = `${sectionKey}-${group.id}-cap-${i}`;
+                      const panelId = `${sectionKey}-${group.id}-${i}`;
                       const isFocused = focusedPanelId === panelId;
                       const isFaded = hasFocus && !isFocused;
                       return (
                         <StripItem
-                          key={`${sectionKey}-${group.key}-${i}-${item.src}`}
+                          key={`${sectionKey}-${group.id}-${i}-${item.src}`}
                           item={item}
-                          groupLabel={group.label}
+                          groupLabel={group.title}
                           capId={capId}
                           panelId={panelId}
                           sectionKey={sectionKey}
@@ -750,6 +800,9 @@ function SectionWorkScroll({
                           reduceMotion={reduceMotion}
                           registerDesktopItemRef={
                             isMobile ? undefined : registerDesktopItemRef
+                          }
+                          onDesktopVideoActivate={(id) =>
+                            onDesktopStripExpand({ panelId: id })
                           }
                         />
                       );
@@ -874,8 +927,10 @@ export function WorkExperience() {
     <LayoutGroup>
       <div
         className="relative w-full"
-        onClick={() => {
-          if (isMobile && focusedPanelId !== null) closeFocus();
+        onClick={(e) => {
+          if (!isMobile || focusedPanelId === null) return;
+          if (eventFromWorkPlayer(e)) return;
+          closeFocus();
         }}
       >
         {WORK_SECTION_ORDER.map((section) => {

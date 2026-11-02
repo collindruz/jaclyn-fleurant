@@ -79,7 +79,7 @@ export function applyWorkCuration(
   const flat: Entry[] = [];
   for (const { key: fromKey } of WORK_COLOR_ORDER) {
     for (const item of input[fromKey] || []) {
-      if (item.kind !== "image") continue;
+      if (item.kind !== "image" && item.kind !== "video") continue;
       flat.push({ item, fromKey });
     }
   }

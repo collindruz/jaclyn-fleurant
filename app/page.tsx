@@ -1,23 +1,22 @@
-import { HeroImage } from "@/components/HeroImage";
-import { FabricHeroVeil, LinenWeave } from "@/components/FabricHeroVeil";
-import { HomeExhibit } from "@/components/HomeExhibit";
-import { images } from "@/lib/placeholders";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { WorkExperience } from "@/components/work/WorkExperience";
+import { SiteFooter } from "@/components/SiteFooter";
+import { interiorMainClass } from "@/lib/interior-layout";
 
 export const metadata: Metadata = {
-  title: { absolute: "JACLYN FLEURANT" },
-  description: "Stylist and creative director, New York.",
+  title: "Work",
+  description:
+    "Photography and motion, organized as a small editorial color palette.",
 };
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <main id="main">
-      <section className="relative min-h-[100dvh]">
-        <HeroImage src={images.hero} alt="" priority />
-        <FabricHeroVeil />
-        <LinenWeave />
-        <HomeExhibit />
-      </section>
+    <main className={interiorMainClass}>
+      <h1 className="sr-only">Work</h1>
+      <div className="pb-10 sm:pb-10">
+        <WorkExperience />
+      </div>
+      <SiteFooter />
     </main>
   );
 }

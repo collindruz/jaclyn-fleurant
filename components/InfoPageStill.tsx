@@ -2,7 +2,7 @@ import Image from "next/image";
 
 /** Public path: reserved for Info; excluded from Work / World / homepage pool via curation. */
 export const INFO_PAGE_STILL_SRC =
-  "/images/work/site-pull/site-040.jpg" as const;
+  "/images/work/site-pull-cropped/site-040.jpg" as const;
 
 /**
  * Single floating still: same 4:5 frame and width scale as the homepage

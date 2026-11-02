@@ -1,35 +1,14 @@
 /**
- * Visual asset map — all work stills live under `public/images/work/site-pull/`.
- *
- * **Color** comes from `work-color-groups` ( `npm run color:group` ) + `work-curation.json` (`colorOverrides`, etc.).
- * **Sections** (Editorial, Red Carpet, …) are virtual: `lib/build-work-sections.ts` + `sectionOverrides` /
- * `work-site-section-metadata.json` + quarter split on `SITE_PULL_FILENAMES` order. No on-disk folders.
- *
- * `workColorGroups` is the merge of all sections, deduped by `src` (for World and flat layouts).
- *
- * ## Instagram
- * Do not scrape Instagram. Export or download images only with permission; place them in
- *   /public/images/instagram/
- * or add them later through a CMS. Nothing here pulls from Instagram automatically.
+ * Visual asset map — Work stills and local videos live in categorized folders
+ * under `public/images/work/{editorial,costume-design,advertising,music-videos,events}/`.
+ * Catalog: `npm run work:catalog` → `lib/work-catalog.ts`.
+ * Projects: `lib/work-projects.json` (preserved by the catalog generator).
  */
-import type { WorkItem } from "./work-types";
-import type { WorkColorKey } from "./work-types";
-import { WORK_COLOR_ORDER } from "./work-types";
-import { applyWorkCuration } from "./apply-work-curation";
-import {
-  buildWorkSections,
-  mergeWorkSectionsToFlatColorGroups,
-  type WorkSections,
-} from "./build-work-sections";
-import { workCuration } from "./work-curation";
-import { workColorGroups as workColorGroupsGenerated } from "./work-color-groups";
-import {
-  PERSON_FILTER_APPLIED,
-  PERSON_IMAGE_FILENAMES,
-} from "./work-person-filtered";
-import { SITE_PULL_FILENAMES } from "./site-pull-files";
-import workSiteSectionMetadata from "./work-site-section-metadata.json";
-import { WORLD_STILLS_MAX, WORLD_STILLS_MIN } from "./world-stills-bounds";
+import type { WorkItem, WorkProjectGroup } from "./work-types";
+import type { WorkColorKey, WorkSectionKey } from "./work-types";
+import { WORK_COLOR_ORDER, WORK_SECTION_ORDER } from "./work-types";
+import { WORK_CATALOG, WORK_PROJECTS } from "./work-catalog";
+import { WORLD_STILLS_MIN } from "./world-stills-bounds";
 
 export type { WorkItem } from "./work-types";
 export { WORK_COLOR_ORDER, WORK_SECTION_ORDER } from "./work-types";
@@ -37,17 +16,20 @@ export type { WorkColorKey, WorkMediaKind, WorkSectionKey } from "./work-types";
 
 const ph = "/images/placeholder.svg";
 
-function isWorkColorGroupsEmpty(
-  g: Record<WorkColorKey, WorkItem[]>
-): boolean {
-  return WORK_COLOR_ORDER.every(({ key }) => (g[key]?.length ?? 0) === 0);
+export type WorkProjectSections = Record<WorkSectionKey, WorkProjectGroup[]>;
+
+function emptyProjectSections(): WorkProjectSections {
+  return {
+    editorial: [],
+    costumeDesign: [],
+    advertising: [],
+    musicVideos: [],
+    events: [],
+  };
 }
 
-function workItemsFromFilenames(
-  basePath: string,
-  filenames: readonly string[]
-): Record<WorkColorKey, WorkItem[]> {
-  const out: Record<WorkColorKey, WorkItem[]> = {
+function emptyColorGroups(): Record<WorkColorKey, WorkItem[]> {
+  return {
     black: [],
     white: [],
     neutral: [],
@@ -55,112 +37,130 @@ function workItemsFromFilenames(
     cool: [],
     vivid: [],
   };
-  const order = WORK_COLOR_ORDER.map((x) => x.key);
-  for (let i = 0; i < filenames.length; i++) {
-    const k = order[i % order.length];
-    out[k].push({
-      kind: "image",
-      src: `${basePath}/${filenames[i]}`,
+}
+
+function buildWorkProjectSectionsFromCatalog(): WorkProjectSections {
+  const bySrc = new Map<string, WorkItem>();
+  for (const item of WORK_CATALOG) {
+    if (!bySrc.has(item.src)) bySrc.set(item.src, item);
+  }
+  const out = emptyProjectSections();
+  const used = new Set<string>();
+  for (const project of WORK_PROJECTS) {
+    const section = project.sectionKey;
+    if (!out[section]) continue;
+    const items: WorkItem[] = [];
+    for (const src of project.assets) {
+      const item = bySrc.get(src);
+      if (!item || used.has(item.src)) continue;
+      used.add(item.src);
+      items.push(item);
+    }
+    if (items.length === 0) continue;
+    out[section].push({
+      id: project.id,
+      title: project.title,
+      sectionKey: section,
+      provisional: project.provisional,
+      items,
     });
   }
   return out;
 }
 
-/**
- * Auto groups from `color:group`, then curation; or fallback strips, then curation the same way.
- */
-const curatedWorkColorGroups: Record<WorkColorKey, WorkItem[]> = (() => {
-  const base: Record<WorkColorKey, WorkItem[]> = (() => {
-    if (!isWorkColorGroupsEmpty(workColorGroupsGenerated)) {
-      return workColorGroupsGenerated;
+export const workProjectSections: WorkProjectSections =
+  buildWorkProjectSectionsFromCatalog();
+
+/** @deprecated Color groups are not used for Work carousels. Kept for World stills. */
+export type WorkSections = Record<WorkSectionKey, Record<WorkColorKey, WorkItem[]>>;
+
+function colorGroupsFromCatalog(): Record<WorkColorKey, WorkItem[]> {
+  const out = emptyColorGroups();
+  const seen = new Set<string>();
+  for (const item of WORK_CATALOG) {
+    if (seen.has(item.src)) continue;
+    seen.add(item.src);
+    const color = (item.colorKey as WorkColorKey | undefined) ?? "neutral";
+    if (!out[color]) continue;
+    out[color].push(item);
+  }
+  return out;
+}
+
+export const workColorGroups: Record<WorkColorKey, WorkItem[]> =
+  colorGroupsFromCatalog();
+
+/** Flat color buckets per section — unused by Work carousels; World/debug fallbacks. */
+export const workSections: WorkSections = (() => {
+  const out: WorkSections = {
+    editorial: emptyColorGroups(),
+    costumeDesign: emptyColorGroups(),
+    advertising: emptyColorGroups(),
+    musicVideos: emptyColorGroups(),
+    events: emptyColorGroups(),
+  };
+  for (const { key: sectionKey } of WORK_SECTION_ORDER) {
+    for (const group of workProjectSections[sectionKey]) {
+      for (const item of group.items) {
+        const color = (item.colorKey as WorkColorKey | undefined) ?? "neutral";
+        if (out[sectionKey][color]) out[sectionKey][color].push(item);
+      }
     }
-    if (PERSON_FILTER_APPLIED) {
-      return workItemsFromFilenames(
-        "/images/work/site-pull",
-        PERSON_IMAGE_FILENAMES
-      );
-    }
-    return workItemsFromFilenames(
-      "/images/work/site-pull",
-      SITE_PULL_FILENAMES
-    );
-  })();
-  return applyWorkCuration(base, workCuration);
+  }
+  return out;
 })();
 
-/** Virtual sections (same color groups each). Built from curated groups + section rules. */
-export const workSections: WorkSections = buildWorkSections(
-  curatedWorkColorGroups,
-  workCuration,
-  SITE_PULL_FILENAMES,
-  workSiteSectionMetadata as Record<string, string>
-);
-
-/** Flat merge of all sections, deduped by `src`, for World + legacy flat usage. */
-export const workColorGroups: Record<WorkColorKey, WorkItem[]> =
-  mergeWorkSectionsToFlatColorGroups(workSections);
-
-export type { WorkSections };
-
-/**
- * Global hero and world stills. Point at real files under /public/images/ as they exist.
- * Hero and world use the shared placeholder until you add photography paths.
- */
 export const images = {
   hero: ph,
   world: [ph, ph, ph, ph, ph, ph] as string[],
 } as const;
 
-export { WORLD_STILLS_MAX, WORLD_STILLS_MIN } from "./world-stills-bounds";
+export { WORLD_STILLS_MIN } from "./world-stills-bounds";
+
+const SKIP_WORLD_SRC = /\/(manual-review|site-pull|site-pull-cropped|site-pull-duplicates|unsorted|youtube-posters|video-posters)\//;
+
+export type WorldStill = {
+  src: string;
+  width: number;
+  height: number;
+};
 
 /**
- * 6–10 stills for /the-world, using the same color groups as the Work page: generated
- * `work-color-groups` (paths under /images/work/site-pull/) with `applyWorkCuration`, via
- * `workColorGroups`. Takes the first and second un-seen image per group (Black, White, Neutral,
- * Warm, Cool, Vivid), deduplicates, then backfills in stable order to reach up to
- * `WORLD_STILLS_MAX`. If there are no images in the groups, returns `WORLD_STILLS_MIN`×
- * placeholder.svg.
+ * Every approved local Work photo, once, in catalog/section order.
+ * Videos, embeds, posters, legacy folders, and reserved Info stills are excluded.
  */
-export function getWorldStillsFromColorGroups(): string[] {
-  const groups = workColorGroups;
-
-  const imageSrcs = (key: WorkColorKey): string[] =>
-    groups[key]
-      .filter((i) => i.kind === "image")
-      .map((i) => i.src);
-
-  const tryAppend = (src: string, seen: Set<string>, out: string[]) => {
-    if (seen.has(src) || out.length >= WORLD_STILLS_MAX) return;
-    seen.add(src);
-    out.push(src);
-  };
-
+export function getWorldStillsFromCatalog(): WorldStill[] {
   const seen = new Set<string>();
-  const out: string[] = [];
-
-  for (let round = 0; round < 2; round++) {
-    for (const { key } of WORK_COLOR_ORDER) {
-      if (out.length >= WORLD_STILLS_MAX) break;
-      for (const src of imageSrcs(key)) {
-        if (seen.has(src)) continue;
-        tryAppend(src, seen, out);
-        break;
-      }
-    }
+  const out: WorldStill[] = [];
+  for (const item of WORK_CATALOG) {
+    if (item.kind !== "image") continue;
+    const src = item.src;
+    if (!src.startsWith("/images/work/")) continue;
+    if (src.startsWith("http")) continue;
+    if (SKIP_WORLD_SRC.test(src)) continue;
+    if (src.includes("site-040.jpg")) continue;
+    if (seen.has(src)) continue;
+    seen.add(src);
+    out.push({
+      src,
+      width: item.width && item.width > 0 ? item.width : 4,
+      height: item.height && item.height > 0 ? item.height : 5,
+    });
   }
+  return out;
+}
 
-  for (const { key } of WORK_COLOR_ORDER) {
-    if (out.length >= WORLD_STILLS_MAX) break;
-    for (const item of groups[key]) {
-      if (out.length >= WORLD_STILLS_MAX) break;
-      if (item.kind === "image") tryAppend(item.src, seen, out);
-    }
+/** @deprecated Use getWorldStillsFromCatalog. */
+export function getWorldStillsFromColorGroups(): WorldStill[] {
+  const stills = getWorldStillsFromCatalog();
+  if (stills.length === 0) {
+    return Array.from({ length: WORLD_STILLS_MIN }, () => ({
+      src: ph,
+      width: 4,
+      height: 5,
+    }));
   }
-
-  if (out.length === 0) {
-    return Array(WORLD_STILLS_MIN).fill(ph) as string[];
-  }
-  return out.slice(0, WORLD_STILLS_MAX);
+  return stills;
 }
 
 export const getWorldStillsFromWork = getWorldStillsFromColorGroups;

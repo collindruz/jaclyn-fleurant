@@ -33,13 +33,13 @@ export function normalizeWorkSectionKey(raw: string): WorkSectionKey | null {
   if (t === "editorial" || lower === "editorial" || squish === "editorial")
     return "editorial";
   if (
-    lower === "red carpet" ||
-    lower === "red-carpet" ||
-    lower === "redcarpet" ||
-    squish === "redcarpet" ||
-    t === "redCarpet"
+    lower === "costume" ||
+    lower === "costume design" ||
+    lower === "performance" ||
+    squish === "costumedesign" ||
+    t === "costumeDesign"
   ) {
-    return "redCarpet";
+    return "costumeDesign";
   }
   if (
     lower === "advertising" ||
@@ -53,13 +53,26 @@ export function normalizeWorkSectionKey(raw: string): WorkSectionKey | null {
     return "advertising";
   }
   if (
-    lower === "costume" ||
-    lower === "costume design" ||
-    lower === "performance" ||
-    squish === "costumedesign" ||
-    t === "costumeDesign"
+    lower === "music videos" ||
+    lower === "music video" ||
+    lower === "musicvideos" ||
+    squish === "musicvideos" ||
+    t === "musicVideos"
   ) {
-    return "costumeDesign";
+    return "musicVideos";
+  }
+  if (
+    lower === "events" ||
+    lower === "event" ||
+    lower === "red carpet" ||
+    lower === "red-carpet" ||
+    lower === "redcarpet" ||
+    squish === "redcarpet" ||
+    squish === "events" ||
+    t === "redCarpet" ||
+    t === "events"
+  ) {
+    return "events";
   }
 
   for (const k of SECTION_KEYS) {
@@ -68,7 +81,7 @@ export function normalizeWorkSectionKey(raw: string): WorkSectionKey | null {
   return null;
 }
 
-function sectionFromQuartile(
+function sectionFromQuintile(
   basename: string,
   sitePullOrder: readonly string[]
 ): WorkSectionKey {
@@ -77,10 +90,11 @@ function sectionFromQuartile(
   const i = sitePullOrder.indexOf(basename);
   const rank = i >= 0 ? i : n;
   const t = rank / n;
-  if (t < 0.25) return "editorial";
-  if (t < 0.5) return "redCarpet";
-  if (t < 0.75) return "advertising";
-  return "costumeDesign";
+  if (t < 0.2) return "editorial";
+  if (t < 0.4) return "costumeDesign";
+  if (t < 0.6) return "advertising";
+  if (t < 0.8) return "musicVideos";
+  return "events";
 }
 
 function assignSection(
@@ -102,7 +116,7 @@ function assignSection(
     const k = normalizeWorkSectionKey(String(m));
     if (k) return k;
   }
-  return sectionFromQuartile(basename, sitePullOrder);
+  return sectionFromQuintile(basename, sitePullOrder);
 }
 
 export type WorkSections = Record<WorkSectionKey, Record<WorkColorKey, WorkItem[]>>;
@@ -119,9 +133,10 @@ export function buildWorkSections(
 ): WorkSections {
   const out: WorkSections = {
     editorial: emptyColorGroups(),
-    redCarpet: emptyColorGroups(),
-    advertising: emptyColorGroups(),
     costumeDesign: emptyColorGroups(),
+    advertising: emptyColorGroups(),
+    musicVideos: emptyColorGroups(),
+    events: emptyColorGroups(),
   };
 
   for (const { key: colorKey } of WORK_COLOR_ORDER) {
@@ -137,8 +152,8 @@ export function buildWorkSections(
 }
 
 /**
- * Merged color groups for World / any flat strip: section order editorial → red carpet →
- * advertising → costume design; de-duplicated by `src` (first win).
+ * Merged color groups for World / any flat strip: follows `WORK_SECTION_ORDER`;
+ * de-duplicated by `src` (first win).
  */
 export function mergeWorkSectionsToFlatColorGroups(
   sections: WorkSections

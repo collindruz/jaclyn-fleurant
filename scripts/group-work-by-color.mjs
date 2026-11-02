@@ -35,6 +35,7 @@ const SITE_PULL_URL = "/images/work/site-pull";
 const MAX_IMAGES_PER_GROUP = 30;
 
 const IMG_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"]);
+const VIDEO_EXT = new Set([".mp4", ".webm", ".m4v"]);
 
 const KEYS = ["black", "white", "neutral", "warm", "cool", "vivid"];
 
@@ -259,7 +260,11 @@ function capGroupSizes(groups, totalN) {
 function isImageFile(e) {
   if (!e.isFile()) return false;
   const ext = path.extname(e.name).toLowerCase();
-  return IMG_EXT.has(ext);
+  return IMG_EXT.has(ext) || VIDEO_EXT.has(ext);
+}
+
+function isVideoName(name) {
+  return VIDEO_EXT.has(path.extname(name).toLowerCase());
 }
 
 /**
@@ -349,20 +354,26 @@ async function main() {
       console.log(`[color:group] ${i + 1}/${names.length}…`);
     }
     const full = path.join(SITE_PULL_DIR, name);
+    const isVideo = isVideoName(name);
     let key;
-    try {
-      key = await classifyImageToGroupKey(full);
-      logLines.push(`  ${name} → ${key}`);
-    } catch (err) {
-      console.warn(`[color:group] ${name}: ${err?.message || err} → neutral`);
-      key = "neutral";
-      logLines.push(`  ${name} → neutral (error)`);
+    if (isVideo) {
+      key = "black";
+      logLines.push(`  ${name} → ${key} (video)`);
+    } else {
+      try {
+        key = await classifyImageToGroupKey(full);
+        logLines.push(`  ${name} → ${key}`);
+      } catch (err) {
+        console.warn(`[color:group] ${name}: ${err?.message || err} → neutral`);
+        key = "neutral";
+        logLines.push(`  ${name} → neutral (error)`);
+      }
     }
 
     if (!key || !KEYS.includes(key)) key = "neutral";
 
     groups[key].push({
-      kind: "image",
+      kind: isVideo ? "video" : "image",
       src: `${SITE_PULL_URL}/${name}`,
     });
   }
@@ -393,7 +404,7 @@ function writeTs(groups, logLines, count) {
       arr
         .map(
           (it) =>
-            `    { kind: "image" as const, src: ${JSON.stringify(it.src)} }`
+            `    { kind: ${JSON.stringify(it.kind ?? "image")} as const, src: ${JSON.stringify(it.src)} }`
         )
         .join(",\n") +
       ",\n  ]"

@@ -1,62 +1,20 @@
 "use client";
 
-import {
-  animate,
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  type PanInfo,
-} from "framer-motion";
-import { WORLD_STILLS_MAX } from "@/lib/world-stills-bounds";
-import type { RefObject } from "react";
+import { motion } from "framer-motion";
+import type { WorldStill } from "@/lib/placeholders";
+import { packWorldStills, type WorldPackSlot } from "@/lib/world-pack";
+import Image from "next/image";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 
 type DraggableWorldProps = {
-  srcs: string[];
-};
-
-/**
- * Collage: desktop = left / center / right; mobile = full-width band with `left` spread
- * (~5–78%) so prints are not pinned to a single left column (no implicit “nav gutter”).
- */
-const PRINTS: {
-  m: { t: string; l: string; w: string };
-  d: { t: string; l: string; w: string };
-}[] = [
-  { m: { t: "0%", l: "5%", w: "32%" }, d: { t: "5%", l: "5%", w: "21%" } },
-  { m: { t: "14%", l: "20%", w: "30%" }, d: { t: "4%", l: "38%", w: "20%" } },
-  { m: { t: "6%", l: "40%", w: "32%" }, d: { t: "8%", l: "66%", w: "20%" } },
-  { m: { t: "30%", l: "60%", w: "30%" }, d: { t: "38%", l: "12%", w: "22%" } },
-  { m: { t: "20%", l: "78%", w: "20%" }, d: { t: "32%", l: "40%", w: "20%" } },
-  { m: { t: "44%", l: "4%", w: "34%" }, d: { t: "30%", l: "68%", w: "20%" } },
-  { m: { t: "36%", l: "38%", w: "32%" }, d: { t: "58%", l: "6%", w: "21%" } },
-  { m: { t: "58%", l: "58%", w: "30%" }, d: { t: "52%", l: "38%", w: "20%" } },
-  { m: { t: "68%", l: "18%", w: "28%" }, d: { t: "10%", l: "68%", w: "19%" } },
-  { m: { t: "52%", l: "72%", w: "24%" }, d: { t: "62%", l: "58%", w: "20%" } },
-];
-
-/** Rest (non-enlarged) only: press / drag nudge. */
-const INTERACTION_SCALE = 1.1;
-/**
- * Enlarge only via motion `scale` (layout width unchanged). Resting print layout is fixed; all
- * size change is `transform: scale` from `printVariant`’s `baseScale`.
- */
-const ENLARGED_MULT = 2.0;
-/** `whileDrag` / `whileTap` when enlarged: at most `baseScale` × this (2.5% over 2×). */
-const ENLARGED_DRAG_MAX_MULT = 2.05;
-
-const resetTransition = {
-  type: "spring" as const,
-  stiffness: 360,
-  damping: 34,
-  mass: 0.85,
+  stills: WorldStill[];
 };
 
 const scaleSpring = {
@@ -66,22 +24,6 @@ const scaleSpring = {
   mass: 0.78,
 };
 
-const whileDragTransition = {
-  type: "spring" as const,
-  stiffness: 520,
-  damping: 32,
-  mass: 0.45,
-};
-
-/** Below this, movement is treated as jitter; above, the gesture is a drag (blocks `onTap`). */
-const DRAG_MOVE_THRESHOLD_PX = 6;
-/** After a drag, ignore `onTap` for this long (Framer can fire tap after release). */
-const DRAG_TAP_SUPPRESS_MS = 120;
-
-/**
- * Per-print “random” but stable: same `src` + `index` always yields the same rotate/scale
- * (SSR-safe, no flicker; reset remount does not need to re-roll).
- */
 function printVariant(src: string, index: number) {
   let h = 2166136261;
   const s = `${src}#${index}`;
@@ -90,290 +32,217 @@ function printVariant(src: string, index: number) {
     h = Math.imul(h, 16777619) >>> 0;
   }
   const r0 = h / 0xffff_ffff;
-  const t = Math.imul(h, 0x9e37_79b1) >>> 0;
-  const r1 = t / 0xffff_ffff;
-  const rotate = -2.5 + r0 * 5;
-  const scale = 0.82 + r1 * 0.08;
-  return { rotate, scale };
+  const rotate = -1.2 + r0 * 2.4;
+  return { rotate };
 }
 
-function useIsMd() {
-  return useSyncExternalStore(
-    (onStoreChange) => {
-      if (typeof window === "undefined") return () => {};
-      const mq = window.matchMedia("(min-width: 768px)");
-      mq.addEventListener("change", onStoreChange);
-      return () => mq.removeEventListener("change", onStoreChange);
-    },
-    () => window.matchMedia("(min-width: 768px)").matches,
-    () => false
-  );
+function useWorldBoard() {
+  const [box, setBox] = useState({ w: 0, h: 0 });
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const header = document.querySelector("header");
+      const hh = header ? header.getBoundingClientRect().height : 0;
+      setBox({
+        w: window.innerWidth,
+        h: Math.max(64, window.innerHeight - hh),
+      });
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    const header = document.querySelector("header");
+    const ro = header ? new ResizeObserver(measure) : null;
+    if (header && ro) ro.observe(header);
+    const html = document.documentElement;
+    const prevHtml = html.style.overflow;
+    const prevBody = document.body.style.overflow;
+    html.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("resize", measure);
+      ro?.disconnect();
+      html.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, []);
+
+  return box;
 }
 
-export function DraggableWorld({ srcs }: DraggableWorldProps) {
-  const list = useMemo(
-    () => srcs.slice(0, WORLD_STILLS_MAX),
-    [srcs]
-  );
+export function DraggableWorld({ stills }: DraggableWorldProps) {
+  const list = stills;
   const n = list.length;
-  const constraintsRef = useRef<HTMLDivElement>(null);
-  /** Which still gets the "second tap" expand (two-step: first activate, then toggle). */
+  const board = useWorldBoard();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  /**
-   * Enlarged state is per index: expanding or selecting one still does not clear others
-   * (only Escape resets all, or a second tap on a still toggles that still only).
-   */
-  const [expandedIndices, setExpandedIndices] = useState<Set<number>>(
-    () => new Set()
+  const [enlargedIndex, setEnlargedIndex] = useState<number | null>(null);
+
+  const packed = useMemo(
+    () => packWorldStills(list, board.w, board.h),
+    [list, board.w, board.h]
   );
-  /** Increments to trigger a smooth (spring) return of all drags to origin. */
-  const [resetTick, setResetTick] = useState(0);
 
   const activate = useCallback((i: number) => {
     setActiveIndex(i);
   }, []);
 
-  /** First tap: select (active for second tap). Second tap: toggle expand for that still only. */
-  const onPrintTap = useCallback(
-    (i: number) => {
-      if (activeIndex === i) {
-        setExpandedIndices((prev) => {
-          const next = new Set(prev);
-          if (next.has(i)) next.delete(i);
-          else next.add(i);
-          return next;
-        });
-      } else {
-        setActiveIndex(i);
-      }
-    },
-    [activeIndex]
-  );
+  const closeEnlarge = useCallback(() => {
+    setEnlargedIndex(null);
+  }, []);
 
   const reset = useCallback(() => {
     setActiveIndex(null);
-    setExpandedIndices(new Set());
-    setResetTick((t) => t + 1);
+    setEnlargedIndex(null);
+  }, []);
+
+  const onPrintTap = useCallback((i: number) => {
+    setActiveIndex(i);
+    setEnlargedIndex((cur) => (cur === i ? null : i));
   }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.preventDefault();
+      if (enlargedIndex != null) {
+        setEnlargedIndex(null);
+        return;
+      }
       reset();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [reset]);
+  }, [enlargedIndex, reset]);
 
   if (n === 0) return null;
 
+  const enlarged = enlargedIndex != null ? list[enlargedIndex] : null;
+  const boardH = board.h || "calc(100dvh - 7.5rem)";
+
   return (
-    <div className="w-screen min-w-0 max-w-[100dvw] overflow-x-clip">
-      {/*
-        Drag bounds = this padded, viewport-tall box so stills stay mostly on screen.
-        Replaces a very tall (130dvh) play area that let images drift far out of view.
-      */}
-      <div className="w-full max-w-none overflow-clip">
+    <div
+      className="relative w-full min-w-0 overflow-hidden touch-manipulation select-none"
+      style={{ height: boardH, width: "100%" }}
+      role="group"
+      aria-label="Stills"
+    >
+      {list.map((still, i) => {
+        const slot = packed.slots[i];
+        if (!slot) return null;
+        const isEnl = enlargedIndex === i;
+        const isAct = activeIndex === i;
+        const z = (isEnl ? 50_000 : 0) + (isAct ? 5_000 : 0) + 20 + i;
+        return (
+          <DraggablePrint
+            key={`${i}-${still.src}`}
+            src={still.src}
+            width={still.width}
+            height={still.height}
+            index={i}
+            n={n}
+            slot={slot}
+            zIndex={z}
+            isActive={isAct}
+            isEnlarged={isEnl}
+            onActivate={() => activate(i)}
+            onPrintTap={() => onPrintTap(i)}
+          />
+        );
+      })}
+
+      {enlarged && enlargedIndex != null ? (
         <div
-          ref={constraintsRef}
-          className="relative box-border w-full touch-manipulation select-none px-0 py-1 sm:px-2 sm:py-2 md:px-3 md:py-3"
-          style={{ height: "min(100dvh, 1100px)" }}
-          role="group"
-          aria-label="Stills"
+          className="fixed inset-0 z-[2000000] flex items-center justify-center bg-bone/70 p-3 sm:p-5"
+          onClick={closeEnlarge}
         >
-        {list.map((src, i) => {
-          const L = PRINTS[i] ?? PRINTS[i % PRINTS.length]!;
-          const isEnl = expandedIndices.has(i);
-          const isAct = activeIndex === i;
-          /** Enlarged above rest; the active (selected) still above unselected peers; +i for stable ties. */
-          const z = (isEnl ? 1_000_000 : 0) + (isAct ? 5_000 : 0) + 20 + i;
-          return (
-            <DraggablePrint
-              key={`${i}-${src}`}
-              src={src}
-              index={i}
-              n={n}
-              layoutM={L.m}
-              layoutD={L.d}
-              zIndex={z}
-              isActive={isAct}
-              isEnlarged={isEnl}
-              onActivate={() => activate(i)}
-              onPrintTap={() => onPrintTap(i)}
-              dragConstraints={constraintsRef}
-              resetTick={resetTick}
+          <button
+            type="button"
+            className="relative h-[min(82dvh,calc(100dvh-8rem))] w-[min(92vw,52rem)] max-h-full max-w-full cursor-pointer border-0 bg-transparent p-0"
+            aria-label={`Close still ${enlargedIndex + 1} of ${n}`}
+            onClick={closeEnlarge}
+          >
+            <Image
+              src={enlarged.src}
+              alt=""
+              fill
+              className="pointer-events-none object-contain object-center"
+              sizes="(max-width: 767px) 92vw, (max-width: 1279px) 80vw, 52rem"
+              quality={90}
+              priority
+              draggable={false}
             />
-          );
-        })}
+          </button>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
 
 type DraggablePrintProps = {
   src: string;
+  width: number;
+  height: number;
   index: number;
   n: number;
-  layoutM: (typeof PRINTS)[0]["m"];
-  layoutD: (typeof PRINTS)[0]["d"];
+  slot: WorldPackSlot;
   zIndex: number;
   isActive: boolean;
   isEnlarged: boolean;
   onActivate: () => void;
   onPrintTap: () => void;
-  dragConstraints: RefObject<HTMLDivElement | null>;
-  resetTick: number;
 };
 
 function DraggablePrint({
   src,
+  width,
+  height,
   index,
   n,
-  layoutM,
-  layoutD,
+  slot,
   zIndex,
   isActive,
   isEnlarged,
   onActivate,
   onPrintTap,
-  dragConstraints,
-  resetTick,
 }: DraggablePrintProps) {
-  const isMd = useIsMd();
-  const reduceMotion = useReducedMotion();
-  const L = isMd ? layoutD : layoutM;
-  const { rotate, scale: baseScale } = useMemo(
-    () => printVariant(src, index),
-    [src, index]
-  );
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const printRef = useRef<HTMLDivElement | null>(null);
-  const didDragRef = useRef(false);
-  /** `true` after movement past threshold — blocks tap until 120ms after drag end. */
-  const sawOnDragRef = useRef(false);
-  const dragStartPosRef = useRef<{ x: number; y: number } | null>(null);
-  const dragEndSuppressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
-  /** `true` for 120ms after any pan that moved (even under threshold) — Framer can still fire onTap. */
-  const postGestureTapBlockRef = useRef(false);
-
-  useEffect(() => {
-    if (resetTick === 0) return;
-    const ax = animate(x, 0, resetTransition);
-    const ay = animate(y, 0, resetTransition);
-    return () => {
-      ax.stop();
-      ay.stop();
-    };
-  }, [resetTick, x, y]);
-
-  useEffect(() => {
-    return () => {
-      if (dragEndSuppressTimeoutRef.current !== null) {
-        clearTimeout(dragEndSuppressTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  /*
-   * Scale (motion `transform`, layout unchanged):
-   * - rest: baseScale
-   * - enlarged: baseScale * 2
-   * - drag / tap when enlarged: baseScale * 2.05 max (tiny nudge; not × INTERACTION_SCALE)
-   * - not enlarged + drag / tap: baseScale * INTERACTION_SCALE
-   */
-  const restScale = isEnlarged
-    ? baseScale * ENLARGED_MULT
-    : baseScale;
-  const interactionScale = isEnlarged
-    ? baseScale * ENLARGED_DRAG_MAX_MULT
-    : baseScale * INTERACTION_SCALE;
-
-  const handleDragStart = useCallback(
-    (_: unknown, info: PanInfo) => {
-      didDragRef.current = false;
-      sawOnDragRef.current = false;
-      postGestureTapBlockRef.current = false;
-      dragStartPosRef.current = { x: info.point.x, y: info.point.y };
-      onActivate();
-    },
-    [onActivate]
-  );
-
-  const handleDrag = useCallback((_: unknown, info: PanInfo) => {
-    sawOnDragRef.current = true;
-    const s = dragStartPosRef.current;
-    if (s) {
-      const d = Math.hypot(info.point.x - s.x, info.point.y - s.y);
-      if (d > DRAG_MOVE_THRESHOLD_PX) {
-        didDragRef.current = true;
-      }
-    }
-  }, []);
-
-  const handleDragEnd = useCallback(() => {
-    dragStartPosRef.current = null;
-    if (!sawOnDragRef.current) return;
-    sawOnDragRef.current = false;
-    if (dragEndSuppressTimeoutRef.current !== null) {
-      clearTimeout(dragEndSuppressTimeoutRef.current);
-    }
-    postGestureTapBlockRef.current = true;
-    dragEndSuppressTimeoutRef.current = setTimeout(() => {
-      didDragRef.current = false;
-      postGestureTapBlockRef.current = false;
-      dragEndSuppressTimeoutRef.current = null;
-    }, DRAG_TAP_SUPPRESS_MS);
-  }, []);
+  const { rotate } = useMemo(() => printVariant(src, index), [src, index]);
+  const thumbSize = Math.max(24, Math.ceil(Math.max(slot.w, slot.h) * 2));
+  const pointerStart = useRef({ x: 0, y: 0 });
 
   return (
     <motion.div
-      ref={printRef}
-      className="absolute flex cursor-grab items-center justify-center border-0 bg-transparent p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone active:cursor-grabbing aspect-[3/4] max-w-[9.5rem] sm:aspect-[4/5] sm:max-w-[9rem] md:max-w-[8.5rem]"
+      className="absolute cursor-grab border-0 bg-transparent p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone active:cursor-grabbing"
       data-cursor="interactive"
       data-world-print=""
       data-index={index}
       data-active={isActive || undefined}
       style={{
-        top: L.t,
-        left: L.l,
-        width: L.w,
+        top: slot.y,
+        left: slot.x,
+        width: slot.w,
+        height: slot.h,
         zIndex,
-        x,
-        y,
         transformOrigin: "center",
       }}
       role="button"
       tabIndex={0}
       aria-pressed={isEnlarged}
       aria-label={`Still ${index + 1} of ${n}`}
-      animate={{ scale: restScale, rotate }}
+      animate={{ scale: 1, rotate }}
       transition={scaleSpring}
       drag
-      dragConstraints={dragConstraints}
-      dragElastic={0.04}
-      dragMomentum={!reduceMotion}
-      dragTransition={{
-        power: 0.1,
-        timeConstant: 200,
-        restDelta: 0.4,
+      dragSnapToOrigin
+      dragElastic={0.12}
+      dragMomentum={false}
+      onDragStart={onActivate}
+      onPointerDown={(e) => {
+        pointerStart.current = { x: e.clientX, y: e.clientY };
       }}
-      onDragStart={handleDragStart}
-      onDrag={handleDrag}
-      onDragEnd={handleDragEnd}
-      whileDrag={{ scale: interactionScale, transition: whileDragTransition }}
-      whileTap={{ scale: interactionScale, transition: whileDragTransition }}
-      onTap={(e) => {
-        if (didDragRef.current || postGestureTapBlockRef.current) return;
-        const t = (e as unknown as { target: EventTarget | null }).target;
-        if (!(t instanceof Element) || !t.closest?.("[data-world-image]")) {
-          return;
-        }
-        onPrintTap();
+      onPointerUp={(e) => {
+        const d = Math.hypot(
+          e.clientX - pointerStart.current.x,
+          e.clientY - pointerStart.current.y
+        );
+        if (d < 8) onPrintTap();
       }}
       onFocus={onActivate}
       onKeyDown={(e) => {
@@ -383,23 +252,17 @@ function DraggablePrint({
         }
       }}
     >
-      {/*
-        Tight box around the visible still only: tap toggles; flex padding of the frame does not.
-        Native img: intrinsic box, no extra hit slop.
-      */}
-      <div
-        data-world-image=""
-        className="pointer-events-auto inline-block max-w-full"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <div data-world-image="" className="pointer-events-auto h-full w-full">
+        <Image
           src={src}
           alt=""
-          className="pointer-events-none block h-auto w-auto max-h-[12rem] max-w-[min(9.5rem,78vw)] select-none sm:max-w-[9rem] md:max-h-[11rem] md:max-w-[8.5rem]"
+          width={width}
+          height={height}
+          className="pointer-events-none block h-full w-full select-none object-contain object-center"
+          sizes={`${thumbSize}px`}
+          quality={70}
           draggable={false}
-          decoding="async"
-          fetchPriority={index < 2 ? "high" : "auto"}
-          loading={index < 2 ? "eager" : "lazy"}
+          priority={index < 24}
         />
       </div>
     </motion.div>

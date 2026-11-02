@@ -33,6 +33,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# local transcode scratch (web-optimized copies replace in-repo videos)
+.tmp-web-videos/
+.tmp-video-frames/
+
+# Oversized original MP4s are stored outside this repository
+# (Documents/jaclyn-fleurant-original-videos/). Do not copy them back
+# into public/images/work — GitHub rejects files over 100 MB.
+
 # site image pull — keep folder, ignore heavy binaries (Vercel must get assets via CI pull or LFS)
 # Local: npm run pull:site-images && npm run work:sync-files && npm run color:group && npm run check:images
 public/images/work/site-pull/*

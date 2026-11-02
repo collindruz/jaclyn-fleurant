@@ -1,6 +1,7 @@
 /**
  * Regenerate `lib/site-pull-files.ts` from filenames actually present in
- * `public/images/work/site-pull` (sorted). Does not move, delete, or dedupe files.
+ * `public/images/work/site-pull` (sorted). Prefer `npm run work:catalog` for the live site
+ * (categorized folders). This script is legacy for the old site-pull registry.
  *
  * Run: npm run work:sync-files
  * Then: npm run color:group
@@ -15,9 +16,11 @@ const SITE_PULL = path.join(ROOT, "public", "images", "work", "site-pull");
 const SITE_PULL_FILES = path.join(ROOT, "lib", "site-pull-files.ts");
 
 const IMG_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"]);
+const VIDEO_EXT = new Set([".mp4", ".webm", ".m4v"]);
 
 function isImageName(name) {
-  return IMG_EXT.has(path.extname(name).toLowerCase());
+  const ext = path.extname(name).toLowerCase();
+  return IMG_EXT.has(ext) || VIDEO_EXT.has(ext);
 }
 
 /**

@@ -1,67 +1,77 @@
-import { HOMEPAGE_FRAME_FILENAMES, SITE_PULL_FILENAMES } from "./site-pull-files";
-import { workCuration } from "./work-curation";
+import { WORK_CATALOG } from "./work-catalog";
 
-const SITE_PULL = "/images/work/site-pull";
-const PLACEHOLDER = "/images/placeholder.svg";
-const MAX_SLIDES = 12;
+const MAX_SLIDES = 8;
+/** Curated Intro stills — current categorized paths only. */
+const PREFERRED = [
+  "site-001.jpg",
+  "site-004.jpg",
+  "site-044.png",
+  "site-062.jpg",
+  "site-122.webp",
+  "site-003.webp",
+  "IMG_1178.jpg",
+  "site-166.jpg",
+];
 
-const sitePullSet = new Set<string>(SITE_PULL_FILENAMES);
-const curationExcludes = new Set(
-  workCuration.excludeFilenames.map((f) => f.trim()).filter(Boolean)
-);
-
-/**
- * Return the next filename from the archive that is not in `used`, in `SITE_PULL` order.
- * Skips curation `excludeFilenames` (e.g. stills reserved for a single page).
- */
-function takeNextUnused(used: Set<string>): string | undefined {
-  for (const f of SITE_PULL_FILENAMES) {
-    if (curationExcludes.has(f)) continue;
-    if (!used.has(f)) return f;
+function basename(src: string): string {
+  try {
+    const pathOnly = src.split("?")[0] ?? src;
+    const parts = pathOnly.split("/");
+    return decodeURIComponent(parts[parts.length - 1] ?? src);
+  } catch {
+    return src;
   }
-  return undefined;
 }
 
-/**
- * Slides for the homepage small frame — all valid entries in `HOMEPAGE_FRAME_FILENAMES`, invalid or
- * duplicate names replaced from `SITE_PULL_FILENAMES`, then (if still short) filled to at least 8
- * when the archive has enough. Capped at `MAX_SLIDES`. If nothing can be resolved, returns the
- * global placeholder.
- */
-export function getHomeFrameSlides(): { kind: "image"; src: string }[] {
-  if (HOMEPAGE_FRAME_FILENAMES.length === 0) {
-    return [{ kind: "image", src: PLACEHOLDER }];
-  }
+export type HomeFrameSlide = {
+  kind: "image";
+  src: string;
+  width: number;
+  height: number;
+};
 
+export function getHomeFrameSlides(): HomeFrameSlide[] {
+  const images = WORK_CATALOG.filter(
+    (i) =>
+      i.kind === "image" &&
+      i.src.startsWith("/images/work/") &&
+      !i.src.includes("site-040.jpg") &&
+      !/\/(manual-review|site-pull|site-pull-cropped|site-pull-duplicates|unsorted|youtube-posters|video-posters)\//.test(
+        i.src
+      )
+  );
+  const byBase = new Map(images.map((i) => [basename(i.src), i]));
   const used = new Set<string>();
-  const out: string[] = [];
+  const out: HomeFrameSlide[] = [];
 
-  for (const name of HOMEPAGE_FRAME_FILENAMES) {
+  const push = (item: (typeof images)[number] | undefined) => {
+    if (!item || used.has(item.src) || out.length >= MAX_SLIDES) return;
+    used.add(item.src);
+    out.push({
+      kind: "image",
+      src: item.src,
+      width: item.width && item.width > 0 ? item.width : 4,
+      height: item.height && item.height > 0 ? item.height : 5,
+    });
+  };
+
+  for (const name of PREFERRED) {
+    push(byBase.get(name));
+  }
+
+  const sectionOnce = new Set<string>();
+  for (const item of images) {
     if (out.length >= MAX_SLIDES) break;
-    if (curationExcludes.has(name) || !sitePullSet.has(name) || used.has(name)) {
-      const sub = takeNextUnused(used);
-      if (sub) {
-        used.add(sub);
-        out.push(sub);
-      }
-    } else {
-      used.add(name);
-      out.push(name);
-    }
+    const section = item.sectionKey ?? "";
+    if (sectionOnce.has(section)) continue;
+    sectionOnce.add(section);
+    push(item);
   }
 
-  while (out.length < 8) {
-    const sub = takeNextUnused(used);
-    if (!sub) break;
-    out.push(sub);
+  for (const item of images) {
+    if (out.length >= MAX_SLIDES) break;
+    push(item);
   }
 
-  if (out.length === 0) {
-    return [{ kind: "image", src: PLACEHOLDER }];
-  }
-
-  return out.slice(0, MAX_SLIDES).map((file) => ({
-    kind: "image" as const,
-    src: `${SITE_PULL}/${file}`,
-  }));
+  return out;
 }
