@@ -39,7 +39,7 @@ const FINE_POINTER_MQ = "(hover: hover) and (pointer: fine)";
 const INTERACTIVE_SELECTOR =
   'a, button, [role="button"], [data-cursor="interactive"]';
 
-const CURSOR_LAYER = 99999 as const;
+const CURSOR_LAYER = 500000 as const;
 
 function subscribeFinePointer(onChange: () => void) {
   const mq = window.matchMedia(FINE_POINTER_MQ);

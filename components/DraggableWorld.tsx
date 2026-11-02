@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { WorldStill } from "@/lib/placeholders";
 import { packWorldStills, type WorldPackSlot } from "@/lib/world-pack";
 import Image from "next/image";
@@ -12,6 +12,11 @@ import {
   useRef,
   useState,
 } from "react";
+
+const WORLD_VIEWER_Z = 60000;
+const TAP_MOVE_PX = 16;
+const SWIPE_PX = 48;
+const WHEEL_LOCK_MS = 560;
 
 type DraggableWorldProps = {
   stills: WorldStill[];
@@ -107,7 +112,7 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
 
   const onPrintTap = useCallback((i: number) => {
     setActiveIndex(i);
-    setEnlargedIndex((cur) => (cur === i ? null : i));
+    setEnlargedIndex(i);
   }, []);
 
   useEffect(() => {
@@ -185,6 +190,12 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
   );
 }
 
+function stillAspect(still: WorldStill) {
+  const natW = still.width > 32 ? still.width : 1600;
+  const natH = still.height > 32 ? still.height : 2000;
+  return { natW, natH, ratio: natW / natH };
+}
+
 function WorldEnlarge({
   still,
   index,
@@ -200,16 +211,22 @@ function WorldEnlarge({
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const reduceMotion = useReducedMotion() ?? false;
   const wheelLock = useRef(0);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const pointerStart = useRef<{ x: number; y: number } | null>(null);
+  const skipClick = useRef(false);
   const canStep = n > 1;
+  const { natW, natH, ratio } = stillAspect(still);
+  const fade = reduceMotion
+    ? { duration: 0 }
+    : { duration: 0.28, ease: [0.4, 0, 0.2, 1] as const };
 
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       if (!canStep) return;
       const now = performance.now();
-      if (now - wheelLock.current < 560) return;
+      if (now - wheelLock.current < WHEEL_LOCK_MS) return;
       const ax = Math.abs(e.deltaX);
       const ay = Math.abs(e.deltaY);
       if (ax < 14 && ay < 14) return;
@@ -227,74 +244,109 @@ function WorldEnlarge({
     return () => window.removeEventListener("wheel", onWheel);
   }, [canStep, onNext, onPrev]);
 
+  const onPointerDown = (e: React.PointerEvent) => {
+    pointerStart.current = { x: e.clientX, y: e.clientY };
+    skipClick.current = false;
+  };
+
+  const finishPointer = (clientX: number, clientY: number) => {
+    const start = pointerStart.current;
+    pointerStart.current = null;
+    if (!start) return;
+    const dx = clientX - start.x;
+    const dy = clientY - start.y;
+    const dist = Math.hypot(dx, dy);
+    if (canStep && Math.abs(dx) >= SWIPE_PX && Math.abs(dx) > Math.abs(dy) * 1.15) {
+      skipClick.current = true;
+      if (dx < 0) onNext();
+      else onPrev();
+      return;
+    }
+    if (dist >= TAP_MOVE_PX) {
+      skipClick.current = true;
+    }
+  };
+
+  const onBackdropClick = (e: React.MouseEvent) => {
+    if (e.target !== e.currentTarget) return;
+    if (skipClick.current) {
+      skipClick.current = false;
+      return;
+    }
+    onClose();
+  };
+
+  const onPhotoClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (skipClick.current) {
+      skipClick.current = false;
+      return;
+    }
+    if (canStep) onNext();
+  };
+
   return (
     <div
-      className="fixed inset-0 z-[2000000] overflow-hidden overscroll-none"
+      className="fixed inset-0 flex items-center justify-center overflow-hidden overscroll-none"
+      style={{ zIndex: WORLD_VIEWER_Z }}
       role="dialog"
       aria-modal="true"
       aria-label={`Still ${index + 1} of ${n}, enlarged`}
-      onPointerDown={(e) => e.stopPropagation()}
-      onTouchStart={(e) => {
-        const t = e.changedTouches[0];
-        if (!t) return;
-        touchStart.current = { x: t.clientX, y: t.clientY };
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        onPointerDown(e);
       }}
-      onTouchEnd={(e) => {
-        const start = touchStart.current;
-        touchStart.current = null;
-        if (!start || !canStep) return;
-        const t = e.changedTouches[0];
-        if (!t) return;
-        const dx = t.clientX - start.x;
-        const dy = t.clientY - start.y;
-        if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
-        if (dx < 0) onNext();
-        else onPrev();
+      onPointerUp={(e) => finishPointer(e.clientX, e.clientY)}
+      onPointerCancel={() => {
+        pointerStart.current = null;
+        skipClick.current = true;
       }}
+      onClick={onBackdropClick}
     >
-      <div className="absolute inset-0 bg-bone/80" />
-      <button
-        type="button"
-        className="fixed right-3 top-3 z-20 cursor-pointer border-0 bg-bone/90 px-3 py-1.5 font-sans text-[0.62rem] tracking-[0.12em] text-charcoal/70 sm:right-5 sm:top-5"
-        aria-label={`Close still ${index + 1} of ${n}`}
-        onClick={onClose}
-      >
-        Close
-      </button>
-      {canStep ? (
-        <>
-          <button
-            type="button"
-            className="fixed left-2 top-1/2 z-20 -translate-y-1/2 cursor-pointer border-0 bg-bone/90 px-2.5 py-2 font-sans text-[0.62rem] tracking-[0.12em] text-charcoal/70 sm:left-4"
-            aria-label={`Previous still, ${index === 0 ? n : index} of ${n}`}
-            onClick={onPrev}
-          >
-            Prev
-          </button>
-          <button
-            type="button"
-            className="fixed right-2 top-1/2 z-20 -translate-y-1/2 cursor-pointer border-0 bg-bone/90 px-2.5 py-2 font-sans text-[0.62rem] tracking-[0.12em] text-charcoal/70 sm:right-4"
-            aria-label={`Next still, ${index + 2 > n ? 1 : index + 2} of ${n}`}
-            onClick={onNext}
-          >
-            Next
-          </button>
-        </>
-      ) : null}
-      <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden p-3 pt-12 sm:p-5">
-        <div className="relative h-[min(82dvh,calc(100dvh-8rem))] w-[min(90vw,52rem)]">
+      <div className="pointer-events-none absolute inset-0 bg-bone/80" aria-hidden />
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.button
+          key={still.src}
+          type="button"
+          data-cursor="interactive"
+          aria-label={
+            canStep
+              ? `Still ${index + 1} of ${n}. Next still.`
+              : `Still ${index + 1} of ${n}`
+          }
+          className="relative z-10 block max-h-[85vh] max-w-[90vw] cursor-pointer border-0 bg-transparent p-0"
+          style={{
+            aspectRatio: `${natW} / ${natH}`,
+            width: `min(90vw, calc(85vh * ${ratio}))`,
+            height: "auto",
+          }}
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={reduceMotion ? undefined : { opacity: 0 }}
+          transition={fade}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            onPointerDown(e);
+          }}
+          onPointerUp={(e) => {
+            e.stopPropagation();
+            finishPointer(e.clientX, e.clientY);
+          }}
+          onClick={onPhotoClick}
+        >
           <Image
             src={still.src}
             alt=""
-            fill
-            className="pointer-events-none select-none object-contain object-center"
+            width={natW}
+            height={natH}
+            className="pointer-events-none h-auto w-full select-none object-contain object-center"
             sizes="90vw"
             quality={90}
             priority
             draggable={false}
           />
-        </div>
-      </div>
+        </motion.button>
+      </AnimatePresence>
     </div>
   );
 }
@@ -352,7 +404,7 @@ function DraggablePrint({
         transformOrigin: "center",
       }}
       role="button"
-      tabIndex={0}
+      tabIndex={dragEnabled ? 0 : -1}
       aria-pressed={isEnlarged}
       aria-label={`Still ${index + 1} of ${n}`}
       animate={{ scale: 1, rotate }}
