@@ -10,6 +10,7 @@ import Image from "next/image";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -91,14 +92,25 @@ function resolveWorkItem(
  * Mobile: larger cards (~1.5–2 per viewport).
  * md+ collapsed: several per view; md+ expanded (~1.5×): larger in-place archive read.
  */
-/** md+ expand: tile width transition and centering scroll share duration and in-out quad feel. */
+/** md+ expand: tile size transition and centering scroll share this duration. */
 const STRIP_EXPAND_SCROLL_MS = 1200;
-/** After expand, let tile width reflow; then rAF×2 and offset-based measure. */
-const STRIP_SCROLL_START_DELAY_MS = 100;
 
-/** easeInOutQuad; t ∈ [0,1] — same weight as scroll rAF; CSS uses a close cubic bezier. */
-function easeInOutQuad(t: number): number {
-  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+/** Matches `cubic-bezier(0.5, 0, 0.5, 1)` used on md+ tile height. */
+function stripExpandEase(t: number): number {
+  const x1 = 0.5;
+  const x2 = 0.5;
+  let lo = 0;
+  let hi = 1;
+  let u = t;
+  for (let i = 0; i < 12; i++) {
+    const mt = 1 - u;
+    const x = 3 * mt * mt * u * x1 + 3 * mt * u * u * x2 + u * u * u;
+    if (x < t) lo = u;
+    else hi = u;
+    u = (lo + hi) / 2;
+  }
+  const mt = 1 - u;
+  return 3 * mt * u * u + u * u * u;
 }
 
 /** Shared row height; width follows each asset’s natural aspect ratio (no 4:5 crop). */
@@ -106,8 +118,7 @@ const stripItemClassBase =
   "group relative shrink-0 overflow-hidden " +
   "h-[12.5rem] max-w-[min(92vw,42rem)] " +
   "transition-[height] duration-200 ease-out " +
-  `md:duration-[${STRIP_EXPAND_SCROLL_MS}ms] ` +
-  "md:[transition-timing-function:cubic-bezier(0.5,0,0.5,1)] " +
+  "md:duration-[1200ms] md:[transition-timing-function:cubic-bezier(0.5,0,0.5,1)] " +
   "motion-reduce:transition-none ";
 
 const stripItemClassMd = "md:h-[14.5rem]";
@@ -186,34 +197,18 @@ const workChapterTitleGapClass = "mb-10 sm:mb-12 md:mb-10";
 /** Vertical break between main sections (tighter on md+ only). */
 const workSectionChapterBreakClass = "mt-20 sm:mt-28 md:mt-24";
 
-/**
- * Cumulative x from `el` to `scroller` along `offsetParent` (strips are nested: outer ul > li > inner ul > li item).
- * Do not use getBoundingClientRect for target scroll.
- */
-function offsetLeftInScroller(
-  scroller: HTMLElement,
-  el: HTMLElement
-): number {
-  let x = 0;
-  for (
-    let n: HTMLElement | null = el;
-    n && n !== scroller;
-    n = (n.offsetParent as HTMLElement | null) ?? null
-  ) {
-    x += n.offsetLeft;
-  }
-  return x;
+function itemScreenCenterX(item: HTMLElement): number {
+  const r = item.getBoundingClientRect();
+  return r.left + r.width / 2;
 }
 
-function scrollLeftToClampedTarget(
-  scroller: HTMLUListElement,
-  item: HTMLLIElement
-): number {
-  const itemLeft = offsetLeftInScroller(scroller, item);
-  const itemCenter = itemLeft + item.offsetWidth / 2;
-  const targetScroll = itemCenter - scroller.clientWidth / 2;
+function scrollerPortCenterX(scroller: HTMLElement): number {
+  return scroller.getBoundingClientRect().left + scroller.clientWidth / 2;
+}
+
+function clampScrollLeft(scroller: HTMLUListElement, next: number): number {
   const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
-  return Math.max(0, Math.min(targetScroll, maxScroll));
+  return Math.max(0, Math.min(next, maxScroll));
 }
 
 type MobileImagePointerEnd = {
@@ -549,7 +544,7 @@ type SectionWorkScrollProps = {
   isSectionDesktopExpanded: boolean;
   onDesktopStripExpand: (ctx: StripExpandClickContext | null) => void;
   stripExpandCenter: StripExpandCenterPayload | null;
-  onStripExpandCenterConsumed: () => void;
+  onStripExpandCenterConsumed: (panelId?: string) => void;
   stripArmed: boolean;
   onStripHorizontal: (sk: WorkSectionKey) => void;
   onMobileImagePointerEnd: (panelId: string, p: MobileImagePointerEnd) => void;
@@ -615,83 +610,89 @@ function SectionWorkScroll({
     [isMobile, onDesktopStripExpand]
   );
 
-  useEffect(() => {
-    if (isMobile || !isSectionDesktopExpanded || !stripExpandCenter) return;
-    const { panelId } = stripExpandCenter;
+  const expandCenterPanelId = stripExpandCenter?.panelId ?? null;
+
+  useLayoutEffect(() => {
+    if (isMobile || !isSectionDesktopExpanded || !expandCenterPanelId) return;
     const scroller = scrollerRef.current;
     if (!scroller) {
-      onStripExpandCenterConsumed();
+      onStripExpandCenterConsumed(expandCenterPanelId);
       return;
     }
+
+    const itemEl = () =>
+      itemRefs.current.get(expandCenterPanelId) ??
+      (scroller.querySelector(
+        `[data-work-panel="${CSS.escape(expandCenterPanelId)}"]`
+      ) as HTMLLIElement | null);
+
+    const item = itemEl();
+    if (!item) {
+      onStripExpandCenterConsumed(expandCenterPanelId);
+      return;
+    }
+
     let cancelled = false;
     let rafId = 0;
-    let raf0 = 0;
-    let raf1 = 0;
-    let startTimer: number | undefined;
+    let finished = false;
+    const observers: ResizeObserver[] = [];
 
     const cancel = () => {
       cancelled = true;
-      if (startTimer !== undefined) {
-        window.clearTimeout(startTimer);
-      }
-      cancelAnimationFrame(raf0);
-      cancelAnimationFrame(raf1);
       if (rafId) cancelAnimationFrame(rafId);
+      for (const ro of observers) ro.disconnect();
     };
 
-    const run = () => {
-      if (cancelled) return;
-      const item =
-        itemRefs.current.get(panelId) ??
-        (scroller.querySelector(
-          `[data-work-panel="${CSS.escape(panelId)}"]`
-        ) as HTMLLIElement | null);
-      if (!item) {
-        onStripExpandCenterConsumed();
+    if (reduceMotion) {
+      scroller.scrollLeft = clampScrollLeft(
+        scroller,
+        scroller.scrollLeft +
+          itemScreenCenterX(item) -
+          scrollerPortCenterX(scroller)
+      );
+      onStripExpandCenterConsumed(expandCenterPanelId);
+      return cancel;
+    }
+
+    const startScreenX = itemScreenCenterX(item);
+    const t0 = performance.now();
+
+    const tick = (now: number) => {
+      if (cancelled || finished) return;
+      const el = itemEl();
+      if (!el) {
+        finished = true;
+        onStripExpandCenterConsumed(expandCenterPanelId);
         return;
       }
-
-      const clampedTarget = scrollLeftToClampedTarget(scroller, item);
-      if (reduceMotion) {
-        scroller.scrollLeft = clampedTarget;
-        onStripExpandCenterConsumed();
-        return;
+      const u = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
+      const e = stripExpandEase(u);
+      const desiredScreenX =
+        startScreenX + (scrollerPortCenterX(scroller) - startScreenX) * e;
+      scroller.scrollLeft = clampScrollLeft(
+        scroller,
+        scroller.scrollLeft + itemScreenCenterX(el) - desiredScreenX
+      );
+      if (u < 1) {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(tick);
+      } else {
+        finished = true;
+        onStripExpandCenterConsumed(expandCenterPanelId);
       }
-
-      const from = scroller.scrollLeft;
-      const delta = clampedTarget - from;
-      if (Math.abs(delta) < 0.5) {
-        onStripExpandCenterConsumed();
-        return;
-      }
-
-      const t0 = performance.now();
-      const tick = (now: number) => {
-        if (cancelled) return;
-        const u = Math.min(1, (now - t0) / STRIP_EXPAND_SCROLL_MS);
-        scroller.scrollLeft = from + delta * easeInOutQuad(u);
-        if (u < 1) {
-          rafId = requestAnimationFrame(tick);
-        } else {
-          onStripExpandCenterConsumed();
-        }
-      };
-      rafId = requestAnimationFrame(tick);
     };
 
-    startTimer = window.setTimeout(() => {
-      raf0 = requestAnimationFrame(() => {
-        raf1 = requestAnimationFrame(() => {
-          run();
-        });
-      });
-    }, STRIP_SCROLL_START_DELAY_MS);
-
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(() => tick(performance.now()));
+      ro.observe(item);
+      observers.push(ro);
+    }
+    tick(t0);
     return cancel;
   }, [
     isMobile,
     isSectionDesktopExpanded,
-    stripExpandCenter,
+    expandCenterPanelId,
     onStripExpandCenterConsumed,
     reduceMotion,
   ]);
@@ -750,6 +751,7 @@ function SectionWorkScroll({
             data-cursor={isMobile ? undefined : "interactive"}
             style={{
               WebkitOverflowScrolling: "touch",
+              overflowAnchor: "none",
               ...(isMobile ? { touchAction: "pan-x pan-y" } : null),
             }}
             onPointerDown={handleHStripPointerDown}
@@ -853,8 +855,12 @@ export function WorkExperience() {
     setStripReady((r) => ({ ...r, [sk]: true }));
   }, []);
 
-  const onStripExpandCenterConsumed = useCallback(() => {
-    setStripExpandCenter(null);
+  const onStripExpandCenterConsumed = useCallback((panelId?: string) => {
+    setStripExpandCenter((cur) => {
+      if (!cur) return null;
+      if (panelId && cur.panelId !== panelId) return cur;
+      return null;
+    });
   }, []);
 
   useEffect(() => {

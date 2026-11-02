@@ -89,6 +89,17 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
     setEnlargedIndex(null);
   }, []);
 
+  const stepEnlarge = useCallback(
+    (dir: number) => {
+      if (n < 2) return;
+      setEnlargedIndex((cur) => {
+        if (cur == null) return cur;
+        return (cur + dir + n) % n;
+      });
+    },
+    [n]
+  );
+
   const reset = useCallback(() => {
     setActiveIndex(null);
     setEnlargedIndex(null);
@@ -101,17 +112,27 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.preventDefault();
-      if (enlargedIndex != null) {
-        setEnlargedIndex(null);
+      if (e.key === "Escape") {
+        e.preventDefault();
+        if (enlargedIndex != null) {
+          setEnlargedIndex(null);
+          return;
+        }
+        reset();
         return;
       }
-      reset();
+      if (enlargedIndex == null) return;
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        stepEnlarge(1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        stepEnlarge(-1);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [enlargedIndex, reset]);
+  }, [enlargedIndex, reset, stepEnlarge]);
 
   if (n === 0) return null;
 
@@ -155,8 +176,9 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
           still={enlarged}
           index={enlargedIndex}
           n={n}
-          viewW={board.w}
           onClose={closeEnlarge}
+          onPrev={() => stepEnlarge(-1)}
+          onNext={() => stepEnlarge(1)}
         />
       ) : null}
     </div>
@@ -167,35 +189,68 @@ function WorldEnlarge({
   still,
   index,
   n,
-  viewW,
   onClose,
+  onPrev,
+  onNext,
 }: {
   still: WorldStill;
   index: number;
   n: number;
-  viewW: number;
   onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
 }) {
-  const natW = still.width > 32 ? still.width : 1600;
-  const natH = still.height > 32 ? still.height : 2000;
-  const vw = viewW > 0 ? viewW : 1280;
-  const vh =
-    typeof window !== "undefined" ? window.innerHeight : 800;
-  const aspect = natH / natW || 1.4;
-  const displayW = Math.round(
-    Math.min(
-      2560,
-      Math.max(natW, vw * 0.92, (vh * 1.18) / aspect)
-    )
-  );
+  const wheelLock = useRef(0);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const canStep = n > 1;
+
+  useEffect(() => {
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (!canStep) return;
+      const now = performance.now();
+      if (now - wheelLock.current < 560) return;
+      const ax = Math.abs(e.deltaX);
+      const ay = Math.abs(e.deltaY);
+      if (ax < 14 && ay < 14) return;
+      wheelLock.current = now;
+      if (ay >= ax) {
+        if (e.deltaY > 0) onNext();
+        else onPrev();
+      } else if (e.deltaX > 0) {
+        onNext();
+      } else {
+        onPrev();
+      }
+    };
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel);
+  }, [canStep, onNext, onPrev]);
 
   return (
     <div
-      className="fixed inset-0 z-[2000000]"
+      className="fixed inset-0 z-[2000000] overflow-hidden overscroll-none"
       role="dialog"
       aria-modal="true"
       aria-label={`Still ${index + 1} of ${n}, enlarged`}
       onPointerDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => {
+        const t = e.changedTouches[0];
+        if (!t) return;
+        touchStart.current = { x: t.clientX, y: t.clientY };
+      }}
+      onTouchEnd={(e) => {
+        const start = touchStart.current;
+        touchStart.current = null;
+        if (!start || !canStep) return;
+        const t = e.changedTouches[0];
+        if (!t) return;
+        const dx = t.clientX - start.x;
+        const dy = t.clientY - start.y;
+        if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
+        if (dx < 0) onNext();
+        else onPrev();
+      }}
     >
       <div className="absolute inset-0 bg-bone/80" />
       <button
@@ -206,25 +261,34 @@ function WorldEnlarge({
       >
         Close
       </button>
-      <div
-        className="absolute inset-0 z-10 overflow-auto overscroll-contain pt-12"
-        style={{ touchAction: "pan-x pan-y", WebkitOverflowScrolling: "touch" }}
-        onClick={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
-        onPointerMove={(e) => e.stopPropagation()}
-        onWheel={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
-        onTouchMove={(e) => e.stopPropagation()}
-      >
-        <div className="inline-block min-h-full min-w-full p-4 sm:p-6">
+      {canStep ? (
+        <>
+          <button
+            type="button"
+            className="fixed left-2 top-1/2 z-20 -translate-y-1/2 cursor-pointer border-0 bg-bone/90 px-2.5 py-2 font-sans text-[0.62rem] tracking-[0.12em] text-charcoal/70 sm:left-4"
+            aria-label={`Previous still, ${index === 0 ? n : index} of ${n}`}
+            onClick={onPrev}
+          >
+            Prev
+          </button>
+          <button
+            type="button"
+            className="fixed right-2 top-1/2 z-20 -translate-y-1/2 cursor-pointer border-0 bg-bone/90 px-2.5 py-2 font-sans text-[0.62rem] tracking-[0.12em] text-charcoal/70 sm:right-4"
+            aria-label={`Next still, ${index + 2 > n ? 1 : index + 2} of ${n}`}
+            onClick={onNext}
+          >
+            Next
+          </button>
+        </>
+      ) : null}
+      <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden p-3 pt-12 sm:p-5">
+        <div className="relative h-[min(82dvh,calc(100dvh-8rem))] w-[min(90vw,52rem)]">
           <Image
             src={still.src}
             alt=""
-            width={still.width}
-            height={still.height}
-            className="block h-auto max-w-none select-none"
-            style={{ width: displayW }}
-            sizes={`${displayW}px`}
+            fill
+            className="pointer-events-none select-none object-contain object-center"
+            sizes="90vw"
             quality={90}
             priority
             draggable={false}

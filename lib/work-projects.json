@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "notes": "Editable Work project metadata. Catalog generator reads this file and preserves membership/order. Do not use file mtimes as dates. projectOrder is an optional explicit override (lower = earlier).",
+  "notes": "Editable Work project metadata. Catalog generator reads this file and preserves membership/order. Do not use file mtimes as dates. projectOrder is an explicit featured-project override (lower = earlier) and takes precedence over automatic sorting. lockOrder + assetOrder lock in-project sequence (covers/looks/photos-before-clips) so npm run work:catalog cannot rewrite them. Advertising: ad-hearts-sold-separately stays first with site-122 cover. Editorial: Mariah-first, cover-first, related shoot kept with its cover. Costume Design: Mariah performance photos first; related local clips after those photos (not video-first).",
   "projects": [
     {
       "id": "ed-ugg-season",
@@ -15,7 +15,7 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_1182.jpg",
       "provisional": false,
-      "notes": "Bus livery reads UGG SEASON. Public publication date not verified."
+      "notes": "Bus livery reads UGG SEASON. Public publication date not verified. Not Mariah; remains after featured Mariah editorial."
     },
     {
       "id": "ed-pink-puffer",
@@ -33,7 +33,16 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_6249.JPG",
       "provisional": true,
-      "notes": "Same pink puffer hood look across camera roll IMG_6249–6253 and site-004. Shoot/publication name not verified."
+      "notes": "FEATURED OVERRIDE projectOrder 3. Mariah pink puffer hood look (IMG_6249–6253, site-004). Shoot/publication name not verified.",
+      "projectOrder": 3,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/IMG_6249.JPG",
+        "/images/work/editorial/IMG_6250.JPG",
+        "/images/work/editorial/IMG_6252.JPG",
+        "/images/work/editorial/IMG_6253.JPG",
+        "/images/work/editorial/site-004.jpg"
+      ]
     },
     {
       "id": "ed-olive-studio",
@@ -48,7 +57,13 @@
       ],
       "coverAsset": "/images/work/editorial/site-001.jpg",
       "provisional": true,
-      "notes": "Same redhead olive-studio sitting as IMG_6913 / site-001. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 2. Mariah olive-studio sitting (IMG_6913 / site-001). Title and publication date unknown.",
+      "projectOrder": 2,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/IMG_6913.JPG",
+        "/images/work/editorial/site-001.jpg"
+      ]
     },
     {
       "id": "cd-hss-live",
@@ -70,7 +85,20 @@
       ],
       "coverAsset": "/images/work/costume-design/6a075460084e41c09a0079d890591614.MP4",
       "provisional": true,
-      "notes": "All local costume MP4s share the same live staging/watermark. Treated as one performance group; venue/date not verified. Review if any clip is a different night."
+      "notes": "All local costume MP4s share the same live staging/watermark. Treated as one performance group; venue/date not verified. Review if any clip is a different night. FEATURED OVERRIDE projectOrder 13 — local performance clips AFTER Mariah performance photo projects. Not placed first because they are videos. Clips stay together as one live group; not scattered through photo looks.",
+      "projectOrder": 13,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/3e267b23835d44eaa80136082cf7a043.MP4",
+        "/images/work/costume-design/60d1550b7cdd4726ba58fe18787b3e36.MP4",
+        "/images/work/costume-design/6a075460084e41c09a0079d890591614.MP4",
+        "/images/work/costume-design/8a6ef93c3c354cd5b9f6b304256b40d8.MP4",
+        "/images/work/costume-design/ac6b2416ac0d4f5da01e47572918a4d5.MP4",
+        "/images/work/costume-design/d5aad41c02be4ec596187e8328584762.MP4",
+        "/images/work/costume-design/d75b104b4d174316ab70eaa5d50b748d.MP4",
+        "/images/work/costume-design/e57d7ed3cce34c5ea3c5809e4b134405.MP4",
+        "/images/work/costume-design/%E2%80%9CThere%E2%80%99s%20got%20to%20be%20more%E2%80%A6%E2%80%9D%F0%9F%A9%B7%F0%9F%AA%96s-o%20%40_maramoments%20for%20capturing%20this%21%F0%9F%92%95%23mariahthescientist%20%23selkcub.MP4"
+      ]
     },
     {
       "id": "cd-bet-awards-2026",
@@ -106,10 +134,20 @@
       "datePrecision": "day",
       "dateSource": "TheTVDB original air date 2025-09-16; Rolling Stone 2025-09-17; Wikipedia Fallon 2025 episode list.",
       "assets": [
+        "/images/work/costume-design/site-179.jpg",
+        "/images/work/costume-design/site-181.jpg",
         "https://www.youtube.com/shorts/-p83jyXsL_k"
       ],
       "provisional": false,
-      "notes": "Emailed short is the Fallon Rainy Days clip. Rolling Stone also notes Burning Blue in the same medley."
+      "notes": "FEATURED OVERRIDE projectOrder 12. Mariah Fallon performance PHOTOS first, then the existing YouTube short. Stills not merged with tour green-helmet photos. lockOrder prevents the clip from leading this project.",
+      "coverAsset": "/images/work/costume-design/site-179.jpg",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/site-179.jpg",
+        "/images/work/costume-design/site-181.jpg",
+        "https://www.youtube.com/shorts/-p83jyXsL_k"
+      ],
+      "projectOrder": 12
     },
     {
       "id": "cd-homecoming-trailer",
@@ -119,10 +157,17 @@
       "datePrecision": "day",
       "dateSource": "NPR 2019-04-08 trailer coverage. Film itself launched on Netflix 2019-04-17.",
       "assets": [
+        "/images/work/costume-design/site-228.jpg",
         "https://www.youtube.com/watch?v=fB8qvx0HOlI"
       ],
       "provisional": false,
-      "notes": "Kept in Costume Design per emailed category. Date is trailer publication, not Coachella 2018."
+      "notes": "Kept in Costume Design per emailed category. Date is trailer publication, not Coachella 2018. Trailer still (site-228) kept with this project; YouTube link retained and does not lead Costume Design.",
+      "coverAsset": "/images/work/costume-design/site-228.jpg",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/site-228.jpg",
+        "https://www.youtube.com/watch?v=fB8qvx0HOlI"
+      ]
     },
     {
       "id": "cd-burning-blue-link",
@@ -380,7 +425,7 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_5661.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_5661.JPG–IMG_5666.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_5661–5666: man in camo. Not Mariah; not featured."
     },
     {
       "id": "ed-roll-img-6221",
@@ -399,7 +444,17 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_6221.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_6221.JPG–IMG_6226.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 4. Mariah black-fur editorial roll IMG_6221–6226. Publication not verified.",
+      "projectOrder": 4,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/IMG_6221.JPG",
+        "/images/work/editorial/IMG_6222.JPG",
+        "/images/work/editorial/IMG_6223.JPG",
+        "/images/work/editorial/IMG_6224.JPG",
+        "/images/work/editorial/IMG_6225.JPG",
+        "/images/work/editorial/IMG_6226.jpg"
+      ]
     },
     {
       "id": "ed-roll-img-9285",
@@ -414,11 +469,59 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_9285.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_9285.jpg–IMG_9286.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 5. Mariah closet editorial roll IMG_9285–9286. Publication not verified.",
+      "projectOrder": 5,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/IMG_9285.jpg",
+        "/images/work/editorial/IMG_9286.jpg"
+      ]
     },
     {
-      "id": "ed-unidentified-stills",
-      "title": "Untitled stills",
+      "id": "ed-highsnobiety-mariah",
+      "title": "Highsnobiety — Mariah the Scientist",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-047.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-047.jpg",
+      "provisional": false,
+      "notes": "FEATURED OVERRIDE projectOrder 0. Confirmed Highsnobiety cover (Mariah the Scientist is seizing control). No matching interior spreads found among approved editorial stills (no orange-wall/fur/cigar interiors). Related-shoot assignment not invented.",
+      "projectOrder": 0,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-047.jpg"
+      ]
+    },
+    {
+      "id": "ed-mariah-grey-coat",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-045.jpg",
+        "/images/work/editorial/site-048.jpg",
+        "/images/work/editorial/site-046.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-045.jpg",
+      "provisional": true,
+      "notes": "FEATURED OVERRIDE projectOrder 1. Mariah editorial: grey-coat/white-glove look (site-045, site-048) then cream moto look (site-046). Same talent/bangs/flash sitting; looks kept consecutive and distinct. Publication not verified.",
+      "projectOrder": 1,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-045.jpg",
+        "/images/work/editorial/site-048.jpg",
+        "/images/work/editorial/site-046.jpg"
+      ]
+    },
+    {
+      "id": "ed-mariah-hills",
+      "title": "Untitled",
       "section": "editorial",
       "releaseDate": null,
       "datePrecision": null,
@@ -427,54 +530,413 @@
         "/images/work/editorial/site-041.jpg",
         "/images/work/editorial/site-042.jpg",
         "/images/work/editorial/site-043.jpg",
-        "/images/work/editorial/site-044.png",
-        "/images/work/editorial/site-045.jpg",
-        "/images/work/editorial/site-046.jpg",
-        "/images/work/editorial/site-047.jpg",
-        "/images/work/editorial/site-048.jpg",
-        "/images/work/editorial/site-049.jpg",
-        "/images/work/editorial/site-050.jpg",
-        "/images/work/editorial/site-051.jpg",
-        "/images/work/editorial/site-052.jpg",
-        "/images/work/editorial/site-053.jpg",
-        "/images/work/editorial/site-054.jpg",
-        "/images/work/editorial/site-055.jpg",
-        "/images/work/editorial/site-056.jpg",
-        "/images/work/editorial/site-057.jpg",
-        "/images/work/editorial/site-058.jpg",
-        "/images/work/editorial/site-059.png",
-        "/images/work/editorial/site-060.png",
-        "/images/work/editorial/site-061.jpg",
-        "/images/work/editorial/site-062.jpg",
-        "/images/work/editorial/site-063.jpg",
-        "/images/work/editorial/site-064.jpg",
-        "/images/work/editorial/site-065.jpg",
-        "/images/work/editorial/site-066.jpg",
-        "/images/work/editorial/site-067.jpg",
-        "/images/work/editorial/site-068.jpg",
-        "/images/work/editorial/site-069.jpg",
         "/images/work/editorial/site-070.jpg",
-        "/images/work/editorial/site-071.jpg",
-        "/images/work/editorial/site-072.jpg",
-        "/images/work/editorial/site-073.jpg",
-        "/images/work/editorial/site-074.jpg",
-        "/images/work/editorial/site-075.jpg",
-        "/images/work/editorial/site-078.jpg",
-        "/images/work/editorial/site-079.jpg",
-        "/images/work/editorial/site-080.jpg",
-        "/images/work/editorial/site-084.jpg",
-        "/images/work/editorial/site-087.jpg",
-        "/images/work/editorial/site-088.jpg",
-        "/images/work/editorial/site-089.jpg",
-        "/images/work/editorial/site-090.jpg",
-        "/images/work/editorial/site-091.jpg",
-        "/images/work/editorial/site-092.jpg",
-        "/images/work/editorial/site-093.jpg",
-        "/images/work/editorial/site-094.jpg"
+        "/images/work/editorial/site-084.jpg"
       ],
       "coverAsset": "/images/work/editorial/site-041.jpg",
       "provisional": true,
-      "notes": "Unidentified editorial stills without a verified shoot/campaign match. Kept together at the end so nothing is hidden; split into real projects after review. Files: site-041.jpg, site-042.jpg, site-043.jpg, site-044.png, site-045.jpg, site-046.jpg, site-047.jpg, site-048.jpg, site-049.jpg, site-050.jpg, site-051.jpg, site-052.jpg, site-053.jpg, site-054.jpg, site-055.jpg, site-056.jpg, site-057.jpg, site-058.jpg, site-059.png, site-060.png, site-061.jpg, site-062.jpg, site-063.jpg, site-064.jpg, site-065.jpg, site-066.jpg, site-067.jpg, site-068.jpg, site-069.jpg, site-070.jpg, site-071.jpg, site-072.jpg, site-073.jpg, site-074.jpg, site-075.jpg, site-078.jpg, site-079.jpg, site-080.jpg, site-084.jpg, site-087.jpg, site-088.jpg, site-089.jpg, site-090.jpg, site-091.jpg, site-092.jpg, site-093.jpg, site-094.jpg"
+      "notes": "FEATURED OVERRIDE projectOrder 6. Mariah golden-hour hills: belt look (041–043), lingerie-on-sheets look (070), brown-jacket look (084). Same talent/location; looks kept consecutive and distinct. site-074 (cream smocked, different hair/trees) kept separate — uncertain whether same shoot.",
+      "projectOrder": 6,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-041.jpg",
+        "/images/work/editorial/site-042.jpg",
+        "/images/work/editorial/site-043.jpg",
+        "/images/work/editorial/site-070.jpg",
+        "/images/work/editorial/site-084.jpg"
+      ]
+    },
+    {
+      "id": "ed-lofficiel-bebe-rexha",
+      "title": "L'Officiel — Bebe Rexha",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-049.jpg",
+        "/images/work/editorial/site-052.jpg",
+        "/images/work/editorial/site-050.jpg",
+        "/images/work/editorial/site-051.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-049.jpg",
+      "provisional": false,
+      "notes": "Cover-first within this shoot: L'Officiel cover (site-049) then related looks — pearl (052), leopard (050), yellow Prada (051). Not merged with other magazine covers.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-049.jpg",
+        "/images/work/editorial/site-052.jpg",
+        "/images/work/editorial/site-050.jpg",
+        "/images/work/editorial/site-051.jpg"
+      ]
+    },
+    {
+      "id": "ed-galore-tiffany-young",
+      "title": "Galore — Tiffany Young",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-092.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-092.jpg",
+      "provisional": true,
+      "notes": "Galore cover of Tiffany Young. No matching interior spreads verified in the approved set; not Mariah.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-092.jpg"
+      ]
+    },
+    {
+      "id": "ed-white-shirt-studio",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-053.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-053.jpg",
+      "provisional": true,
+      "notes": "Black-and-white white-shirt studio sitting. Same-talent relationship to site-054 not verified as one shoot; kept separate."
+    },
+    {
+      "id": "ed-black-lace-studio",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-054.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-054.jpg",
+      "provisional": true,
+      "notes": "Black lace studio look. Not merged with site-053 solely because of similar talent; shoot relationship uncertain."
+    },
+    {
+      "id": "ed-lace-overlay",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-044.png"
+      ],
+      "coverAsset": "/images/work/editorial/site-044.png",
+      "provisional": true,
+      "notes": "Lace-overlay nude still. Not a magazine cover and not assigned as Mariah."
+    },
+    {
+      "id": "ed-ivory-gown",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-055.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-055.jpg",
+      "provisional": true,
+      "notes": "Ivory structured gown. Not merged with site-057; same-shoot assignment uncertain."
+    },
+    {
+      "id": "ed-silver-iridescent",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-056.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-056.jpg",
+      "provisional": true,
+      "notes": "Silver iridescent two-piece studio look. Standalone; no related frames verified."
+    },
+    {
+      "id": "ed-patent-boots-studio",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-057.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-057.jpg",
+      "provisional": true,
+      "notes": "Blonde patent-boots studio look. Same-shoot link to site-055 uncertain; kept separate."
+    },
+    {
+      "id": "ed-redhead-outdoor",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-058.jpg",
+        "/images/work/editorial/site-059.png"
+      ],
+      "coverAsset": "/images/work/editorial/site-058.jpg",
+      "provisional": true,
+      "notes": "Redhead outdoor: chainmail look then white mesh look. Same talent; looks distinct. site-060 is a different model and is kept separate.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-058.jpg",
+        "/images/work/editorial/site-059.png"
+      ]
+    },
+    {
+      "id": "ed-outdoor-other-model",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-060.png"
+      ],
+      "coverAsset": "/images/work/editorial/site-060.png",
+      "provisional": true,
+      "notes": "Outdoor still of a different model than site-058/059. Not merged."
+    },
+    {
+      "id": "ed-organza",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-061.jpg",
+        "/images/work/editorial/site-062.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-061.jpg",
+      "provisional": true,
+      "notes": "Organza look, color then black-and-white of the same outfit.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-061.jpg",
+        "/images/work/editorial/site-062.jpg"
+      ]
+    },
+    {
+      "id": "ed-blue-gown-columns",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-063.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-063.jpg",
+      "provisional": true,
+      "notes": "Blue column-gown still. Standalone; no related frames verified."
+    },
+    {
+      "id": "ed-silver-crystal-blonde",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-064.jpg",
+        "/images/work/editorial/site-065.jpg",
+        "/images/work/editorial/site-066.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-064.jpg",
+      "provisional": true,
+      "notes": "Silver crystal blonde look, consecutive frames of the same outfit.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-064.jpg",
+        "/images/work/editorial/site-065.jpg",
+        "/images/work/editorial/site-066.jpg"
+      ]
+    },
+    {
+      "id": "ed-wet-hair-studio",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-067.jpg",
+        "/images/work/editorial/site-068.jpg",
+        "/images/work/editorial/site-087.jpg",
+        "/images/work/editorial/site-088.jpg",
+        "/images/work/editorial/site-094.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-067.jpg",
+      "provisional": true,
+      "notes": "Wet-hair studio shoot with distinct looks kept consecutive: beige (067), black (068), print (087/088), metallic (094). Grouped by matching talent/studio; not merged with unrelated wet-hair stills.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-067.jpg",
+        "/images/work/editorial/site-068.jpg",
+        "/images/work/editorial/site-087.jpg",
+        "/images/work/editorial/site-088.jpg",
+        "/images/work/editorial/site-094.jpg"
+      ]
+    },
+    {
+      "id": "ed-pool-earrings",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-069.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-069.jpg",
+      "provisional": true,
+      "notes": "Pool/earrings still. Not merged with wood-panel nudes; different setting."
+    },
+    {
+      "id": "ed-wood-panel",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-072.jpg",
+        "/images/work/editorial/site-071.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-072.jpg",
+      "provisional": true,
+      "notes": "Wood-panel studio: mesh-dress look then flower-nude look. Same setting; looks distinct.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-072.jpg",
+        "/images/work/editorial/site-071.jpg"
+      ]
+    },
+    {
+      "id": "ed-cream-smocked-outdoor",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-074.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-074.jpg",
+      "provisional": true,
+      "notes": "UNCERTAIN: cream smocked outdoor still. Similar golden hour to Mariah hills but different hair/trees; not assigned to ed-mariah-hills."
+    },
+    {
+      "id": "ed-captain-hat",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-073.jpg",
+        "/images/work/editorial/site-075.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-073.jpg",
+      "provisional": true,
+      "notes": "Captain-hat black-and-white look, two frames of the same outfit.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-073.jpg",
+        "/images/work/editorial/site-075.jpg"
+      ]
+    },
+    {
+      "id": "ed-crystal-necklace",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-078.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-078.jpg",
+      "provisional": true,
+      "notes": "Crystal necklace still. Standalone; no related frames verified."
+    },
+    {
+      "id": "ed-bangs-colored-light",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-079.jpg",
+        "/images/work/editorial/site-080.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-079.jpg",
+      "provisional": true,
+      "notes": "Bangs with red/green gel lighting. Same person, not Mariah; two frames of the same look family.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-079.jpg",
+        "/images/work/editorial/site-080.jpg"
+      ]
+    },
+    {
+      "id": "ed-neon-platinum",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-089.jpg",
+        "/images/work/editorial/site-090.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-089.jpg",
+      "provisional": true,
+      "notes": "UNCERTAIN same-shoot: platinum talent, neon look (089) then tomboy-bed look (090). Looks kept distinct. Same-editorial assignment is visual, not verified.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/editorial/site-089.jpg",
+        "/images/work/editorial/site-090.jpg"
+      ]
+    },
+    {
+      "id": "ed-braids-red",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-091.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-091.jpg",
+      "provisional": true,
+      "notes": "Braids/red still. Standalone; no related frames verified."
+    },
+    {
+      "id": "ed-blue-curtain",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/editorial/site-093.jpg"
+      ],
+      "coverAsset": "/images/work/editorial/site-093.jpg",
+      "provisional": true,
+      "notes": "Blue-curtain still. Standalone; no related frames verified."
     },
     {
       "id": "co-roll-img-0316",
@@ -485,25 +947,18 @@
       "dateSource": null,
       "assets": [
         "/images/work/costume-design/IMG_0316.JPG",
-        "/images/work/costume-design/IMG_0317.JPG"
+        "/images/work/costume-design/IMG_0317.JPG",
+        "/images/work/costume-design/IMG_0324.JPG"
       ],
       "coverAsset": "/images/work/costume-design/IMG_0316.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_0316.JPG–IMG_0317.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
-    },
-    {
-      "id": "co-roll-img-0324",
-      "title": "Untitled",
-      "section": "costumeDesign",
-      "releaseDate": null,
-      "datePrecision": null,
-      "dateSource": null,
-      "assets": [
+      "notes": "Gold corset performance look (IMG_0316–0317 + IMG_0324). Not Mariah; not featured.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_0316.JPG",
+        "/images/work/costume-design/IMG_0317.JPG",
         "/images/work/costume-design/IMG_0324.JPG"
-      ],
-      "coverAsset": "/images/work/costume-design/IMG_0324.JPG",
-      "provisional": true,
-      "notes": "Camera-roll cluster IMG_0324.JPG–IMG_0324.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      ]
     },
     {
       "id": "co-roll-img-2661",
@@ -514,11 +969,19 @@
       "dateSource": null,
       "assets": [
         "/images/work/costume-design/IMG_2661.JPG",
-        "/images/work/costume-design/IMG_2663.JPG"
+        "/images/work/costume-design/IMG_2663.JPG",
+        "/images/work/costume-design/IMG_8684.jpg"
       ],
       "coverAsset": "/images/work/costume-design/IMG_2661.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_2661.JPG–IMG_2663.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 6. Mariah green cap/bra/shorts look, including IMG_8684 (same look).",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_2661.JPG",
+        "/images/work/costume-design/IMG_2663.JPG",
+        "/images/work/costume-design/IMG_8684.jpg"
+      ],
+      "projectOrder": 6
     },
     {
       "id": "co-roll-img-2678",
@@ -528,15 +991,16 @@
       "datePrecision": null,
       "dateSource": null,
       "assets": [
-        "/images/work/costume-design/IMG_2678.JPG",
-        "/images/work/costume-design/IMG_2679.JPG",
-        "/images/work/costume-design/IMG_2682.JPG",
-        "/images/work/costume-design/IMG_2685.JPG",
-        "/images/work/costume-design/IMG_2686.JPG"
+        "/images/work/costume-design/IMG_2678.JPG"
       ],
       "coverAsset": "/images/work/costume-design/IMG_2678.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_2678.JPG–IMG_2686.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 10. Mariah mint chiffon cowboy HSS look. Other frames from the old IMG_2678–2686 cluster were the teal-jacket look and were moved to co-roll-img-2712.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_2678.JPG"
+      ],
+      "projectOrder": 10
     },
     {
       "id": "co-roll-img-2705",
@@ -550,7 +1014,12 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_2705.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_2705.jpg–IMG_2705.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 9. Mariah white/gold-button performance look.",
+      "projectOrder": 9,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_2705.jpg"
+      ]
     },
     {
       "id": "co-roll-img-2712",
@@ -561,11 +1030,27 @@
       "dateSource": null,
       "assets": [
         "/images/work/costume-design/IMG_2712.jpg",
-        "/images/work/costume-design/IMG_2717.jpg"
+        "/images/work/costume-design/IMG_2717.jpg",
+        "/images/work/costume-design/IMG_8140.JPG",
+        "/images/work/costume-design/IMG_2679.JPG",
+        "/images/work/costume-design/IMG_2682.JPG",
+        "/images/work/costume-design/IMG_2685.JPG",
+        "/images/work/costume-design/IMG_2686.JPG"
       ],
       "coverAsset": "/images/work/costume-design/IMG_2712.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_2712.jpg–IMG_2717.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 7. Mariah teal zip-jacket / metallic-green stage look on the pink HSS stand. Frames pulled out of the former IMG_2678 cluster (2679/2682/2685/2686) because they are this look, not the mint cowboy dress.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_2712.jpg",
+        "/images/work/costume-design/IMG_2717.jpg",
+        "/images/work/costume-design/IMG_8140.JPG",
+        "/images/work/costume-design/IMG_2679.JPG",
+        "/images/work/costume-design/IMG_2682.JPG",
+        "/images/work/costume-design/IMG_2685.JPG",
+        "/images/work/costume-design/IMG_2686.JPG"
+      ],
+      "projectOrder": 7
     },
     {
       "id": "co-roll-img-2735",
@@ -580,21 +1065,13 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_2735.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_2735.JPG–IMG_2736.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
-    },
-    {
-      "id": "co-roll-img-3390",
-      "title": "Untitled",
-      "section": "costumeDesign",
-      "releaseDate": null,
-      "datePrecision": null,
-      "dateSource": null,
-      "assets": [
-        "/images/work/costume-design/IMG_3390.JPG"
-      ],
-      "coverAsset": "/images/work/costume-design/IMG_3390.JPG",
-      "provisional": true,
-      "notes": "Camera-roll cluster IMG_3390.JPG–IMG_3390.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 8. Mariah pink sailor performance look.",
+      "projectOrder": 8,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_2735.JPG",
+        "/images/work/costume-design/IMG_2736.JPG"
+      ]
     },
     {
       "id": "co-roll-img-3485",
@@ -605,11 +1082,25 @@
       "dateSource": null,
       "assets": [
         "/images/work/costume-design/IMG_3485.jpg",
-        "/images/work/costume-design/IMG_3486.jpg"
+        "/images/work/costume-design/IMG_3486.jpg",
+        "/images/work/costume-design/IMG_3390.JPG",
+        "/images/work/costume-design/IMG_4897.JPEG",
+        "/images/work/costume-design/site-175.jpg",
+        "/images/work/costume-design/site-180.jpg"
       ],
       "coverAsset": "/images/work/costume-design/IMG_3485.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_3485.jpg–IMG_3486.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 4. Mariah green-helmet / toy-soldier HSS live look. Merged same-look stills IMG_3390, IMG_4897, site-175, site-180. Fallon stills kept with the Fallon project, not merged here.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_3485.jpg",
+        "/images/work/costume-design/IMG_3486.jpg",
+        "/images/work/costume-design/IMG_3390.JPG",
+        "/images/work/costume-design/IMG_4897.JPEG",
+        "/images/work/costume-design/site-175.jpg",
+        "/images/work/costume-design/site-180.jpg"
+      ],
+      "projectOrder": 4
     },
     {
       "id": "co-roll-img-3565",
@@ -631,7 +1122,20 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_3565.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_3565.jpg–IMG_3573.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 3. Mariah pink-leather performance look. Photos only.",
+      "projectOrder": 3,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_3565.jpg",
+        "/images/work/costume-design/IMG_3566.jpg",
+        "/images/work/costume-design/IMG_3567.jpg",
+        "/images/work/costume-design/IMG_3568.jpg",
+        "/images/work/costume-design/IMG_3569.jpg",
+        "/images/work/costume-design/IMG_3570.jpg",
+        "/images/work/costume-design/IMG_3571.jpg",
+        "/images/work/costume-design/IMG_3572.jpg",
+        "/images/work/costume-design/IMG_3573.jpg"
+      ]
     },
     {
       "id": "co-roll-img-3825",
@@ -646,21 +1150,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_3825.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_3825.jpg–IMG_3826.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
-    },
-    {
-      "id": "co-roll-img-4897",
-      "title": "Untitled",
-      "section": "costumeDesign",
-      "releaseDate": null,
-      "datePrecision": null,
-      "dateSource": null,
-      "assets": [
-        "/images/work/costume-design/IMG_4897.JPEG"
-      ],
-      "coverAsset": "/images/work/costume-design/IMG_4897.JPEG",
-      "provisional": true,
-      "notes": "Camera-roll cluster IMG_4897.JPEG–IMG_4897.JPEG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Bathroom/selfie roll. Not featured Mariah performance."
     },
     {
       "id": "co-roll-img-6263",
@@ -675,7 +1165,13 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_6263.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_6263.jpg–IMG_6264.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 5. Mariah green-boots performance look, placed after the green-helmet look. Distinct outfit.",
+      "projectOrder": 5,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_6263.jpg",
+        "/images/work/costume-design/IMG_6264.jpg"
+      ]
     },
     {
       "id": "co-roll-img-7105",
@@ -691,21 +1187,14 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_7105.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_7105.jpg–IMG_7107.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
-    },
-    {
-      "id": "co-roll-img-8140",
-      "title": "Untitled",
-      "section": "costumeDesign",
-      "releaseDate": null,
-      "datePrecision": null,
-      "dateSource": null,
-      "assets": [
-        "/images/work/costume-design/IMG_8140.JPG"
-      ],
-      "coverAsset": "/images/work/costume-design/IMG_8140.JPG",
-      "provisional": true,
-      "notes": "Camera-roll cluster IMG_8140.JPG–IMG_8140.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 2. Mariah fur/bra performance look. Photos only.",
+      "projectOrder": 2,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_7105.jpg",
+        "/images/work/costume-design/IMG_7106.jpg",
+        "/images/work/costume-design/IMG_7107.jpg"
+      ]
     },
     {
       "id": "co-roll-img-8562",
@@ -719,39 +1208,22 @@
         "/images/work/costume-design/IMG_8564.jpg",
         "/images/work/costume-design/IMG_8565.jpg",
         "/images/work/costume-design/IMG_8566.jpg",
-        "/images/work/costume-design/IMG_8567.jpg"
+        "/images/work/costume-design/IMG_8567.jpg",
+        "/images/work/costume-design/IMG_8582.jpg"
       ],
       "coverAsset": "/images/work/costume-design/IMG_8562.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_8562.jpg–IMG_8567.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
-    },
-    {
-      "id": "co-roll-img-8582",
-      "title": "Untitled",
-      "section": "costumeDesign",
-      "releaseDate": null,
-      "datePrecision": null,
-      "dateSource": null,
-      "assets": [
+      "notes": "FEATURED OVERRIDE projectOrder 1. Mariah houndstooth performance look, including IMG_8582 (same look). Photos only.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_8562.jpg",
+        "/images/work/costume-design/IMG_8564.jpg",
+        "/images/work/costume-design/IMG_8565.jpg",
+        "/images/work/costume-design/IMG_8566.jpg",
+        "/images/work/costume-design/IMG_8567.jpg",
         "/images/work/costume-design/IMG_8582.jpg"
       ],
-      "coverAsset": "/images/work/costume-design/IMG_8582.jpg",
-      "provisional": true,
-      "notes": "Camera-roll cluster IMG_8582.jpg–IMG_8582.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
-    },
-    {
-      "id": "co-roll-img-8684",
-      "title": "Untitled",
-      "section": "costumeDesign",
-      "releaseDate": null,
-      "datePrecision": null,
-      "dateSource": null,
-      "assets": [
-        "/images/work/costume-design/IMG_8684.jpg"
-      ],
-      "coverAsset": "/images/work/costume-design/IMG_8684.jpg",
-      "provisional": true,
-      "notes": "Camera-roll cluster IMG_8684.jpg–IMG_8684.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "projectOrder": 1
     },
     {
       "id": "co-roll-img-9262",
@@ -769,7 +1241,16 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_9262.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_9262.jpg–IMG_9267.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "FEATURED OVERRIDE projectOrder 0. Mariah military-stripe performance look. Photos only.",
+      "projectOrder": 0,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/IMG_9262.jpg",
+        "/images/work/costume-design/IMG_9263.jpg",
+        "/images/work/costume-design/IMG_9264.jpg",
+        "/images/work/costume-design/IMG_9266.jpg",
+        "/images/work/costume-design/IMG_9267.jpg"
+      ]
     },
     {
       "id": "co-roll-img-9287",
@@ -783,7 +1264,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_9287.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_9287.jpg–IMG_9287.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "UNCERTAIN: purple metallic screen still, possibly Mariah. Not featured because identity/look assignment is unverified."
     },
     {
       "id": "co-roll-img-9613",
@@ -797,7 +1278,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_9613.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_9613.JPG–IMG_9613.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Distant stage still. Talent/look not verified as featured Mariah; not featured."
     },
     {
       "id": "co-roll-img-9620",
@@ -812,43 +1293,192 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_9620.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_9620.jpg–IMG_9622.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Two performers on stage. Not Mariah-only featured photos."
     },
     {
-      "id": "cd-unidentified-stills",
-      "title": "Untitled stills",
+      "id": "cd-hss-pink-cowboy",
+      "title": "Hearts Sold Separately — pink cowboy",
+      "section": "costumeDesign",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/costume-design/site-184.jpg"
+      ],
+      "coverAsset": "/images/work/costume-design/site-184.jpg",
+      "provisional": true,
+      "notes": "FEATURED OVERRIDE projectOrder 11. Mariah pink cowboy-hat HSS still. Distinct from the mint chiffon cowboy look.",
+      "projectOrder": 11,
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/site-184.jpg"
+      ]
+    },
+    {
+      "id": "cd-renaissance-hats",
+      "title": "Untitled",
       "section": "costumeDesign",
       "releaseDate": null,
       "datePrecision": null,
       "dateSource": null,
       "assets": [
         "/images/work/costume-design/site-166.jpg",
-        "/images/work/costume-design/site-167.jpg",
-        "/images/work/costume-design/site-168.jpg",
-        "/images/work/costume-design/site-175.jpg",
-        "/images/work/costume-design/site-178.jpg",
-        "/images/work/costume-design/site-179.jpg",
-        "/images/work/costume-design/site-180.jpg",
-        "/images/work/costume-design/site-181.jpg",
-        "/images/work/costume-design/site-184.jpg",
-        "/images/work/costume-design/site-195.jpg",
-        "/images/work/costume-design/site-196.jpg",
-        "/images/work/costume-design/site-197.jpg",
-        "/images/work/costume-design/site-228.jpg",
-        "/images/work/costume-design/site-229.jpg",
-        "/images/work/costume-design/site-231.jpg",
-        "/images/work/costume-design/site-234.jpg",
-        "/images/work/costume-design/site-236.jpg",
-        "/images/work/costume-design/site-242.png",
-        "/images/work/costume-design/site-243.png",
-        "/images/work/costume-design/site-244.png",
-        "/images/work/costume-design/site-245.png",
-        "/images/work/costume-design/site-246.png",
-        "/images/work/costume-design/site-247.png"
+        "/images/work/costume-design/site-167.jpg"
       ],
       "coverAsset": "/images/work/costume-design/site-166.jpg",
       "provisional": true,
-      "notes": "Unidentified costumeDesign stills without a verified shoot/campaign match. Kept together at the end so nothing is hidden; split into real projects after review. Files: site-166.jpg, site-167.jpg, site-168.jpg, site-175.jpg, site-178.jpg, site-179.jpg, site-180.jpg, site-181.jpg, site-184.jpg, site-195.jpg, site-196.jpg, site-197.jpg, site-228.jpg, site-229.jpg, site-231.jpg, site-234.jpg, site-236.jpg, site-242.png, site-243.png, site-244.png, site-245.png, site-246.png, site-247.png"
+      "notes": "Renaissance/hat performance stills (Beyoncé). Not Mariah; not featured.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/site-166.jpg",
+        "/images/work/costume-design/site-167.jpg"
+      ]
+    },
+    {
+      "id": "cd-red-dancers",
+      "title": "Untitled",
+      "section": "costumeDesign",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/costume-design/site-168.jpg"
+      ],
+      "coverAsset": "/images/work/costume-design/site-168.jpg",
+      "provisional": true,
+      "notes": "Red dancer ensemble still. Not Mariah; not featured."
+    },
+    {
+      "id": "cd-garment-still",
+      "title": "Untitled",
+      "section": "costumeDesign",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/costume-design/site-178.jpg"
+      ],
+      "coverAsset": "/images/work/costume-design/site-178.jpg",
+      "provisional": true,
+      "notes": "Pink garment still. Not a performance portrait; not featured."
+    },
+    {
+      "id": "cd-club-looks",
+      "title": "Untitled",
+      "section": "costumeDesign",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/costume-design/site-195.jpg",
+        "/images/work/costume-design/site-196.jpg"
+      ],
+      "coverAsset": "/images/work/costume-design/site-195.jpg",
+      "provisional": true,
+      "notes": "Club looks, same talent. site-197 (plaid cowboy) is a different look/person context and is kept separate.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/site-195.jpg",
+        "/images/work/costume-design/site-196.jpg"
+      ]
+    },
+    {
+      "id": "cd-plaid-cowboy",
+      "title": "Untitled",
+      "section": "costumeDesign",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/costume-design/site-197.jpg"
+      ],
+      "coverAsset": "/images/work/costume-design/site-197.jpg",
+      "provisional": true,
+      "notes": "Plaid cowboy-hat still. Not merged with cd-club-looks; relationship uncertain."
+    },
+    {
+      "id": "cd-beyonce-studded",
+      "title": "Untitled",
+      "section": "costumeDesign",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/costume-design/site-229.jpg"
+      ],
+      "coverAsset": "/images/work/costume-design/site-229.jpg",
+      "provisional": true,
+      "notes": "Beyoncé studded-cape look. Not merged with other Beyoncé looks solely because of the performer."
+    },
+    {
+      "id": "cd-beyonce-silver-cape",
+      "title": "Untitled",
+      "section": "costumeDesign",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/costume-design/site-231.jpg"
+      ],
+      "coverAsset": "/images/work/costume-design/site-231.jpg",
+      "provisional": true,
+      "notes": "Beyoncé silver mesh cape look. Distinct from site-229."
+    },
+    {
+      "id": "cd-beyonce-patent-red",
+      "title": "Untitled",
+      "section": "costumeDesign",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/costume-design/site-234.jpg"
+      ],
+      "coverAsset": "/images/work/costume-design/site-234.jpg",
+      "provisional": true,
+      "notes": "Beyoncé patent red look. Distinct from other Beyoncé stills."
+    },
+    {
+      "id": "cd-beyonce-leopard",
+      "title": "Untitled",
+      "section": "costumeDesign",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/costume-design/site-236.jpg"
+      ],
+      "coverAsset": "/images/work/costume-design/site-236.jpg",
+      "provisional": true,
+      "notes": "Beyoncé leopard look. Distinct from other Beyoncé stills."
+    },
+    {
+      "id": "cd-beyonce-gold",
+      "title": "Untitled",
+      "section": "costumeDesign",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/costume-design/site-242.png",
+        "/images/work/costume-design/site-243.png",
+        "/images/work/costume-design/site-247.png",
+        "/images/work/costume-design/site-246.png",
+        "/images/work/costume-design/site-244.png",
+        "/images/work/costume-design/site-245.png"
+      ],
+      "coverAsset": "/images/work/costume-design/site-242.png",
+      "provisional": true,
+      "notes": "Beyoncé gold pregnancy/grammy-adjacent stills. Looks kept consecutive: gold bikini (243/247), gold dress (246), stage tableau (244), dancers (245). Not Mariah.",
+      "lockOrder": true,
+      "assetOrder": [
+        "/images/work/costume-design/site-242.png",
+        "/images/work/costume-design/site-243.png",
+        "/images/work/costume-design/site-247.png",
+        "/images/work/costume-design/site-246.png",
+        "/images/work/costume-design/site-244.png",
+        "/images/work/costume-design/site-245.png"
+      ]
     },
     {
       "id": "mv-unidentified-stills",
