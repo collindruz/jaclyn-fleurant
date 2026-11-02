@@ -359,11 +359,10 @@ add(
         "dateSource": "YouTube published 2025-05-08 (Jx9h3iWudTU); MixtapeChick 2025-05-12; AntiMusic 2025-05-10.",
         "assets": [
             "https://www.youtube.com/watch?v=Jx9h3iWudTU",
-            pub("musicVideos", "site-183.jpg"),
         ],
         "coverAsset": "https://www.youtube.com/watch?v=Jx9h3iWudTU",
         "provisional": False,
-        "notes": "site-183 is a VEVO still of the same military-blue look. Other music-video stills not attached.",
+        "notes": "Official video only. The VEVO still was removed from the site on purpose.",
     }
 )
 

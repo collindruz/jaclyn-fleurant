@@ -145,34 +145,92 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
             isEnlarged={isEnl}
             onActivate={() => activate(i)}
             onPrintTap={() => onPrintTap(i)}
+            dragEnabled={enlargedIndex == null}
           />
         );
       })}
 
       {enlarged && enlargedIndex != null ? (
-        <div
-          className="fixed inset-0 z-[2000000] flex items-center justify-center bg-bone/70 p-3 sm:p-5"
-          onClick={closeEnlarge}
-        >
-          <button
-            type="button"
-            className="relative h-[min(82dvh,calc(100dvh-8rem))] w-[min(92vw,52rem)] max-h-full max-w-full cursor-pointer border-0 bg-transparent p-0"
-            aria-label={`Close still ${enlargedIndex + 1} of ${n}`}
-            onClick={closeEnlarge}
-          >
-            <Image
-              src={enlarged.src}
-              alt=""
-              fill
-              className="pointer-events-none object-contain object-center"
-              sizes="(max-width: 767px) 92vw, (max-width: 1279px) 80vw, 52rem"
-              quality={90}
-              priority
-              draggable={false}
-            />
-          </button>
-        </div>
+        <WorldEnlarge
+          still={enlarged}
+          index={enlargedIndex}
+          n={n}
+          viewW={board.w}
+          onClose={closeEnlarge}
+        />
       ) : null}
+    </div>
+  );
+}
+
+function WorldEnlarge({
+  still,
+  index,
+  n,
+  viewW,
+  onClose,
+}: {
+  still: WorldStill;
+  index: number;
+  n: number;
+  viewW: number;
+  onClose: () => void;
+}) {
+  const natW = still.width > 32 ? still.width : 1600;
+  const natH = still.height > 32 ? still.height : 2000;
+  const vw = viewW > 0 ? viewW : 1280;
+  const vh =
+    typeof window !== "undefined" ? window.innerHeight : 800;
+  const aspect = natH / natW || 1.4;
+  const displayW = Math.round(
+    Math.min(
+      2560,
+      Math.max(natW, vw * 0.92, (vh * 1.18) / aspect)
+    )
+  );
+
+  return (
+    <div
+      className="fixed inset-0 z-[2000000]"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Still ${index + 1} of ${n}, enlarged`}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      <div className="absolute inset-0 bg-bone/80" />
+      <button
+        type="button"
+        className="fixed right-3 top-3 z-20 cursor-pointer border-0 bg-bone/90 px-3 py-1.5 font-sans text-[0.62rem] tracking-[0.12em] text-charcoal/70 sm:right-5 sm:top-5"
+        aria-label={`Close still ${index + 1} of ${n}`}
+        onClick={onClose}
+      >
+        Close
+      </button>
+      <div
+        className="absolute inset-0 z-10 overflow-auto overscroll-contain pt-12"
+        style={{ touchAction: "pan-x pan-y", WebkitOverflowScrolling: "touch" }}
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerMove={(e) => e.stopPropagation()}
+        onWheel={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+      >
+        <div className="inline-block min-h-full min-w-full p-4 sm:p-6">
+          <Image
+            src={still.src}
+            alt=""
+            width={still.width}
+            height={still.height}
+            className="block h-auto max-w-none select-none"
+            style={{ width: displayW }}
+            sizes={`${displayW}px`}
+            quality={90}
+            priority
+            draggable={false}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -189,6 +247,7 @@ type DraggablePrintProps = {
   isEnlarged: boolean;
   onActivate: () => void;
   onPrintTap: () => void;
+  dragEnabled: boolean;
 };
 
 function DraggablePrint({
@@ -203,6 +262,7 @@ function DraggablePrint({
   isEnlarged,
   onActivate,
   onPrintTap,
+  dragEnabled,
 }: DraggablePrintProps) {
   const { rotate } = useMemo(() => printVariant(src, index), [src, index]);
   const thumbSize = Math.max(24, Math.ceil(Math.max(slot.w, slot.h) * 2));
@@ -210,7 +270,11 @@ function DraggablePrint({
 
   return (
     <motion.div
-      className="absolute cursor-grab border-0 bg-transparent p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone active:cursor-grabbing"
+      className={`absolute border-0 bg-transparent p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone ${
+        dragEnabled
+          ? "cursor-grab active:cursor-grabbing"
+          : "pointer-events-none"
+      }`}
       data-cursor="interactive"
       data-world-print=""
       data-index={index}
@@ -229,7 +293,7 @@ function DraggablePrint({
       aria-label={`Still ${index + 1} of ${n}`}
       animate={{ scale: 1, rotate }}
       transition={scaleSpring}
-      drag
+      drag={dragEnabled}
       dragSnapToOrigin
       dragElastic={0.12}
       dragMomentum={false}

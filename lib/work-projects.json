@@ -33,7 +33,7 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_6249.JPG",
       "provisional": true,
-      "notes": "Same pink puffer hood look across camera roll IMG_6249\u20136253 and site-004. Shoot/publication name not verified."
+      "notes": "Same pink puffer hood look across camera roll IMG_6249–6253 and site-004. Shoot/publication name not verified."
     },
     {
       "id": "ed-olive-studio",
@@ -52,7 +52,7 @@
     },
     {
       "id": "cd-hss-live",
-      "title": "Hearts Sold Separately \u2014 live",
+      "title": "Hearts Sold Separately — live",
       "section": "costumeDesign",
       "releaseDate": "2026",
       "datePrecision": "year",
@@ -113,7 +113,7 @@
     },
     {
       "id": "cd-homecoming-trailer",
-      "title": "Homecoming: A Film By Beyonc\u00e9",
+      "title": "Homecoming: A Film By Beyoncé",
       "section": "costumeDesign",
       "releaseDate": "2019-04-08",
       "datePrecision": "day",
@@ -152,11 +152,11 @@
     },
     {
       "id": "ad-reebok-born-classic",
-      "title": "Reebok Born Classic. Worn for Life. \u2014 London",
+      "title": "Reebok Born Classic. Worn for Life. — London",
       "section": "advertising",
       "releaseDate": "2026-02-18",
       "datePrecision": "day",
-      "dateSource": "Footwear Magazine: SS26 Garment Leather / Workout Plus collection launch 2026-02-18. London hub 27 Feb\u20131 Mar 2026 (TheIndustry.fashion 2026-02-26).",
+      "dateSource": "Footwear Magazine: SS26 Garment Leather / Workout Plus collection launch 2026-02-18. London hub 27 Feb–1 Mar 2026 (TheIndustry.fashion 2026-02-26).",
       "assets": [
         "https://www.youtube.com/watch?v=sRRUl9sJZtQ"
       ],
@@ -225,7 +225,54 @@
       ],
       "coverAsset": "/images/work/advertising/site-256.jpg",
       "provisional": false,
-      "notes": "CK Jeans lockup visible on site-256. site-257 same 800\u00d71120 frame size. Campaign launch date not verified. site-259 not included (different dimensions)."
+      "notes": "Paint-splatter denim in dry grass; CALVIN KLEIN JEANS lockup on both frames. Same campaign/model. Launch date not verified."
+    },
+    {
+      "id": "ad-calvin-klein-ckinlife",
+      "title": "Calvin Klein",
+      "section": "advertising",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/advertising/site-259.jpg"
+      ],
+      "coverAsset": "/images/work/advertising/site-259.jpg",
+      "provisional": false,
+      "notes": "CALVIN KLEIN wordmark and #CKINLIFE on a golden-hour group running in a field. Same location family as the Jeans ads but different talent, wardrobe, and lockup — kept as a separate CK campaign so CK stills stay consecutive without merging two campaigns."
+    },
+    {
+      "id": "ad-about-face-tube-job",
+      "title": "about-face tube job",
+      "section": "advertising",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/advertising/site-123.jpg",
+        "/images/work/advertising/site-124.jpg"
+      ],
+      "coverAsset": "/images/work/advertising/site-123.jpg",
+      "provisional": false,
+      "notes": "about-face tube job mascara product visible in both stills; same blonde talent and lab/beauty styling. Campaign date not verified."
+    },
+    {
+      "id": "ad-kappa-desert",
+      "title": "Kappa",
+      "section": "advertising",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "assets": [
+        "/images/work/advertising/site-126.png",
+        "/images/work/advertising/site-129.png",
+        "/images/work/advertising/site-130.png",
+        "/images/work/advertising/site-131.png",
+        "/images/work/advertising/site-135.png"
+      ],
+      "coverAsset": "/images/work/advertising/site-129.png",
+      "provisional": true,
+      "notes": "Desert racetrack / tower set with Kappa branding and checkerboard styling. site-126 has no logo but matches the same location, light, and checker motif as the Kappa frames."
     },
     {
       "id": "mv-a-good-day",
@@ -287,12 +334,11 @@
       "datePrecision": "day",
       "dateSource": "YouTube published 2025-05-08 (Jx9h3iWudTU); MixtapeChick 2025-05-12; AntiMusic 2025-05-10.",
       "assets": [
-        "https://www.youtube.com/watch?v=Jx9h3iWudTU",
-        "/images/work/music-videos/site-183.jpg"
+        "https://www.youtube.com/watch?v=Jx9h3iWudTU"
       ],
       "coverAsset": "https://www.youtube.com/watch?v=Jx9h3iWudTU",
       "provisional": false,
-      "notes": "site-183 is a VEVO still of the same military-blue look. Other music-video stills not attached."
+      "notes": "Official video only. The VEVO still was removed from the site on purpose."
     },
     {
       "id": "cd-runway-356",
@@ -317,7 +363,7 @@
       ],
       "coverAsset": "/images/work/costume-design/site-356.jpg",
       "provisional": true,
-      "notes": "Consecutive site-356\u2013367, identical 1366\u00d72048 runway frames. Show name/season not verified."
+      "notes": "Consecutive site-356–367, identical 1366×2048 runway frames. Show name/season not verified."
     },
     {
       "id": "ed-roll-img-5661",
@@ -334,7 +380,7 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_5661.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_5661.JPG\u2013IMG_5666.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_5661.JPG–IMG_5666.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "ed-roll-img-6221",
@@ -353,7 +399,7 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_6221.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_6221.JPG\u2013IMG_6226.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_6221.JPG–IMG_6226.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "ed-roll-img-9285",
@@ -368,7 +414,7 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_9285.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_9285.jpg\u2013IMG_9286.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_9285.jpg–IMG_9286.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "ed-unidentified-stills",
@@ -443,7 +489,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_0316.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_0316.JPG\u2013IMG_0317.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_0316.JPG–IMG_0317.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-0324",
@@ -457,7 +503,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_0324.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_0324.JPG\u2013IMG_0324.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_0324.JPG–IMG_0324.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-2661",
@@ -472,7 +518,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_2661.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_2661.JPG\u2013IMG_2663.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_2661.JPG–IMG_2663.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-2678",
@@ -490,7 +536,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_2678.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_2678.JPG\u2013IMG_2686.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_2678.JPG–IMG_2686.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-2705",
@@ -504,7 +550,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_2705.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_2705.jpg\u2013IMG_2705.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_2705.jpg–IMG_2705.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-2712",
@@ -519,7 +565,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_2712.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_2712.jpg\u2013IMG_2717.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_2712.jpg–IMG_2717.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-2735",
@@ -534,7 +580,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_2735.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_2735.JPG\u2013IMG_2736.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_2735.JPG–IMG_2736.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-3390",
@@ -548,7 +594,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_3390.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_3390.JPG\u2013IMG_3390.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_3390.JPG–IMG_3390.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-3485",
@@ -563,7 +609,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_3485.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_3485.jpg\u2013IMG_3486.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_3485.jpg–IMG_3486.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-3565",
@@ -585,7 +631,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_3565.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_3565.jpg\u2013IMG_3573.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_3565.jpg–IMG_3573.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-3825",
@@ -600,7 +646,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_3825.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_3825.jpg\u2013IMG_3826.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_3825.jpg–IMG_3826.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-4897",
@@ -614,7 +660,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_4897.JPEG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_4897.JPEG\u2013IMG_4897.JPEG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_4897.JPEG–IMG_4897.JPEG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-6263",
@@ -629,7 +675,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_6263.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_6263.jpg\u2013IMG_6264.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_6263.jpg–IMG_6264.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-7105",
@@ -645,7 +691,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_7105.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_7105.jpg\u2013IMG_7107.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_7105.jpg–IMG_7107.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-8140",
@@ -659,7 +705,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_8140.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_8140.JPG\u2013IMG_8140.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_8140.JPG–IMG_8140.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-8562",
@@ -677,7 +723,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_8562.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_8562.jpg\u2013IMG_8567.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_8562.jpg–IMG_8567.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-8582",
@@ -691,7 +737,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_8582.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_8582.jpg\u2013IMG_8582.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_8582.jpg–IMG_8582.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-8684",
@@ -705,7 +751,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_8684.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_8684.jpg\u2013IMG_8684.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_8684.jpg–IMG_8684.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-9262",
@@ -723,7 +769,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_9262.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_9262.jpg\u2013IMG_9267.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_9262.jpg–IMG_9267.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-9287",
@@ -737,7 +783,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_9287.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_9287.jpg\u2013IMG_9287.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_9287.jpg–IMG_9287.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-9613",
@@ -751,7 +797,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_9613.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_9613.JPG\u2013IMG_9613.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_9613.JPG–IMG_9613.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "co-roll-img-9620",
@@ -766,7 +812,7 @@
       ],
       "coverAsset": "/images/work/costume-design/IMG_9620.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_9620.jpg\u2013IMG_9622.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Camera-roll cluster IMG_9620.jpg–IMG_9622.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
     },
     {
       "id": "cd-unidentified-stills",
@@ -805,27 +851,6 @@
       "notes": "Unidentified costumeDesign stills without a verified shoot/campaign match. Kept together at the end so nothing is hidden; split into real projects after review. Files: site-166.jpg, site-167.jpg, site-168.jpg, site-175.jpg, site-178.jpg, site-179.jpg, site-180.jpg, site-181.jpg, site-184.jpg, site-195.jpg, site-196.jpg, site-197.jpg, site-228.jpg, site-229.jpg, site-231.jpg, site-234.jpg, site-236.jpg, site-242.png, site-243.png, site-244.png, site-245.png, site-246.png, site-247.png"
     },
     {
-      "id": "ad-unidentified-stills",
-      "title": "Untitled stills",
-      "section": "advertising",
-      "releaseDate": null,
-      "datePrecision": null,
-      "dateSource": null,
-      "assets": [
-        "/images/work/advertising/site-123.jpg",
-        "/images/work/advertising/site-124.jpg",
-        "/images/work/advertising/site-126.png",
-        "/images/work/advertising/site-129.png",
-        "/images/work/advertising/site-130.png",
-        "/images/work/advertising/site-131.png",
-        "/images/work/advertising/site-135.png",
-        "/images/work/advertising/site-259.jpg"
-      ],
-      "coverAsset": "/images/work/advertising/site-123.jpg",
-      "provisional": true,
-      "notes": "Unidentified advertising stills without a verified shoot/campaign match. Kept together at the end so nothing is hidden; split into real projects after review. Files: site-123.jpg, site-124.jpg, site-126.png, site-129.png, site-130.png, site-131.png, site-135.png, site-259.jpg"
-    },
-    {
       "id": "mv-unidentified-stills",
       "title": "Untitled stills",
       "section": "musicVideos",
@@ -849,7 +874,70 @@
       "notes": "Unidentified musicVideos stills without a verified shoot/campaign match. Kept together at the end so nothing is hidden; split into real projects after review. Files: site-185.jpg, site-186.jpg, site-188.jpg, site-189.jpg, site-190.jpg, site-191.jpg, site-192.jpg, site-213.jpg, site-214.jpg, site-281.jpg"
     },
     {
-      "id": "re-roll-img-1178",
+      "id": "ev-ama-white-military",
+      "title": "American Music Awards",
+      "section": "events",
+      "releaseDate": "2025-11-23",
+      "datePrecision": "day",
+      "dateSource": "CBS / Paramount+ / Dick Clark Productions AMA step-and-repeat. 2025 American Music Awards aired 2025-11-23.",
+      "assets": [
+        "/images/work/events/IMG_4819.jpg",
+        "/images/work/events/IMG_4986.JPG",
+        "/images/work/events/IMG_4988.JPG"
+      ],
+      "coverAsset": "/images/work/events/IMG_4986.JPG",
+      "provisional": true,
+      "notes": "Same white military crop, feather cuffs, and satin train on the AMA carpet. Grouped by look, not by IMG number (4819 sat apart from 4986/4988). Year tagged from the CBS/Paramount+ board; confirm if this carpet was reused another year."
+    },
+    {
+      "id": "ev-vs-floral-sheer",
+      "title": "Victoria's Secret",
+      "section": "events",
+      "releaseDate": "2024-10-15",
+      "datePrecision": "day",
+      "dateSource": "Victoria's Secret Fashion Show 2024 step-and-repeat (Brooklyn, 2024-10-15).",
+      "assets": [
+        "/images/work/events/IMG_6999.JPG",
+        "/images/work/events/site-154.jpg",
+        "/images/work/events/site-155.jpg",
+        "/images/work/events/site-156.jpg"
+      ],
+      "coverAsset": "/images/work/events/IMG_6999.JPG",
+      "provisional": false,
+      "notes": "Same sheer floral slip, two-tone hair, crystal choker, and white fur. Carpet (6999, site-154), indoor (site-155), and car (site-156) are one look."
+    },
+    {
+      "id": "ev-billboard-wim-2019-white",
+      "title": "Billboard Women in Music 2019",
+      "section": "events",
+      "releaseDate": "2019-12-12",
+      "datePrecision": "day",
+      "dateSource": "Step-and-repeat prints Billboard Women in Music 2019. Event date 2019-12-12.",
+      "assets": [
+        "/images/work/events/site-149.jpg",
+        "/images/work/events/site-150.jpg"
+      ],
+      "coverAsset": "/images/work/events/site-149.jpg",
+      "provisional": false,
+      "notes": "Same white cropped jacket, trousers, and tulle train on the 2019 WIM carpet."
+    },
+    {
+      "id": "ev-iheart-white-cape",
+      "title": "iHeartRadio Music Awards",
+      "section": "events",
+      "releaseDate": "2018-03-11",
+      "datePrecision": "day",
+      "dateSource": "iHeartRadio Music Awards step-and-repeat (FOX). 2018 ceremony 2018-03-11.",
+      "assets": [
+        "/images/work/events/site-151.jpg",
+        "/images/work/events/site-153.jpg"
+      ],
+      "coverAsset": "/images/work/events/site-151.jpg",
+      "provisional": true,
+      "notes": "Same white textured mini, black hem, sheer cape, and sheer boots. Hotel lobby (151) and iHeart carpet (153) are one look. Year tagged from the 2018 ceremony; confirm if this wardrobe appeared at a later iHeart show."
+    },
+    {
+      "id": "ev-pink-trench",
       "title": "Untitled",
       "section": "events",
       "releaseDate": null,
@@ -861,10 +949,10 @@
       ],
       "coverAsset": "/images/work/events/IMG_1178.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_1178.jpg\u2013IMG_1179.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Same pink belted trench suit and black hardware, street portraits. Event name/date not on frame."
     },
     {
-      "id": "re-roll-img-1306",
+      "id": "ev-white-draped-tee",
       "title": "Untitled",
       "section": "events",
       "releaseDate": null,
@@ -876,39 +964,25 @@
       ],
       "coverAsset": "/images/work/events/IMG_1306.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_1306.JPG\u2013IMG_1307.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Same distressed white draped tee-dress, blue wig, and green boots (Prudential Center carpet visible). Specific show date not verified."
     },
     {
-      "id": "re-roll-img-4819",
+      "id": "ev-teal-fringe",
       "title": "Untitled",
       "section": "events",
       "releaseDate": null,
       "datePrecision": null,
       "dateSource": null,
       "assets": [
-        "/images/work/events/IMG_4819.jpg"
+        "/images/work/events/site-147.jpg",
+        "/images/work/events/site-148.jpg"
       ],
-      "coverAsset": "/images/work/events/IMG_4819.jpg",
+      "coverAsset": "/images/work/events/site-147.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_4819.jpg\u2013IMG_4819.jpg. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Same teal sequin fringe halter; full-length (147) and crop (148). Event name/date not on frame."
     },
     {
-      "id": "re-roll-img-4986",
-      "title": "Untitled",
-      "section": "events",
-      "releaseDate": null,
-      "datePrecision": null,
-      "dateSource": null,
-      "assets": [
-        "/images/work/events/IMG_4986.JPG",
-        "/images/work/events/IMG_4988.JPG"
-      ],
-      "coverAsset": "/images/work/events/IMG_4986.JPG",
-      "provisional": true,
-      "notes": "Camera-roll cluster IMG_4986.JPG\u2013IMG_4988.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
-    },
-    {
-      "id": "re-roll-img-6129",
+      "id": "ev-olive-cargo",
       "title": "Untitled",
       "section": "events",
       "releaseDate": null,
@@ -919,44 +993,21 @@
       ],
       "coverAsset": "/images/work/events/IMG_6129.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_6129.JPG\u2013IMG_6129.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
+      "notes": "Olive/grey cargo construction from behind. No matching outfit in the Events set. Event name/date unknown."
     },
     {
-      "id": "re-roll-img-6999",
+      "id": "ev-blush-sequin-reception",
       "title": "Untitled",
       "section": "events",
       "releaseDate": null,
       "datePrecision": null,
       "dateSource": null,
       "assets": [
-        "/images/work/events/IMG_6999.JPG"
+        "/images/work/events/site-152.jpg"
       ],
-      "coverAsset": "/images/work/events/IMG_6999.JPG",
+      "coverAsset": "/images/work/events/site-152.jpg",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_6999.JPG\u2013IMG_6999.JPG. Same shoot inferred from consecutive IMG numbers. Title and date unknown."
-    },
-    {
-      "id": "rc-unidentified-stills",
-      "title": "Untitled stills",
-      "section": "events",
-      "releaseDate": null,
-      "datePrecision": null,
-      "dateSource": null,
-      "assets": [
-        "/images/work/events/site-147.jpg",
-        "/images/work/events/site-148.jpg",
-        "/images/work/events/site-149.jpg",
-        "/images/work/events/site-150.jpg",
-        "/images/work/events/site-151.jpg",
-        "/images/work/events/site-152.jpg",
-        "/images/work/events/site-153.jpg",
-        "/images/work/events/site-154.jpg",
-        "/images/work/events/site-155.jpg",
-        "/images/work/events/site-156.jpg"
-      ],
-      "coverAsset": "/images/work/events/site-147.jpg",
-      "provisional": true,
-      "notes": "Unidentified events stills without a verified shoot/campaign match. Kept together at the end so nothing is hidden; split into real projects after review. Files: site-147.jpg, site-148.jpg, site-149.jpg, site-150.jpg, site-151.jpg, site-152.jpg, site-153.jpg, site-154.jpg, site-155.jpg, site-156.jpg"
+      "notes": "Blush sequin off-shoulder mini with Tom Ford. Different person and look from the white-cape iHeart pair — not combined. Event/date not verified (BFA 4184246)."
     }
   ]
 }
