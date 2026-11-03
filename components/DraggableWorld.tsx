@@ -96,6 +96,15 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
     [list, board.w, board.h]
   );
 
+  useEffect(() => {
+    if (board.w < 8 || board.h < 8 || packed.slots.length === 0) return;
+    const hs = packed.slots.map((s) => s.h);
+    const avgH = hs.reduce((a, b) => a + b, 0) / hs.length;
+    console.info(
+      `[world-pack] thumbMaxH=${packed.thumbMaxH.toFixed(1)} avgH=${avgH.toFixed(1)} gap=${packed.gap} pad=${packed.pad} board=${board.w}x${board.h} n=${packed.slots.length}`
+    );
+  }, [board.w, board.h, packed]);
+
   const closeEnlarge = useCallback(() => {
     setEnlargedIndex(null);
   }, []);
@@ -172,10 +181,14 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
     <div
       className="relative w-full min-w-0 overflow-hidden overscroll-none select-none"
       data-world-board=""
+      data-thumb-max-h={packed.thumbMaxH}
+      data-pack-gap={packed.gap}
+      data-pack-pad={packed.pad}
       style={{
         height: boardH,
         width: "100%",
         minHeight: boardH ? undefined : "50vh",
+        padding: 0,
       }}
       role="group"
       aria-label="Stills"
