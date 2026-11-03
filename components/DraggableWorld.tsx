@@ -25,7 +25,7 @@ const VIEWER_QUALITY = 85;
 const THUMB_EAGER_COUNT = 12;
 const THUMB_BATCH = 16;
 const GOLDEN_FILTER =
-  "[filter:sepia(0.46)_saturate(0.7)_brightness(1.02)_hue-rotate(-8deg)_contrast(0.97)]";
+  "[filter:sepia(0.66)_saturate(1.36)_brightness(1.08)_hue-rotate(-16deg)_contrast(1.05)]";
 
 type DragPose = { x: number; y: number; z: number | null };
 
@@ -43,33 +43,68 @@ function printVariant(src: string, index: number) {
   return { rotate: worldPrintRotate(src, index) };
 }
 
-function useWorldBoardWidth() {
-  const [w, setW] = useState(0);
+function readSafeInsetBottom() {
+  const probe = document.createElement("div");
+  probe.style.cssText =
+    "position:absolute;visibility:hidden;pointer-events:none;padding-bottom:env(safe-area-inset-bottom,0px)";
+  document.body.appendChild(probe);
+  const bottom = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+  probe.remove();
+  return bottom;
+}
+
+function useWorldBoard() {
+  const [box, setBox] = useState({ w: 0, h: 0 });
 
   useLayoutEffect(() => {
     const measure = () => {
-      setW(window.innerWidth);
+      const header = document.querySelector("header");
+      const hh = header ? header.getBoundingClientRect().height : 0;
+      const viewportH = window.visualViewport?.height ?? window.innerHeight;
+      const safeBottom = readSafeInsetBottom();
+      setBox({
+        w: window.innerWidth,
+        h: Math.max(64, viewportH - hh - safeBottom),
+      });
     };
     measure();
     window.addEventListener("resize", measure);
+    window.visualViewport?.addEventListener("resize", measure);
+    const header = document.querySelector("header");
+    const ro = header ? new ResizeObserver(measure) : null;
+    if (header && ro) ro.observe(header);
+
+    const html = document.documentElement;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    html.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
     return () => {
       window.removeEventListener("resize", measure);
+      window.visualViewport?.removeEventListener("resize", measure);
+      ro?.disconnect();
+      html.style.overflow = prevHtmlOverflow;
+      document.body.style.overflow = prevBodyOverflow;
     };
   }, []);
 
-  return w;
+  return box;
 }
 
 export function DraggableWorld({ stills }: DraggableWorldProps) {
   const list = stills;
   const n = list.length;
-  const boardW = useWorldBoardWidth();
+  const board = useWorldBoard();
   const [enlargedIndex, setEnlargedIndex] = useState<number | null>(null);
   const [thumbLimit, setThumbLimit] = useState(THUMB_EAGER_COUNT);
   const posesRef = useRef(new Map<string, DragPose>());
   const zSeqRef = useRef(400);
 
-  const packed = useMemo(() => packWorldStills(list, boardW), [list, boardW]);
+  const packed = useMemo(
+    () => packWorldStills(list, board.w, board.h),
+    [list, board.w, board.h]
+  );
 
   const bumpZ = useCallback(() => {
     zSeqRef.current += 1;
@@ -149,31 +184,23 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [enlargedIndex, stepEnlarge]);
 
-  useEffect(() => {
-    if (enlargedIndex == null) return;
-    const html = document.documentElement;
-    const prevHtml = html.style.overflow;
-    const prevBody = document.body.style.overflow;
-    html.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-    return () => {
-      html.style.overflow = prevHtml;
-      document.body.style.overflow = prevBody;
-    };
-  }, [enlargedIndex]);
-
   if (n === 0) return null;
 
   const enlarged = enlargedIndex != null ? list[enlargedIndex] : null;
   const nextStill =
     enlargedIndex != null && n > 1 ? list[(enlargedIndex + 1) % n] : null;
   const viewerOpen = enlargedIndex != null;
-  const boardH = packed.totalH > 0 ? packed.totalH : undefined;
+  const boardH = board.h > 0 ? board.h : undefined;
 
   return (
     <div
-      className="relative w-full min-w-0 overflow-x-clip overflow-y-visible touch-pan-y select-none"
-      style={{ height: boardH, width: "100%", minHeight: boardH ? undefined : "50vh" }}
+      className="relative w-full min-w-0 overflow-hidden overscroll-none select-none"
+      style={{
+        height: boardH,
+        width: "100%",
+        minHeight: boardH ? undefined : "50vh",
+        touchAction: "none",
+      }}
       role="group"
       aria-label="Stills"
     >
@@ -434,7 +461,6 @@ const DraggablePrint = memo(function DraggablePrint({
   const origin = useRef({ x: 0, y: 0 });
   const dragging = useRef(false);
   const pressed = useRef(false);
-  const scrollIntent = useRef(false);
   const isTouch = useRef(false);
   const displayW = Math.max(1, Math.ceil(slot.w));
   const pose = getPose(src);
@@ -478,7 +504,7 @@ const DraggablePrint = memo(function DraggablePrint({
         transformOrigin: "center",
         contain: "layout style",
         containIntrinsicSize: `${Math.ceil(slot.w)}px ${Math.ceil(slot.h)}px`,
-        touchAction: dragEnabled ? "pan-y" : undefined,
+        touchAction: dragEnabled ? "none" : undefined,
       }}
       role="button"
       tabIndex={dragEnabled ? 0 : -1}
@@ -488,7 +514,6 @@ const DraggablePrint = memo(function DraggablePrint({
         if (!dragEnabled) return;
         pressed.current = true;
         dragging.current = false;
-        scrollIntent.current = false;
         isTouch.current = e.pointerType === "touch";
         pointerStart.current = { x: e.clientX, y: e.clientY };
         const p = getPose(src);
@@ -504,18 +529,11 @@ const DraggablePrint = memo(function DraggablePrint({
         }
       }}
       onPointerMove={(e) => {
-        if (!dragEnabled || !pressed.current || scrollIntent.current) return;
+        if (!dragEnabled || !pressed.current) return;
         const dx = e.clientX - pointerStart.current.x;
         const dy = e.clientY - pointerStart.current.y;
         const tap = isTouch.current ? PRINT_TAP_TOUCH_PX : PRINT_TAP_PX;
         if (!dragging.current && Math.hypot(dx, dy) < tap) return;
-        if (!dragging.current && isTouch.current && Math.abs(dy) > Math.abs(dx) * 1.15) {
-          scrollIntent.current = true;
-          pressed.current = false;
-          const el = nodeRef.current;
-          if (el) el.style.willChange = "auto";
-          return;
-        }
         if (!dragging.current) {
           dragging.current = true;
           nodeRef.current?.setPointerCapture?.(e.pointerId);
@@ -526,12 +544,6 @@ const DraggablePrint = memo(function DraggablePrint({
         writeTransform(p.x, p.y);
       }}
       onPointerUp={(e) => {
-        if (scrollIntent.current) {
-          scrollIntent.current = false;
-          pressed.current = false;
-          dragging.current = false;
-          return;
-        }
         if (!pressed.current) return;
         pressed.current = false;
         const dx = e.clientX - pointerStart.current.x;
@@ -555,7 +567,6 @@ const DraggablePrint = memo(function DraggablePrint({
       onPointerCancel={() => {
         pressed.current = false;
         dragging.current = false;
-        scrollIntent.current = false;
         const p = getPose(src);
         writeTransform(p.x, p.y);
         const el = nodeRef.current;
