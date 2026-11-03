@@ -276,6 +276,30 @@ const EXTERNAL = [
     embeddable: true,
     embedUrl: "https://www.youtube.com/embed/_SrosL0WdOQ",
   },
+  {
+    section: "musicVideos",
+    watchUrl: "https://www.youtube.com/watch?v=NdBHfXgI3hA",
+    provider: "youtube",
+    id: "NdBHfXgI3hA",
+    title: "Lauren Jauregui, Tainy - Lento (Official Video)",
+    poster: "https://i.ytimg.com/vi/NdBHfXgI3hA/hqdefault.jpg",
+    width: 16,
+    height: 9,
+    embeddable: true,
+    embedUrl: "https://www.youtube-nocookie.com/embed/NdBHfXgI3hA",
+  },
+  {
+    section: "musicVideos",
+    watchUrl: "https://www.youtube.com/watch?v=qAlF70MdfwU",
+    provider: "youtube",
+    id: "qAlF70MdfwU",
+    title: "JACKBOYS & Travis Scott feat. Young Thug - OUT WEST (Official Music Video)",
+    poster: "https://i.ytimg.com/vi/qAlF70MdfwU/hqdefault.jpg",
+    width: 16,
+    height: 9,
+    embeddable: true,
+    embedUrl: "https://www.youtube-nocookie.com/embed/qAlF70MdfwU",
+  },
 ];
 
 function rgbToHsl(r, g, b) {

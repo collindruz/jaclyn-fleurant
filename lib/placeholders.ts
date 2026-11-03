@@ -143,7 +143,16 @@ export function getWorldStillsFromCatalog(): WorldStill[] {
     if (SKIP_WORLD_SRC.test(src)) continue;
     const base = src.split("/").pop() ?? src;
     if (EXCLUDE_FILENAMES.includes(base)) continue;
-    if (src.includes("site-040.jpg") || src.includes("site-048.jpg") || src.includes("site-228.jpg")) continue;
+    if (
+      src.includes("site-040.jpg") ||
+      src.includes("site-048.jpg") ||
+      src.includes("site-228.jpg") ||
+      src.includes("IMG_6253.JPG") ||
+      src.includes("site-213.jpg") ||
+      src.includes("site-214.jpg") ||
+      src.includes("site-281.jpg")
+    )
+      continue;
     if (seen.has(src)) continue;
     seen.add(src);
     out.push({

@@ -40,6 +40,10 @@ export function getHomeFrameSlides(): HomeFrameSlide[] {
       !EXCLUDE_FILENAMES.includes(basename(i.src)) &&
       !i.src.includes("site-048.jpg") &&
       !i.src.includes("site-228.jpg") &&
+      !i.src.includes("IMG_6253.JPG") &&
+      !i.src.includes("site-213.jpg") &&
+      !i.src.includes("site-214.jpg") &&
+      !i.src.includes("site-281.jpg") &&
       !/\/(manual-review|site-pull|site-pull-cropped|site-pull-duplicates|unsorted|youtube-posters|video-posters)\//.test(
         i.src
       )

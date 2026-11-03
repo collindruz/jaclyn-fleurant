@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { WorldStill } from "@/lib/placeholders";
-import { packWorldStills, type WorldPackSlot } from "@/lib/world-pack";
+import { packWorldStills, worldPrintRotate, type WorldPackSlot } from "@/lib/world-pack";
 import Image from "next/image";
 import {
   memo,
@@ -35,15 +35,7 @@ function stillAspect(still: WorldStill) {
 }
 
 function printVariant(src: string, index: number) {
-  let h = 2166136261;
-  const s = `${src}#${index}`;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 16777619) >>> 0;
-  }
-  const r0 = h / 0xffff_ffff;
-  const rotate = -1.2 + r0 * 2.4;
-  return { rotate };
+  return { rotate: worldPrintRotate(src, index) };
 }
 
 function useWorldBoard() {
@@ -515,8 +507,8 @@ const DraggablePrint = memo(function DraggablePrint({
             height={height}
             className={`pointer-events-none block h-full w-full select-none object-contain object-center transition-[filter] duration-[550ms] ease-in-out motion-reduce:duration-75 ${
               isEnlarged
-                ? "grayscale-0"
-                : "grayscale md:group-hover/still:grayscale-0"
+                ? "[filter:none]"
+                : "[filter:sepia(0.5)_saturate(0.58)_brightness(0.98)_hue-rotate(-14deg)_contrast(0.96)] md:group-hover/still:[filter:none]"
             }`}
             sizes={`${displayW}px`}
             quality={THUMB_QUALITY}

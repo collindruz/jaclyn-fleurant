@@ -28,19 +28,17 @@
         "/images/work/editorial/IMG_6249.JPG",
         "/images/work/editorial/IMG_6250.JPG",
         "/images/work/editorial/IMG_6252.JPG",
-        "/images/work/editorial/IMG_6253.JPG",
         "/images/work/editorial/site-004.jpg"
       ],
       "coverAsset": "/images/work/editorial/IMG_6249.JPG",
       "provisional": true,
-      "notes": "FEATURED OVERRIDE projectOrder 3. Mariah pink puffer hood look (IMG_6249–6253, site-004). Shoot/publication name not verified.",
+      "notes": "FEATURED OVERRIDE projectOrder 3. Mariah pink puffer hood look (IMG_6249–6253, site-004). IMG_6253.JPG permanently excluded. Shoot/publication name not verified.",
       "projectOrder": 3,
       "lockOrder": true,
       "assetOrder": [
         "/images/work/editorial/IMG_6249.JPG",
         "/images/work/editorial/IMG_6250.JPG",
         "/images/work/editorial/IMG_6252.JPG",
-        "/images/work/editorial/IMG_6253.JPG",
         "/images/work/editorial/site-004.jpg"
       ]
     },
@@ -395,6 +393,34 @@
       "coverAsset": "https://www.youtube.com/watch?v=Jx9h3iWudTU",
       "provisional": false,
       "notes": "Official video only. The VEVO still was removed from the site on purpose."
+    },
+    {
+      "id": "mv-lento",
+      "title": "Lento",
+      "section": "musicVideos",
+      "releaseDate": "2020-03-20",
+      "datePrecision": "day",
+      "dateSource": "YouTube published 2020-03-20 (NdBHfXgI3hA); oEmbed title Lauren Jauregui, Tainy - Lento (Official Video).",
+      "assets": [
+        "https://www.youtube.com/watch?v=NdBHfXgI3hA"
+      ],
+      "coverAsset": "https://www.youtube.com/watch?v=NdBHfXgI3hA",
+      "provisional": false,
+      "notes": null
+    },
+    {
+      "id": "mv-out-west",
+      "title": "OUT WEST",
+      "section": "musicVideos",
+      "releaseDate": "2020-03-20",
+      "datePrecision": "day",
+      "dateSource": "YouTube / Billboard 2020-03-20 (qAlF70MdfwU); oEmbed title JACKBOYS & Travis Scott feat. Young Thug - OUT WEST (Official Music Video).",
+      "assets": [
+        "https://www.youtube.com/watch?v=qAlF70MdfwU"
+      ],
+      "coverAsset": "https://www.youtube.com/watch?v=qAlF70MdfwU",
+      "provisional": false,
+      "notes": null
     },
     {
       "id": "cd-runway-356",
@@ -1488,29 +1514,6 @@
         "/images/work/costume-design/site-244.png",
         "/images/work/costume-design/site-245.png"
       ]
-    },
-    {
-      "id": "mv-unidentified-stills",
-      "title": "Untitled stills",
-      "section": "musicVideos",
-      "releaseDate": null,
-      "datePrecision": null,
-      "dateSource": null,
-      "assets": [
-        "/images/work/music-videos/site-185.jpg",
-        "/images/work/music-videos/site-186.jpg",
-        "/images/work/music-videos/site-188.jpg",
-        "/images/work/music-videos/site-189.jpg",
-        "/images/work/music-videos/site-190.jpg",
-        "/images/work/music-videos/site-191.jpg",
-        "/images/work/music-videos/site-192.jpg",
-        "/images/work/music-videos/site-213.jpg",
-        "/images/work/music-videos/site-214.jpg",
-        "/images/work/music-videos/site-281.jpg"
-      ],
-      "coverAsset": "/images/work/music-videos/site-185.jpg",
-      "provisional": true,
-      "notes": "Unidentified musicVideos stills without a verified shoot/campaign match. Kept together at the end so nothing is hidden; split into real projects after review. Files: site-185.jpg, site-186.jpg, site-188.jpg, site-189.jpg, site-190.jpg, site-191.jpg, site-192.jpg, site-213.jpg, site-214.jpg, site-281.jpg"
     },
     {
       "id": "ev-ama-white-military",
