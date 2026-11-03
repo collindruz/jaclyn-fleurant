@@ -23,8 +23,7 @@ const THUMB_QUALITY = 60;
 const VIEWER_QUALITY = 85;
 const THUMB_EAGER_COUNT = 12;
 const THUMB_BATCH = 16;
-const GOLDEN_FILTER =
-  "[filter:sepia(0.66)_saturate(1.36)_brightness(1.08)_hue-rotate(-16deg)_contrast(1.05)]";
+const THUMB_REST_FILTER = "[filter:grayscale(1)_contrast(1.08)]";
 
 type DraggableWorldProps = {
   stills: WorldStill[];
@@ -172,6 +171,7 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
   return (
     <div
       className="relative w-full min-w-0 overflow-hidden overscroll-none select-none"
+      data-world-board=""
       style={{
         height: boardH,
         width: "100%",
@@ -455,8 +455,8 @@ const WorldPrint = memo(function WorldPrint({
             height={height}
             className={`pointer-events-none block h-full w-full select-none object-contain object-center transition-[filter] duration-[550ms] ease-in-out motion-reduce:duration-75 ${
               isEnlarged
-                ? "[filter:none]"
-                : `${GOLDEN_FILTER} md:group-hover/still:[filter:none]`
+                ? "[filter:none] grayscale-0"
+                : `${THUMB_REST_FILTER} md:group-hover/still:grayscale-0 md:group-hover/still:[filter:none]`
             }`}
             sizes={`${displayW}px`}
             quality={THUMB_QUALITY}

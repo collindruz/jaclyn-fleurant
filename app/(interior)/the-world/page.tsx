@@ -11,7 +11,7 @@ export default function TheWorldPage() {
   const stills = getWorldStillsFromCatalog();
 
   return (
-    <section className="relative min-h-0 w-full overflow-hidden overscroll-none">
+    <section className="relative h-full min-h-0 w-full overflow-hidden overscroll-none">
       <DraggableWorld stills={stills} />
     </section>
   );
