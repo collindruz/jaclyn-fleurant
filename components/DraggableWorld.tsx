@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { WorldStill } from "@/lib/placeholders";
-import { packWorldStills, worldPrintRotate, type WorldPackSlot } from "@/lib/world-pack";
+import { packWorldStills, type WorldPackSlot } from "@/lib/world-pack";
 import { STACK_VIEWER } from "@/lib/stacking";
 import Image from "next/image";
 import {
@@ -15,19 +15,16 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+
 const TAP_MOVE_PX = 16;
 const SWIPE_PX = 48;
 const WHEEL_LOCK_MS = 560;
-const PRINT_TAP_PX = 10;
-const PRINT_TAP_TOUCH_PX = 14;
 const THUMB_QUALITY = 60;
 const VIEWER_QUALITY = 85;
 const THUMB_EAGER_COUNT = 12;
 const THUMB_BATCH = 16;
 const GOLDEN_FILTER =
   "[filter:sepia(0.66)_saturate(1.36)_brightness(1.08)_hue-rotate(-16deg)_contrast(1.05)]";
-
-type DragPose = { x: number; y: number; z: number | null };
 
 type DraggableWorldProps = {
   stills: WorldStill[];
@@ -37,10 +34,6 @@ function stillAspect(still: WorldStill) {
   const natW = still.width > 32 ? still.width : 1600;
   const natH = still.height > 32 ? still.height : 2000;
   return { natW, natH, ratio: natW / natH };
-}
-
-function printVariant(src: string, index: number) {
-  return { rotate: worldPrintRotate(src, index) };
 }
 
 function readSafeInsetBottom() {
@@ -98,27 +91,11 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
   const board = useWorldBoard();
   const [enlargedIndex, setEnlargedIndex] = useState<number | null>(null);
   const [thumbLimit, setThumbLimit] = useState(THUMB_EAGER_COUNT);
-  const posesRef = useRef(new Map<string, DragPose>());
-  const zSeqRef = useRef(400);
 
   const packed = useMemo(
     () => packWorldStills(list, board.w, board.h),
     [list, board.w, board.h]
   );
-
-  const bumpZ = useCallback(() => {
-    zSeqRef.current += 1;
-    return 400 + zSeqRef.current;
-  }, []);
-
-  const getPose = useCallback((id: string): DragPose => {
-    let pose = posesRef.current.get(id);
-    if (!pose) {
-      pose = { x: 0, y: 0, z: null };
-      posesRef.current.set(id, pose);
-    }
-    return pose;
-  }, []);
 
   const closeEnlarge = useCallback(() => {
     setEnlargedIndex(null);
@@ -199,7 +176,6 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
         height: boardH,
         width: "100%",
         minHeight: boardH ? undefined : "50vh",
-        touchAction: "none",
       }}
       role="group"
       aria-label="Stills"
@@ -215,7 +191,7 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
           const slot = packed.slots[i];
           if (!slot) return null;
           return (
-            <DraggablePrint
+            <WorldPrint
               key={still.src}
               src={still.src}
               width={still.width}
@@ -225,11 +201,8 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
               slot={slot}
               isEnlarged={enlargedIndex === i}
               onPrintTap={onPrintTap}
-              dragEnabled={!viewerOpen}
               eager={i < THUMB_EAGER_COUNT}
               showImage={i < thumbLimit}
-              getPose={getPose}
-              bumpZ={bumpZ}
             />
           );
         })}
@@ -424,7 +397,7 @@ function WorldEnlarge({
   );
 }
 
-type DraggablePrintProps = {
+type WorldPrintProps = {
   src: string;
   width: number;
   height: number;
@@ -433,14 +406,11 @@ type DraggablePrintProps = {
   slot: WorldPackSlot;
   isEnlarged: boolean;
   onPrintTap: (index: number) => void;
-  dragEnabled: boolean;
   eager: boolean;
   showImage: boolean;
-  getPose: (id: string) => DragPose;
-  bumpZ: () => number;
 };
 
-const DraggablePrint = memo(function DraggablePrint({
+const WorldPrint = memo(function WorldPrint({
   src,
   width,
   height,
@@ -449,49 +419,18 @@ const DraggablePrint = memo(function DraggablePrint({
   slot,
   isEnlarged,
   onPrintTap,
-  dragEnabled,
   eager,
   showImage,
-  getPose,
-  bumpZ,
-}: DraggablePrintProps) {
-  const { rotate } = useMemo(() => printVariant(src, index), [src, index]);
-  const nodeRef = useRef<HTMLDivElement>(null);
-  const pointerStart = useRef({ x: 0, y: 0 });
-  const origin = useRef({ x: 0, y: 0 });
-  const dragging = useRef(false);
-  const pressed = useRef(false);
-  const isTouch = useRef(false);
+}: WorldPrintProps) {
   const displayW = Math.max(1, Math.ceil(slot.w));
-  const pose = getPose(src);
-
-  const writeTransform = (x: number, y: number) => {
-    const el = nodeRef.current;
-    if (!el) return;
-    el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rotate}deg)`;
-  };
-
-  useLayoutEffect(() => {
-    const p = getPose(src);
-    writeTransform(p.x, p.y);
-    const el = nodeRef.current;
-    if (el) el.style.zIndex = String(p.z ?? slot.z);
-    // slot origin is via top/left; drag offset stays in the transform
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src, slot.x, slot.y, slot.w, slot.h, slot.z, rotate, getPose]);
 
   return (
-    <div
-      ref={nodeRef}
-      className={`absolute border-0 bg-transparent p-0 [content-visibility:auto] focus:outline-none focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone ${
-        dragEnabled
-          ? "cursor-grab active:cursor-grabbing"
-          : "pointer-events-none"
-      }`}
+    <button
+      type="button"
+      className="absolute cursor-pointer border-0 bg-transparent p-0 [content-visibility:auto] focus:outline-none focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone"
       data-cursor="interactive"
       data-world-print=""
       data-index={index}
-      data-overlaps={slot.overlaps ? "1" : "0"}
       data-slot-w={Math.round(slot.w)}
       data-slot-h={Math.round(slot.h)}
       style={{
@@ -499,87 +438,15 @@ const DraggablePrint = memo(function DraggablePrint({
         left: slot.x,
         width: slot.w,
         height: slot.h,
-        zIndex: pose.z ?? slot.z,
-        transform: `translate3d(${pose.x}px, ${pose.y}px, 0) rotate(${rotate}deg)`,
-        transformOrigin: "center",
+        zIndex: 20 + index,
         contain: "layout style",
         containIntrinsicSize: `${Math.ceil(slot.w)}px ${Math.ceil(slot.h)}px`,
-        touchAction: dragEnabled ? "none" : undefined,
       }}
-      role="button"
-      tabIndex={dragEnabled ? 0 : -1}
       aria-pressed={isEnlarged}
       aria-label={`Still ${index + 1} of ${n}`}
-      onPointerDown={(e) => {
-        if (!dragEnabled) return;
-        pressed.current = true;
-        dragging.current = false;
-        isTouch.current = e.pointerType === "touch";
-        pointerStart.current = { x: e.clientX, y: e.clientY };
-        const p = getPose(src);
-        origin.current = { x: p.x, y: p.y };
-        const el = nodeRef.current;
-        if (el) {
-          p.z = bumpZ();
-          el.style.zIndex = String(p.z);
-          el.style.willChange = "transform";
-        }
-        if (!isTouch.current) {
-          el?.setPointerCapture?.(e.pointerId);
-        }
-      }}
-      onPointerMove={(e) => {
-        if (!dragEnabled || !pressed.current) return;
-        const dx = e.clientX - pointerStart.current.x;
-        const dy = e.clientY - pointerStart.current.y;
-        const tap = isTouch.current ? PRINT_TAP_TOUCH_PX : PRINT_TAP_PX;
-        if (!dragging.current && Math.hypot(dx, dy) < tap) return;
-        if (!dragging.current) {
-          dragging.current = true;
-          nodeRef.current?.setPointerCapture?.(e.pointerId);
-        }
-        const p = getPose(src);
-        p.x = origin.current.x + dx;
-        p.y = origin.current.y + dy;
-        writeTransform(p.x, p.y);
-      }}
-      onPointerUp={(e) => {
-        if (!pressed.current) return;
-        pressed.current = false;
-        const dx = e.clientX - pointerStart.current.x;
-        const dy = e.clientY - pointerStart.current.y;
-        const d = Math.hypot(dx, dy);
-        const tap = isTouch.current ? PRINT_TAP_TOUCH_PX : PRINT_TAP_PX;
-        const el = nodeRef.current;
-        if (el) el.style.willChange = "auto";
-        if (dragging.current || d >= tap) {
-          const p = getPose(src);
-          p.x = origin.current.x + dx;
-          p.y = origin.current.y + dy;
-          dragging.current = false;
-          writeTransform(p.x, p.y);
-          return;
-        }
-        dragging.current = false;
-        writeTransform(origin.current.x, origin.current.y);
-        onPrintTap(index);
-      }}
-      onPointerCancel={() => {
-        pressed.current = false;
-        dragging.current = false;
-        const p = getPose(src);
-        writeTransform(p.x, p.y);
-        const el = nodeRef.current;
-        if (el) el.style.willChange = "auto";
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onPrintTap(index);
-        }
-      }}
+      onClick={() => onPrintTap(index)}
     >
-      <div data-world-image="" className="group/still pointer-events-auto h-full w-full">
+      <div data-world-image="" className="group/still h-full w-full">
         {showImage ? (
           <Image
             src={src}
@@ -600,6 +467,6 @@ const DraggablePrint = memo(function DraggablePrint({
           />
         ) : null}
       </div>
-    </div>
+    </button>
   );
 });
