@@ -2,9 +2,24 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
-import { getHomeFrameSlides, type HomeFrameSlide } from "@/lib/home-frame-slides";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import type { HomeFrameSlide } from "@/lib/home-frame-slides";
+
+const REDUCE_MQ = "(prefers-reduced-motion: reduce)";
+
+function subscribeReducedMotion(onChange: () => void) {
+  const mq = window.matchMedia(REDUCE_MQ);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+function reducedMotionSnapshot() {
+  return window.matchMedia(REDUCE_MQ).matches;
+}
+
+function reducedMotionServerSnapshot() {
+  return false;
+}
 
 /** Soft crossfade duration (ease-in-out; overlap reads as a gentle blend). */
 const FADE_MS = 1400;
@@ -13,7 +28,7 @@ const HOLD_MS = 2500;
 
 type Slide = HomeFrameSlide;
 
-function SlideMedia({ slide }: { slide: Slide }) {
+function SlideMedia({ slide, priority }: { slide: Slide; priority?: boolean }) {
   return (
     <div className="absolute inset-0">
       <Image
@@ -21,9 +36,9 @@ function SlideMedia({ slide }: { slide: Slide }) {
         alt=""
         fill
         className="object-contain object-center"
-        sizes="(max-width: 640px) 40vw, 384px"
-        quality={90}
-        priority
+        sizes="(max-width: 640px) 40vw, 192px"
+        quality={75}
+        priority={priority}
         draggable={false}
       />
     </div>
@@ -48,7 +63,11 @@ function stillBoxStyle(slides: Slide[]) {
  * Crossfading stills. Timing: HOLD_MS / FADE_MS.
  */
 function HomeStillsCrossfade({ slides }: { slides: Slide[] }) {
-  const reduce = useReducedMotion();
+  const reduce = useSyncExternalStore(
+    subscribeReducedMotion,
+    reducedMotionSnapshot,
+    reducedMotionServerSnapshot
+  );
   const n = slides.length;
   const [i, setI] = useState(0);
   const [phase, setPhase] = useState<"rest" | "fading">("rest");
@@ -78,7 +97,7 @@ function HomeStillsCrossfade({ slides }: { slides: Slide[] }) {
     return (
       <div className={stillClass} style={stillBoxStyle(slides)}>
         <div className="absolute inset-0 z-[1]">
-          <SlideMedia slide={slides[0]} />
+          <SlideMedia slide={slides[0]} priority />
         </div>
       </div>
     );
@@ -111,7 +130,7 @@ function HomeStillsCrossfade({ slides }: { slides: Slide[] }) {
         }}
         onTransitionEnd={onBackEnd}
       >
-        <SlideMedia slide={slides[i]} />
+        <SlideMedia slide={slides[i]} priority={i === 0} />
       </div>
       <div
         className={`absolute inset-0 z-[2] will-change-[opacity] ${oFront < 0.05 ? "pointer-events-none" : ""}`}
@@ -145,8 +164,7 @@ const nameLinkClass =
  * Center name + right floating stills only (no site nav; interior pages use the global header).
  * Both the title and the stills link to / (work index).
  */
-export function HomeExhibit() {
-  const slides = useMemo(() => getHomeFrameSlides(), []);
+export function HomeExhibit({ slides }: { slides: Slide[] }) {
 
   return (
     <div className="absolute inset-0 z-10 pointer-events-none">

@@ -9,14 +9,14 @@ const serif = Cormorant_Garamond({
   subsets: ["latin"],
   variable: "--font-serif",
   display: "swap",
-  weight: ["400", "500", "600"],
+  weight: ["300", "400"],
 });
 
 const sans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
-  weight: ["400", "500"],
+  weight: ["400"],
 });
 
 const siteUrl = "https://jaclynfleurant.com";

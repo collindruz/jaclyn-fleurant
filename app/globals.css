@@ -14,6 +14,43 @@ html {
   }
 }
 
+@keyframes art-cursor-wobble {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(0.5px, -0.4px);
+  }
+}
+
+.art-cursor-wobble {
+  animation: art-cursor-wobble 2.6s ease-in-out infinite;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-enter {
+  animation: page-enter 0.7s cubic-bezier(0.2, 1, 0.35, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .art-cursor-wobble,
+  .page-enter {
+    animation: none;
+  }
+}
+
 @layer base {
   body {
     @apply overflow-x-clip bg-bone text-charcoal font-sans antialiased;

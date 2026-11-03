@@ -157,15 +157,13 @@
       "datePrecision": "day",
       "dateSource": "NPR 2019-04-08 trailer coverage. Film itself launched on Netflix 2019-04-17.",
       "assets": [
-        "/images/work/costume-design/site-228.jpg",
         "https://www.youtube.com/watch?v=fB8qvx0HOlI"
       ],
       "provisional": false,
-      "notes": "Kept in Costume Design per emailed category. Date is trailer publication, not Coachella 2018. Trailer still (site-228) kept with this project; YouTube link retained and does not lead Costume Design.",
-      "coverAsset": "/images/work/costume-design/site-228.jpg",
+      "notes": "Kept in Costume Design per emailed category. Date is trailer publication, not Coachella 2018. Trailer still (site-228.jpg) permanently excluded from the site; YouTube link retained and does not lead Costume Design.",
+      "coverAsset": "https://www.youtube.com/watch?v=fB8qvx0HOlI",
       "lockOrder": true,
       "assetOrder": [
-        "/images/work/costume-design/site-228.jpg",
         "https://www.youtube.com/watch?v=fB8qvx0HOlI"
       ]
     },
@@ -194,6 +192,19 @@
       ],
       "provisional": false,
       "notes": null
+    },
+    {
+      "id": "ad-brooks-babylon-break-the-map",
+      "title": "Brooks x Babylon — Break the Map",
+      "section": "advertising",
+      "releaseDate": "2025-11-20",
+      "datePrecision": "day",
+      "dateSource": "Believe in the Run 2025-11-20 covers the Brooks x Babylon Ghost 17 campaign film Break the Map (YouTube tgNECKyLmGk). T3 2025-11-18 reported the collab available.",
+      "assets": [
+        "https://www.youtube.com/watch?v=tgNECKyLmGk"
+      ],
+      "provisional": false,
+      "notes": "Highsnobiety YouTube spot. Placed with other Advertising video campaigns after featured Hearts Sold Separately; not a featured-order override."
     },
     {
       "id": "ad-reebok-born-classic",
@@ -505,17 +516,15 @@
       "dateSource": null,
       "assets": [
         "/images/work/editorial/site-045.jpg",
-        "/images/work/editorial/site-048.jpg",
         "/images/work/editorial/site-046.jpg"
       ],
       "coverAsset": "/images/work/editorial/site-045.jpg",
       "provisional": true,
-      "notes": "FEATURED OVERRIDE projectOrder 1. Mariah editorial: grey-coat/white-glove look (site-045, site-048) then cream moto look (site-046). Same talent/bangs/flash sitting; looks kept consecutive and distinct. Publication not verified.",
+      "notes": "FEATURED OVERRIDE projectOrder 1. Mariah editorial: grey-coat/white-glove look (site-045) then cream moto look (site-046). site-048.jpg permanently excluded. Same talent/bangs/flash sitting; looks kept consecutive and distinct. Publication not verified.",
       "projectOrder": 1,
       "lockOrder": true,
       "assetOrder": [
         "/images/work/editorial/site-045.jpg",
-        "/images/work/editorial/site-048.jpg",
         "/images/work/editorial/site-046.jpg"
       ]
     },

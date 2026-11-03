@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * Subtle static grain; reads as print film without animating (avoids visual noise for motion sensitivity)
  */

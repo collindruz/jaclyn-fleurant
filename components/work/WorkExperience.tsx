@@ -115,7 +115,7 @@ function stripExpandEase(t: number): number {
 
 /** Shared row height; width follows each asset’s natural aspect ratio (no 4:5 crop). */
 const stripItemClassBase =
-  "group relative shrink-0 overflow-hidden " +
+  "group relative shrink-0 grow-0 basis-auto overflow-hidden " +
   "h-[12.5rem] max-w-[min(92vw,42rem)] " +
   "transition-[height] duration-200 ease-out " +
   "md:duration-[1200ms] md:[transition-timing-function:cubic-bezier(0.5,0,0.5,1)] " +
@@ -132,7 +132,12 @@ function stripItemWidthClass(isMobile: boolean, isDesktopExpanded: boolean): str
 
 function stripItemStyle(item: WorkItem): CSSProperties {
   const { w, h } = item.kind === "video" && item.external ? posterAspect(item) : itemAspect(item);
-  return { aspectRatio: `${w} / ${h}`, width: "auto" };
+  return {
+    aspectRatio: `${w} / ${h}`,
+    width: "auto",
+    flex: "0 0 auto",
+    minWidth: "auto",
+  };
 }
 
 /** Horizontal scroll: `w-0` + `overflow-visible` keeps group width to the image row; label sticks in scrollport. */
@@ -236,6 +241,7 @@ type StripItemProps = {
   /** Desktop: register tile root for center-scroll. */
   registerDesktopItemRef?: (panelId: string, el: HTMLLIElement | null) => void;
   onDesktopVideoActivate?: (panelId: string) => void;
+  priorityImage?: boolean;
 };
 
 function StripItem({
@@ -253,6 +259,7 @@ function StripItem({
   reduceMotion,
   registerDesktopItemRef,
   onDesktopVideoActivate,
+  priorityImage = false,
 }: StripItemProps) {
   const mobilePtr = useRef<{
     x0: number;
@@ -324,9 +331,14 @@ function StripItem({
   const lift =
     !isMobile && isDesktopExpanded ? liftClassNoHoverNudge : liftClass;
 
-  // Mobile: source slot while this item is shown in the focus layer
+  // Mobile: keep list identity without occupying strip width while this item is in the focus layer
   if (isMobile && isFocused) {
-    return <li className={itemWidthClass} aria-hidden />;
+    return (
+      <li
+        className="h-0 w-0 max-w-0 shrink-0 grow-0 overflow-hidden p-0"
+        aria-hidden
+      />
+    );
   }
 
   const { w: natW, h: natH } = itemAspect(item);
@@ -377,6 +389,8 @@ function StripItem({
           }
           className={mediaClass}
           draggable={false}
+          loading={priorityImage ? "eager" : "lazy"}
+          decoding="async"
         />
       </div>
     );
@@ -744,8 +758,8 @@ function SectionWorkScroll({
           <ul
             ref={scrollerRef}
             className={
-              "no-scrollbar m-0 flex list-none items-center gap-3.5 overflow-x-auto " +
-              "overscroll-x-contain scroll-auto p-0 pb-1.5 pl-1.5 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 " +
+              "no-scrollbar m-0 flex list-none items-center justify-start gap-[14px] overflow-x-auto " +
+              "overscroll-x-contain scroll-auto p-0 pb-1.5 pl-0 pr-0 sm:gap-4 sm:pl-2 sm:pr-0 " +
               "md:gap-4 md:pl-2.5 md:pr-0 "
             }
             data-cursor={isMobile ? undefined : "interactive"}
@@ -761,13 +775,13 @@ function SectionWorkScroll({
             onClick={handleDesktopStripClick}
             aria-label={`${sectionLabel} — projects`}
           >
-            {workProjectSections[sectionKey].flatMap((group) => {
+            {workProjectSections[sectionKey].flatMap((group, groupIndex) => {
               const items = group.items;
               if (items.length === 0) return [];
               return [
                 <li
                   key={`${sectionKey}-project-${group.id}`}
-                  className="flex min-w-0 shrink-0 list-none"
+                  className="flex w-max shrink-0 grow-0 basis-auto list-none"
                 >
                   <span
                     className={PROJECT_STICKY_LABEL}
@@ -776,7 +790,7 @@ function SectionWorkScroll({
                     {group.title}
                   </span>
                   <ul
-                    className="m-0 flex min-w-0 list-none items-center gap-3.5 p-0 sm:gap-4 md:gap-4"
+                    className="m-0 flex w-max shrink-0 grow-0 basis-auto list-none items-center justify-start gap-[14px] p-0 sm:gap-4 md:gap-4"
                     role="list"
                     aria-label={group.title}
                   >
@@ -805,6 +819,11 @@ function SectionWorkScroll({
                           }
                           onDesktopVideoActivate={(id) =>
                             onDesktopStripExpand({ panelId: id })
+                          }
+                          priorityImage={
+                            sectionKey === "editorial" &&
+                            groupIndex === 0 &&
+                            i < 4
                           }
                         />
                       );
@@ -983,6 +1002,14 @@ export function WorkExperience() {
               key={section.key}
               ref={expandedSection === section.key ? expandedSectionContainerRef : null}
               className={showSectionRule ? workSectionChapterBreakClass : undefined}
+              style={
+                showSectionRule
+                  ? {
+                      contentVisibility: "auto",
+                      containIntrinsicSize: "auto 720px",
+                    }
+                  : undefined
+              }
             >
               <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
                 <h2

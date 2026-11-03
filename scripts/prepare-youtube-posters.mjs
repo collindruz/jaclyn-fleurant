@@ -145,6 +145,22 @@ export async function resolveYouTubePosters(externalEntries) {
       report.push({ id, title: ext.title, status: "unresolved", note: "No usable YouTube thumbnail" });
       continue;
     }
+    if (ext.keepOfficialPoster) {
+      byId.set(id, {
+        poster: chosen.url,
+        posterWidth: chosen.width,
+        posterHeight: chosen.height,
+      });
+      report.push({
+        id,
+        title: ext.title,
+        status: "official",
+        source: chosen.name,
+        size: `${chosen.width}x${chosen.height}`,
+        note: "keepOfficialPoster",
+      });
+      continue;
+    }
     const crop = await maybeCrop(chosen.buf);
     if (crop.cropped) {
       const file = `${id.replace(/[^A-Za-z0-9_-]/g, "_")}.jpg`;

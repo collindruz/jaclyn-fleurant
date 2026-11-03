@@ -1,4 +1,5 @@
 import { WORK_CATALOG } from "./work-catalog";
+import { EXCLUDE_FILENAMES } from "./work-curation";
 
 const MAX_SLIDES = 8;
 /** Curated Intro stills — current categorized paths only. */
@@ -36,6 +37,9 @@ export function getHomeFrameSlides(): HomeFrameSlide[] {
       i.kind === "image" &&
       i.src.startsWith("/images/work/") &&
       !i.src.includes("site-040.jpg") &&
+      !EXCLUDE_FILENAMES.includes(basename(i.src)) &&
+      !i.src.includes("site-048.jpg") &&
+      !i.src.includes("site-228.jpg") &&
       !/\/(manual-review|site-pull|site-pull-cropped|site-pull-duplicates|unsorted|youtube-posters|video-posters)\//.test(
         i.src
       )

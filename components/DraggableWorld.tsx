@@ -5,6 +5,7 @@ import type { WorldStill } from "@/lib/placeholders";
 import { packWorldStills, type WorldPackSlot } from "@/lib/world-pack";
 import Image from "next/image";
 import {
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -17,17 +18,21 @@ const WORLD_VIEWER_Z = 60000;
 const TAP_MOVE_PX = 16;
 const SWIPE_PX = 48;
 const WHEEL_LOCK_MS = 560;
+const PRINT_TAP_PX = 8;
+const THUMB_QUALITY = 60;
+const VIEWER_QUALITY = 85;
+const THUMB_EAGER_COUNT = 12;
+const THUMB_BATCH = 16;
 
 type DraggableWorldProps = {
   stills: WorldStill[];
 };
 
-const scaleSpring = {
-  type: "spring" as const,
-  stiffness: 400,
-  damping: 28,
-  mass: 0.78,
-};
+function stillAspect(still: WorldStill) {
+  const natW = still.width > 32 ? still.width : 1600;
+  const natH = still.height > 32 ? still.height : 2000;
+  return { natW, natH, ratio: natW / natH };
+}
 
 function printVariant(src: string, index: number) {
   let h = 2166136261;
@@ -78,17 +83,13 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
   const list = stills;
   const n = list.length;
   const board = useWorldBoard();
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [enlargedIndex, setEnlargedIndex] = useState<number | null>(null);
+  const [thumbLimit, setThumbLimit] = useState(THUMB_EAGER_COUNT);
 
   const packed = useMemo(
     () => packWorldStills(list, board.w, board.h),
     [list, board.w, board.h]
   );
-
-  const activate = useCallback((i: number) => {
-    setActiveIndex(i);
-  }, []);
 
   const closeEnlarge = useCallback(() => {
     setEnlargedIndex(null);
@@ -105,25 +106,40 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
     [n]
   );
 
-  const reset = useCallback(() => {
-    setActiveIndex(null);
-    setEnlargedIndex(null);
-  }, []);
-
   const onPrintTap = useCallback((i: number) => {
-    setActiveIndex(i);
     setEnlargedIndex(i);
   }, []);
+
+  useEffect(() => {
+    if (enlargedIndex != null) return;
+    if (thumbLimit >= n) return;
+    let cancelled = false;
+    const bump = () => {
+      if (cancelled) return;
+      setThumbLimit((c) => Math.min(n, c + THUMB_BATCH));
+    };
+    let idleId = 0;
+    let timeoutId = 0;
+    const ric = window.requestIdleCallback;
+    if (typeof ric === "function") {
+      idleId = ric(bump, { timeout: 180 });
+    } else {
+      timeoutId = window.setTimeout(bump, 48);
+    }
+    return () => {
+      cancelled = true;
+      if (idleId && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [thumbLimit, n, enlargedIndex]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        if (enlargedIndex != null) {
-          setEnlargedIndex(null);
-          return;
-        }
-        reset();
+        if (enlargedIndex != null) setEnlargedIndex(null);
         return;
       }
       if (enlargedIndex == null) return;
@@ -137,12 +153,15 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [enlargedIndex, reset, stepEnlarge]);
+  }, [enlargedIndex, stepEnlarge]);
 
   if (n === 0) return null;
 
   const enlarged = enlargedIndex != null ? list[enlargedIndex] : null;
+  const nextStill =
+    enlargedIndex != null && n > 1 ? list[(enlargedIndex + 1) % n] : null;
   const boardH = board.h || "calc(100dvh - 7.5rem)";
+  const viewerOpen = enlargedIndex != null;
 
   return (
     <div
@@ -151,34 +170,39 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
       role="group"
       aria-label="Stills"
     >
-      {list.map((still, i) => {
-        const slot = packed.slots[i];
-        if (!slot) return null;
-        const isEnl = enlargedIndex === i;
-        const isAct = activeIndex === i;
-        const z = (isEnl ? 50_000 : 0) + (isAct ? 5_000 : 0) + 20 + i;
-        return (
-          <DraggablePrint
-            key={`${i}-${still.src}`}
-            src={still.src}
-            width={still.width}
-            height={still.height}
-            index={i}
-            n={n}
-            slot={slot}
-            zIndex={z}
-            isActive={isAct}
-            isEnlarged={isEnl}
-            onActivate={() => activate(i)}
-            onPrintTap={() => onPrintTap(i)}
-            dragEnabled={enlargedIndex == null}
-          />
-        );
-      })}
+      <div
+        aria-hidden={viewerOpen}
+        style={{
+          visibility: viewerOpen ? "hidden" : "visible",
+          pointerEvents: viewerOpen ? "none" : "auto",
+        }}
+      >
+        {list.map((still, i) => {
+          const slot = packed.slots[i];
+          if (!slot) return null;
+          return (
+            <DraggablePrint
+              key={`${i}-${still.src}`}
+              src={still.src}
+              width={still.width}
+              height={still.height}
+              index={i}
+              n={n}
+              slot={slot}
+              isEnlarged={enlargedIndex === i}
+              onPrintTap={onPrintTap}
+              dragEnabled={!viewerOpen}
+              eager={i < THUMB_EAGER_COUNT}
+              showImage={i < thumbLimit}
+            />
+          );
+        })}
+      </div>
 
       {enlarged && enlargedIndex != null ? (
         <WorldEnlarge
           still={enlarged}
+          nextStill={nextStill}
           index={enlargedIndex}
           n={n}
           onClose={closeEnlarge}
@@ -190,14 +214,9 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
   );
 }
 
-function stillAspect(still: WorldStill) {
-  const natW = still.width > 32 ? still.width : 1600;
-  const natH = still.height > 32 ? still.height : 2000;
-  return { natW, natH, ratio: natW / natH };
-}
-
 function WorldEnlarge({
   still,
+  nextStill,
   index,
   n,
   onClose,
@@ -205,6 +224,7 @@ function WorldEnlarge({
   onNext,
 }: {
   still: WorldStill;
+  nextStill: WorldStill | null;
   index: number;
   n: number;
   onClose: () => void;
@@ -341,12 +361,25 @@ function WorldEnlarge({
             height={natH}
             className="pointer-events-none h-auto w-full select-none object-contain object-center"
             sizes="90vw"
-            quality={90}
+            quality={VIEWER_QUALITY}
             priority
             draggable={false}
           />
         </motion.button>
       </AnimatePresence>
+      {nextStill ? (
+        <div className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden>
+          <Image
+            src={nextStill.src}
+            alt=""
+            width={nextStill.width > 32 ? nextStill.width : 1600}
+            height={nextStill.height > 32 ? nextStill.height : 2000}
+            sizes="90vw"
+            quality={VIEWER_QUALITY}
+            draggable={false}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -358,35 +391,46 @@ type DraggablePrintProps = {
   index: number;
   n: number;
   slot: WorldPackSlot;
-  zIndex: number;
-  isActive: boolean;
   isEnlarged: boolean;
-  onActivate: () => void;
-  onPrintTap: () => void;
+  onPrintTap: (index: number) => void;
   dragEnabled: boolean;
+  eager: boolean;
+  showImage: boolean;
 };
 
-function DraggablePrint({
+const DraggablePrint = memo(function DraggablePrint({
   src,
   width,
   height,
   index,
   n,
   slot,
-  zIndex,
-  isActive,
   isEnlarged,
-  onActivate,
   onPrintTap,
   dragEnabled,
+  eager,
+  showImage,
 }: DraggablePrintProps) {
   const { rotate } = useMemo(() => printVariant(src, index), [src, index]);
-  const thumbSize = Math.max(24, Math.ceil(Math.max(slot.w, slot.h) * 2));
+  const nodeRef = useRef<HTMLDivElement>(null);
   const pointerStart = useRef({ x: 0, y: 0 });
+  const dragging = useRef(false);
+  const pressed = useRef(false);
+  const displayW = Math.max(1, Math.ceil(slot.w));
+
+  const applyTransform = (x: number, y: number, snapping: boolean) => {
+    const el = nodeRef.current;
+    if (!el) return;
+    el.style.transition = snapping
+      ? "transform 320ms cubic-bezier(0.22, 1, 0.36, 1)"
+      : "none";
+    el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rotate}deg)`;
+  };
 
   return (
-    <motion.div
-      className={`absolute border-0 bg-transparent p-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone ${
+    <div
+      ref={nodeRef}
+      className={`absolute border-0 bg-transparent p-0 [content-visibility:auto] focus:outline-none focus-visible:ring-1 focus-visible:ring-charcoal/25 focus-visible:ring-offset-1 focus-visible:ring-offset-bone ${
         dragEnabled
           ? "cursor-grab active:cursor-grabbing"
           : "pointer-events-none"
@@ -394,57 +438,95 @@ function DraggablePrint({
       data-cursor="interactive"
       data-world-print=""
       data-index={index}
-      data-active={isActive || undefined}
       style={{
         top: slot.y,
         left: slot.x,
         width: slot.w,
         height: slot.h,
-        zIndex,
+        zIndex: 20 + index,
+        transform: `translate3d(0, 0, 0) rotate(${rotate}deg)`,
         transformOrigin: "center",
+        contain: "layout style",
+        containIntrinsicSize: `${Math.ceil(slot.w)}px ${Math.ceil(slot.h)}px`,
+        touchAction: dragEnabled ? "none" : undefined,
       }}
       role="button"
       tabIndex={dragEnabled ? 0 : -1}
       aria-pressed={isEnlarged}
       aria-label={`Still ${index + 1} of ${n}`}
-      animate={{ scale: 1, rotate }}
-      transition={scaleSpring}
-      drag={dragEnabled}
-      dragSnapToOrigin
-      dragElastic={0.12}
-      dragMomentum={false}
-      onDragStart={onActivate}
       onPointerDown={(e) => {
+        if (!dragEnabled) return;
+        pressed.current = true;
         pointerStart.current = { x: e.clientX, y: e.clientY };
+        dragging.current = false;
+        const el = nodeRef.current;
+        if (el) {
+          el.style.zIndex = "8000";
+          el.style.willChange = "transform";
+        }
+        applyTransform(0, 0, false);
+        el?.setPointerCapture?.(e.pointerId);
+      }}
+      onPointerMove={(e) => {
+        if (!dragEnabled || !pressed.current) return;
+        const dx = e.clientX - pointerStart.current.x;
+        const dy = e.clientY - pointerStart.current.y;
+        if (!dragging.current && Math.hypot(dx, dy) < PRINT_TAP_PX) return;
+        dragging.current = true;
+        applyTransform(dx, dy, false);
       }}
       onPointerUp={(e) => {
-        const d = Math.hypot(
-          e.clientX - pointerStart.current.x,
-          e.clientY - pointerStart.current.y
-        );
-        if (d < 8) onPrintTap();
+        if (!pressed.current) return;
+        pressed.current = false;
+        const dx = e.clientX - pointerStart.current.x;
+        const dy = e.clientY - pointerStart.current.y;
+        const d = Math.hypot(dx, dy);
+        const el = nodeRef.current;
+        if (el) el.style.willChange = "auto";
+        if (dragging.current || d >= PRINT_TAP_PX) {
+          dragging.current = false;
+          applyTransform(0, 0, true);
+          return;
+        }
+        dragging.current = false;
+        applyTransform(0, 0, false);
+        onPrintTap(index);
       }}
-      onFocus={onActivate}
+      onPointerCancel={() => {
+        pressed.current = false;
+        dragging.current = false;
+        applyTransform(0, 0, true);
+        const el = nodeRef.current;
+        if (el) el.style.willChange = "auto";
+      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onPrintTap();
+          onPrintTap(index);
         }
       }}
     >
-      <div data-world-image="" className="pointer-events-auto h-full w-full">
-        <Image
-          src={src}
-          alt=""
-          width={width}
-          height={height}
-          className="pointer-events-none block h-full w-full select-none object-contain object-center"
-          sizes={`${thumbSize}px`}
-          quality={70}
-          draggable={false}
-          priority={index < 24}
-        />
+      <div data-world-image="" className="group/still pointer-events-auto h-full w-full">
+        {showImage ? (
+          <Image
+            src={src}
+            alt=""
+            width={width}
+            height={height}
+            className={`pointer-events-none block h-full w-full select-none object-contain object-center transition-[filter] duration-[550ms] ease-in-out motion-reduce:duration-75 ${
+              isEnlarged
+                ? "grayscale-0"
+                : "grayscale md:group-hover/still:grayscale-0"
+            }`}
+            sizes={`${displayW}px`}
+            quality={THUMB_QUALITY}
+            draggable={false}
+            loading={eager ? "eager" : "lazy"}
+            fetchPriority={index < 4 ? "high" : "auto"}
+            decoding="async"
+          />
+        ) : null}
       </div>
-    </motion.div>
+    </div>
   );
-}
+});

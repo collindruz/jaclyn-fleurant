@@ -1,20 +1,38 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { useSyncExternalStore } from "react";
+
+const REDUCE_MQ = "(prefers-reduced-motion: reduce)";
+
+function subscribeReducedMotion(onChange: () => void) {
+  const mq = window.matchMedia(REDUCE_MQ);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+function reducedMotionSnapshot() {
+  return window.matchMedia(REDUCE_MQ).matches;
+}
+
+function reducedMotionServerSnapshot() {
+  return false;
+}
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const reduce = useReducedMotion();
+  const reduce = useSyncExternalStore(
+    subscribeReducedMotion,
+    reducedMotionSnapshot,
+    reducedMotionServerSnapshot
+  );
 
   return (
-    <motion.div
+    <div
       key={pathname}
-      initial={reduce ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.7, ease: [0.2, 1, 0.35, 1] }}
+      className={reduce ? undefined : "page-enter"}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

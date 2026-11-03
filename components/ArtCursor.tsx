@@ -32,9 +32,8 @@ const GHOST_SCALE = 0.7;
 const GHOST_OPACITY_IDLE = 0.25;
 const GHOST_OPACITY_HOVER = 0.35;
 
-const TIME_STEP = 0.032;
-
 const FINE_POINTER_MQ = "(hover: hover) and (pointer: fine)";
+const IDLE_EPS = 0.18;
 
 const INTERACTIVE_SELECTOR =
   'a, button, [role="button"], [data-cursor="interactive"]';
@@ -53,13 +52,6 @@ function getFinePointerSnapshot() {
 
 function getFinePointerServerSnapshot() {
   return false;
-}
-
-function wobble(time: number) {
-  return {
-    x: Math.sin(time) * 0.5,
-    y: Math.cos(time) * 0.5,
-  };
 }
 
 const STAR_PATH =
@@ -132,17 +124,16 @@ function ArtCursor() {
   const mainY = useRef(0);
   const ghostX = useRef(0);
   const ghostY = useRef(0);
-  const time = useRef(0);
   const mainNode = useRef<HTMLDivElement>(null);
   const ghostNode = useRef<HTMLDivElement>(null);
   const rafId = useRef(0);
+  const looping = useRef(false);
 
-  const setMainTransform = (cx: number, cy: number, t: number) => {
+  const setMainTransform = (cx: number, cy: number) => {
     if (!mainNode.current) return;
-    const w = wobble(t);
     mainNode.current.style.transform = `translate3d(${
-      cx + OFFSET.x + w.x
-    }px, ${cy + OFFSET.y + w.y}px, 0) ${CURSOR_XFORM_TAIL}`;
+      cx + OFFSET.x
+    }px, ${cy + OFFSET.y}px, 0) ${CURSOR_XFORM_TAIL}`;
   };
 
   const setGhostTransform = (gx: number, gy: number) => {
@@ -188,20 +179,16 @@ function ArtCursor() {
         mainY.current = p.y;
         ghostX.current = p.x;
         ghostY.current = p.y;
-        time.current = 0;
-        setMainTransform(p.x, p.y, 0);
+        setMainTransform(p.x, p.y);
         setGhostTransform(p.x, p.y);
         return;
       }
       target.current = p;
+      if (!looping.current) {
+        looping.current = true;
+        rafId.current = requestAnimationFrame(step);
+      }
     };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, [active, useCustom]);
-
-  useEffect(() => {
-    if (!active || !useCustom) return;
-
     const step = () => {
       const tx = target.current.x;
       const ty = target.current.y;
@@ -209,19 +196,30 @@ function ArtCursor() {
       const my = mainY.current;
       mainX.current = mx + (tx - mx) * MAIN_LERP;
       mainY.current = my + (ty - my) * MAIN_LERP;
-      time.current += TIME_STEP;
 
       const gx = ghostX.current;
       const gy = ghostY.current;
       ghostX.current = gx + (tx - gx) * GHOST_LERP;
       ghostY.current = gy + (ty - gy) * GHOST_LERP;
 
-      setMainTransform(mainX.current, mainY.current, time.current);
+      setMainTransform(mainX.current, mainY.current);
       setGhostTransform(ghostX.current, ghostY.current);
+
+      const settled =
+        Math.hypot(tx - mainX.current, ty - mainY.current) < IDLE_EPS &&
+        Math.hypot(tx - ghostX.current, ty - ghostY.current) < IDLE_EPS;
+      if (settled) {
+        looping.current = false;
+        return;
+      }
       rafId.current = requestAnimationFrame(step);
     };
-    rafId.current = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(rafId.current);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      cancelAnimationFrame(rafId.current);
+      looping.current = false;
+    };
   }, [active, useCustom]);
 
   if (!useCustom) {
@@ -239,12 +237,13 @@ function ArtCursor() {
           ...layerBase,
           transform: `translate3d(0, 0, 0) ${CURSOR_XFORM_TAIL} scale(${GHOST_SCALE})`,
           opacity: active ? ghostOpacity : 0,
-          willChange: "transform, opacity",
           transition: "opacity 0.2s ease-out",
         }}
         aria-hidden
       >
-        <GhostStarSvg />
+        <div className="art-cursor-wobble">
+          <GhostStarSvg />
+        </div>
       </div>
       <div
         ref={mainNode}
@@ -254,12 +253,13 @@ function ArtCursor() {
           color: isInteractive ? INTERACTIVE_COLOR : CURSOR_COLOR,
           transform: `translate3d(0, 0, 0) ${CURSOR_XFORM_TAIL}`,
           opacity: active ? 1 : 0,
-          willChange: "transform, opacity, color",
           transition: `opacity 0.12s ease-out, ${INTERACTIVE_COLOR_TRANSITION}`,
         }}
         aria-hidden
       >
-        <MainStarSvg isInteractive={isInteractive} />
+        <div className="art-cursor-wobble">
+          <MainStarSvg isInteractive={isInteractive} />
+        </div>
       </div>
     </>
   );

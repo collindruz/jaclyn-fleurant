@@ -18,6 +18,9 @@ function embedPlayerSrc(embedUrl: string, provider: "youtube" | "vimeo"): string
   url.searchParams.set("controls", "1");
   url.searchParams.set("playsinline", "1");
   if (provider === "youtube") {
+    if (url.hostname === "www.youtube.com" || url.hostname === "youtube.com") {
+      url.hostname = "www.youtube-nocookie.com";
+    }
     url.searchParams.set("mute", "0");
     url.searchParams.set("fs", "1");
     url.searchParams.set("rel", "0");
@@ -143,7 +146,9 @@ export function WorkLocalVideo({
           height={ph}
           className={`${className} pointer-events-none absolute inset-0`}
           sizes="(max-width: 767px) 70vw, 28vw"
-          quality={85}
+          quality={75}
+          loading="lazy"
+          decoding="async"
           draggable={false}
         />
       ) : null}
@@ -231,7 +236,9 @@ export function WorkExternalVideo({
           height={h}
           className={className}
           sizes="(max-width: 767px) 70vw, 28vw"
-          quality={90}
+          quality={75}
+          loading="lazy"
+          decoding="async"
           draggable={false}
         />
       ) : (

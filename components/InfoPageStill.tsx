@@ -25,6 +25,7 @@ export function InfoPageStill() {
             fill
             className="object-contain object-center"
             sizes="(max-width: 640px) 50vw, 200px"
+            quality={75}
             draggable={false}
             priority
           />

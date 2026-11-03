@@ -9,6 +9,7 @@ import type { WorkColorKey, WorkSectionKey } from "./work-types";
 import { WORK_COLOR_ORDER, WORK_SECTION_ORDER } from "./work-types";
 import { WORK_CATALOG, WORK_PROJECTS } from "./work-catalog";
 import { WORLD_STILLS_MIN } from "./world-stills-bounds";
+import { EXCLUDE_FILENAMES } from "./work-curation";
 
 export type { WorkItem } from "./work-types";
 export { WORK_COLOR_ORDER, WORK_SECTION_ORDER } from "./work-types";
@@ -53,6 +54,8 @@ function buildWorkProjectSectionsFromCatalog(): WorkProjectSections {
     for (const src of project.assets) {
       const item = bySrc.get(src);
       if (!item || used.has(item.src)) continue;
+      const base = item.src.split("/").pop() ?? "";
+      if (EXCLUDE_FILENAMES.includes(base)) continue;
       used.add(item.src);
       items.push(item);
     }
@@ -138,7 +141,9 @@ export function getWorldStillsFromCatalog(): WorldStill[] {
     if (!src.startsWith("/images/work/")) continue;
     if (src.startsWith("http")) continue;
     if (SKIP_WORLD_SRC.test(src)) continue;
-    if (src.includes("site-040.jpg")) continue;
+    const base = src.split("/").pop() ?? src;
+    if (EXCLUDE_FILENAMES.includes(base)) continue;
+    if (src.includes("site-040.jpg") || src.includes("site-048.jpg") || src.includes("site-228.jpg")) continue;
     if (seen.has(src)) continue;
     seen.add(src);
     out.push({

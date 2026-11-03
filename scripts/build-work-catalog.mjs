@@ -40,6 +40,15 @@ const IMG_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"]);
 const VIDEO_EXT = new Set([".mp4", ".webm", ".m4v", ".mov"]);
 const KEYS = ["black", "white", "neutral", "warm", "cool", "vivid"];
 const INFO_RESERVED = new Set(["site-040.jpg"]);
+const CURATION = JSON.parse(
+  fs.readFileSync(path.join(ROOT, "lib", "work-curation.json"), "utf8")
+);
+const EXCLUDE_FILENAMES = new Set(
+  [INFO_RESERVED, CURATION.excludeFilenames || []]
+    .flat()
+    .map((f) => String(f).trim())
+    .filter(Boolean)
+);
 
 /** @type {Array<{section: string, watchUrl: string, provider: string, id: string, title: string, poster: string, width: number, height: number, embeddable: boolean, embedUrl: string | null, notes?: string}>} */
 const EXTERNAL = [
@@ -80,6 +89,19 @@ const EXTERNAL = [
     height: 9,
     embeddable: true,
     embedUrl: "https://www.youtube.com/embed/g4N97ZjaErk",
+  },
+  {
+    section: "advertising",
+    watchUrl: "https://www.youtube.com/watch?v=tgNECKyLmGk",
+    provider: "youtube",
+    id: "tgNECKyLmGk",
+    title: "Brooks x Babylon — Break the Map",
+    poster: "https://i.ytimg.com/vi/tgNECKyLmGk/maxresdefault.jpg",
+    width: 16,
+    height: 9,
+    embeddable: true,
+    embedUrl: "https://www.youtube-nocookie.com/embed/tgNECKyLmGk",
+    keepOfficialPoster: true,
   },
   {
     section: "advertising",
@@ -415,8 +437,11 @@ async function main() {
     const files = walkMedia(abs);
     for (const rel of files) {
       const base = path.posix.basename(rel);
-      if (INFO_RESERVED.has(base)) {
-        excluded.push({ reason: "info-reserved", file: `${folder}/${rel}` });
+      if (EXCLUDE_FILENAMES.has(base)) {
+        excluded.push({
+          reason: INFO_RESERVED.has(base) ? "info-reserved" : "curation-exclude",
+          file: `${folder}/${rel}`,
+        });
         continue;
       }
       const full = path.join(abs, rel);
