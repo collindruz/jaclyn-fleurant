@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { WorldStill } from "@/lib/placeholders";
 import { packWorldStills, worldPrintRotate, type WorldPackSlot } from "@/lib/world-pack";
+import { STACK_VIEWER } from "@/lib/stacking";
 import Image from "next/image";
 import {
   memo,
@@ -13,16 +14,20 @@ import {
   useRef,
   useState,
 } from "react";
-
-const WORLD_VIEWER_Z = 60000;
+import { createPortal } from "react-dom";
 const TAP_MOVE_PX = 16;
 const SWIPE_PX = 48;
 const WHEEL_LOCK_MS = 560;
-const PRINT_TAP_PX = 8;
+const PRINT_TAP_PX = 10;
+const PRINT_TAP_TOUCH_PX = 14;
 const THUMB_QUALITY = 60;
 const VIEWER_QUALITY = 85;
 const THUMB_EAGER_COUNT = 12;
 const THUMB_BATCH = 16;
+const GOLDEN_FILTER =
+  "[filter:sepia(0.46)_saturate(0.7)_brightness(1.02)_hue-rotate(-8deg)_contrast(0.97)]";
+
+type DragPose = { x: number; y: number; z: number | null };
 
 type DraggableWorldProps = {
   stills: WorldStill[];
@@ -38,50 +43,47 @@ function printVariant(src: string, index: number) {
   return { rotate: worldPrintRotate(src, index) };
 }
 
-function useWorldBoard() {
-  const [box, setBox] = useState({ w: 0, h: 0 });
+function useWorldBoardWidth() {
+  const [w, setW] = useState(0);
 
   useLayoutEffect(() => {
     const measure = () => {
-      const header = document.querySelector("header");
-      const hh = header ? header.getBoundingClientRect().height : 0;
-      setBox({
-        w: window.innerWidth,
-        h: Math.max(64, window.innerHeight - hh),
-      });
+      setW(window.innerWidth);
     };
     measure();
     window.addEventListener("resize", measure);
-    const header = document.querySelector("header");
-    const ro = header ? new ResizeObserver(measure) : null;
-    if (header && ro) ro.observe(header);
-    const html = document.documentElement;
-    const prevHtml = html.style.overflow;
-    const prevBody = document.body.style.overflow;
-    html.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("resize", measure);
-      ro?.disconnect();
-      html.style.overflow = prevHtml;
-      document.body.style.overflow = prevBody;
     };
   }, []);
 
-  return box;
+  return w;
 }
 
 export function DraggableWorld({ stills }: DraggableWorldProps) {
   const list = stills;
   const n = list.length;
-  const board = useWorldBoard();
+  const boardW = useWorldBoardWidth();
   const [enlargedIndex, setEnlargedIndex] = useState<number | null>(null);
   const [thumbLimit, setThumbLimit] = useState(THUMB_EAGER_COUNT);
+  const posesRef = useRef(new Map<string, DragPose>());
+  const zSeqRef = useRef(400);
 
-  const packed = useMemo(
-    () => packWorldStills(list, board.w, board.h),
-    [list, board.w, board.h]
-  );
+  const packed = useMemo(() => packWorldStills(list, boardW), [list, boardW]);
+
+  const bumpZ = useCallback(() => {
+    zSeqRef.current += 1;
+    return 400 + zSeqRef.current;
+  }, []);
+
+  const getPose = useCallback((id: string): DragPose => {
+    let pose = posesRef.current.get(id);
+    if (!pose) {
+      pose = { x: 0, y: 0, z: null };
+      posesRef.current.set(id, pose);
+    }
+    return pose;
+  }, []);
 
   const closeEnlarge = useCallback(() => {
     setEnlargedIndex(null);
@@ -147,18 +149,31 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [enlargedIndex, stepEnlarge]);
 
+  useEffect(() => {
+    if (enlargedIndex == null) return;
+    const html = document.documentElement;
+    const prevHtml = html.style.overflow;
+    const prevBody = document.body.style.overflow;
+    html.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, [enlargedIndex]);
+
   if (n === 0) return null;
 
   const enlarged = enlargedIndex != null ? list[enlargedIndex] : null;
   const nextStill =
     enlargedIndex != null && n > 1 ? list[(enlargedIndex + 1) % n] : null;
-  const boardH = board.h || "calc(100dvh - 7.5rem)";
   const viewerOpen = enlargedIndex != null;
+  const boardH = packed.totalH > 0 ? packed.totalH : undefined;
 
   return (
     <div
-      className="relative w-full min-w-0 overflow-hidden touch-manipulation select-none"
-      style={{ height: boardH, width: "100%" }}
+      className="relative w-full min-w-0 overflow-x-clip overflow-y-visible touch-pan-y select-none"
+      style={{ height: boardH, width: "100%", minHeight: boardH ? undefined : "50vh" }}
       role="group"
       aria-label="Stills"
     >
@@ -174,7 +189,7 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
           if (!slot) return null;
           return (
             <DraggablePrint
-              key={`${i}-${still.src}`}
+              key={still.src}
               src={still.src}
               width={still.width}
               height={still.height}
@@ -186,22 +201,27 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
               dragEnabled={!viewerOpen}
               eager={i < THUMB_EAGER_COUNT}
               showImage={i < thumbLimit}
+              getPose={getPose}
+              bumpZ={bumpZ}
             />
           );
         })}
       </div>
 
-      {enlarged && enlargedIndex != null ? (
-        <WorldEnlarge
-          still={enlarged}
-          nextStill={nextStill}
-          index={enlargedIndex}
-          n={n}
-          onClose={closeEnlarge}
-          onPrev={() => stepEnlarge(-1)}
-          onNext={() => stepEnlarge(1)}
-        />
-      ) : null}
+      {enlarged && enlargedIndex != null
+        ? createPortal(
+            <WorldEnlarge
+              still={enlarged}
+              nextStill={nextStill}
+              index={enlargedIndex}
+              n={n}
+              onClose={closeEnlarge}
+              onPrev={() => stepEnlarge(-1)}
+              onNext={() => stepEnlarge(1)}
+            />,
+            document.body
+          )
+        : null}
     </div>
   );
 }
@@ -300,7 +320,8 @@ function WorldEnlarge({
   return (
     <div
       className="fixed inset-0 flex items-center justify-center overflow-hidden overscroll-none"
-      style={{ zIndex: WORLD_VIEWER_Z }}
+      style={{ zIndex: STACK_VIEWER }}
+      data-world-viewer=""
       role="dialog"
       aria-modal="true"
       aria-label={`Still ${index + 1} of ${n}, enlarged`}
@@ -388,6 +409,8 @@ type DraggablePrintProps = {
   dragEnabled: boolean;
   eager: boolean;
   showImage: boolean;
+  getPose: (id: string) => DragPose;
+  bumpZ: () => number;
 };
 
 const DraggablePrint = memo(function DraggablePrint({
@@ -402,22 +425,34 @@ const DraggablePrint = memo(function DraggablePrint({
   dragEnabled,
   eager,
   showImage,
+  getPose,
+  bumpZ,
 }: DraggablePrintProps) {
   const { rotate } = useMemo(() => printVariant(src, index), [src, index]);
   const nodeRef = useRef<HTMLDivElement>(null);
   const pointerStart = useRef({ x: 0, y: 0 });
+  const origin = useRef({ x: 0, y: 0 });
   const dragging = useRef(false);
   const pressed = useRef(false);
+  const scrollIntent = useRef(false);
+  const isTouch = useRef(false);
   const displayW = Math.max(1, Math.ceil(slot.w));
+  const pose = getPose(src);
 
-  const applyTransform = (x: number, y: number, snapping: boolean) => {
+  const writeTransform = (x: number, y: number) => {
     const el = nodeRef.current;
     if (!el) return;
-    el.style.transition = snapping
-      ? "transform 320ms cubic-bezier(0.22, 1, 0.36, 1)"
-      : "none";
     el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rotate}deg)`;
   };
+
+  useLayoutEffect(() => {
+    const p = getPose(src);
+    writeTransform(p.x, p.y);
+    const el = nodeRef.current;
+    if (el) el.style.zIndex = String(p.z ?? slot.z);
+    // slot origin is via top/left; drag offset stays in the transform
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src, slot.x, slot.y, slot.w, slot.h, slot.z, rotate, getPose]);
 
   return (
     <div
@@ -430,17 +465,20 @@ const DraggablePrint = memo(function DraggablePrint({
       data-cursor="interactive"
       data-world-print=""
       data-index={index}
+      data-overlaps={slot.overlaps ? "1" : "0"}
+      data-slot-w={Math.round(slot.w)}
+      data-slot-h={Math.round(slot.h)}
       style={{
         top: slot.y,
         left: slot.x,
         width: slot.w,
         height: slot.h,
-        zIndex: 20 + index,
-        transform: `translate3d(0, 0, 0) rotate(${rotate}deg)`,
+        zIndex: pose.z ?? slot.z,
+        transform: `translate3d(${pose.x}px, ${pose.y}px, 0) rotate(${rotate}deg)`,
         transformOrigin: "center",
         contain: "layout style",
         containIntrinsicSize: `${Math.ceil(slot.w)}px ${Math.ceil(slot.h)}px`,
-        touchAction: dragEnabled ? "none" : undefined,
+        touchAction: dragEnabled ? "pan-y" : undefined,
       }}
       role="button"
       tabIndex={dragEnabled ? 0 : -1}
@@ -449,45 +487,77 @@ const DraggablePrint = memo(function DraggablePrint({
       onPointerDown={(e) => {
         if (!dragEnabled) return;
         pressed.current = true;
-        pointerStart.current = { x: e.clientX, y: e.clientY };
         dragging.current = false;
+        scrollIntent.current = false;
+        isTouch.current = e.pointerType === "touch";
+        pointerStart.current = { x: e.clientX, y: e.clientY };
+        const p = getPose(src);
+        origin.current = { x: p.x, y: p.y };
         const el = nodeRef.current;
         if (el) {
-          el.style.zIndex = "8000";
+          p.z = bumpZ();
+          el.style.zIndex = String(p.z);
           el.style.willChange = "transform";
         }
-        applyTransform(0, 0, false);
-        el?.setPointerCapture?.(e.pointerId);
+        if (!isTouch.current) {
+          el?.setPointerCapture?.(e.pointerId);
+        }
       }}
       onPointerMove={(e) => {
-        if (!dragEnabled || !pressed.current) return;
+        if (!dragEnabled || !pressed.current || scrollIntent.current) return;
         const dx = e.clientX - pointerStart.current.x;
         const dy = e.clientY - pointerStart.current.y;
-        if (!dragging.current && Math.hypot(dx, dy) < PRINT_TAP_PX) return;
-        dragging.current = true;
-        applyTransform(dx, dy, false);
+        const tap = isTouch.current ? PRINT_TAP_TOUCH_PX : PRINT_TAP_PX;
+        if (!dragging.current && Math.hypot(dx, dy) < tap) return;
+        if (!dragging.current && isTouch.current && Math.abs(dy) > Math.abs(dx) * 1.15) {
+          scrollIntent.current = true;
+          pressed.current = false;
+          const el = nodeRef.current;
+          if (el) el.style.willChange = "auto";
+          return;
+        }
+        if (!dragging.current) {
+          dragging.current = true;
+          nodeRef.current?.setPointerCapture?.(e.pointerId);
+        }
+        const p = getPose(src);
+        p.x = origin.current.x + dx;
+        p.y = origin.current.y + dy;
+        writeTransform(p.x, p.y);
       }}
       onPointerUp={(e) => {
+        if (scrollIntent.current) {
+          scrollIntent.current = false;
+          pressed.current = false;
+          dragging.current = false;
+          return;
+        }
         if (!pressed.current) return;
         pressed.current = false;
         const dx = e.clientX - pointerStart.current.x;
         const dy = e.clientY - pointerStart.current.y;
         const d = Math.hypot(dx, dy);
+        const tap = isTouch.current ? PRINT_TAP_TOUCH_PX : PRINT_TAP_PX;
         const el = nodeRef.current;
         if (el) el.style.willChange = "auto";
-        if (dragging.current || d >= PRINT_TAP_PX) {
+        if (dragging.current || d >= tap) {
+          const p = getPose(src);
+          p.x = origin.current.x + dx;
+          p.y = origin.current.y + dy;
           dragging.current = false;
-          applyTransform(0, 0, true);
+          writeTransform(p.x, p.y);
           return;
         }
         dragging.current = false;
-        applyTransform(0, 0, false);
+        writeTransform(origin.current.x, origin.current.y);
         onPrintTap(index);
       }}
       onPointerCancel={() => {
         pressed.current = false;
         dragging.current = false;
-        applyTransform(0, 0, true);
+        scrollIntent.current = false;
+        const p = getPose(src);
+        writeTransform(p.x, p.y);
         const el = nodeRef.current;
         if (el) el.style.willChange = "auto";
       }}
@@ -508,7 +578,7 @@ const DraggablePrint = memo(function DraggablePrint({
             className={`pointer-events-none block h-full w-full select-none object-contain object-center transition-[filter] duration-[550ms] ease-in-out motion-reduce:duration-75 ${
               isEnlarged
                 ? "[filter:none]"
-                : "[filter:sepia(0.5)_saturate(0.58)_brightness(0.98)_hue-rotate(-14deg)_contrast(0.96)] md:group-hover/still:[filter:none]"
+                : `${GOLDEN_FILTER} md:group-hover/still:[filter:none]`
             }`}
             sizes={`${displayW}px`}
             quality={THUMB_QUALITY}

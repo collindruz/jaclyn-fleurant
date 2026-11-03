@@ -1,5 +1,6 @@
 "use client";
 
+import { STACK_CURSOR } from "@/lib/stacking";
 import {
   useEffect,
   useLayoutEffect,
@@ -38,7 +39,7 @@ const IDLE_EPS = 0.18;
 const INTERACTIVE_SELECTOR =
   'a, button, [role="button"], [data-cursor="interactive"]';
 
-const CURSOR_LAYER = 500000 as const;
+const CURSOR_LAYER = STACK_CURSOR;
 
 function subscribeFinePointer(onChange: () => void) {
   const mq = window.matchMedia(FINE_POINTER_MQ);

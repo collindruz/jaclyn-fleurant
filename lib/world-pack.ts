@@ -9,21 +9,29 @@ export type WorldPackSlot = {
   y: number;
   w: number;
   h: number;
+  z: number;
+  overlaps: boolean;
 };
 
 /** Subtle archival tilt, degrees. Packing uses the same value for AABB spacing. */
 export const WORLD_PRINT_ROTATE_MIN = -6;
 export const WORLD_PRINT_ROTATE_MAX = 6;
 
+/** Resting print size vs the old single-viewport fit. */
+export const WORLD_PRINT_SIZE_SCALE = 1.4;
+
 export function worldPrintRotate(src: string, index: number): number {
+  const r0 = hash01(`${src}#${index}`);
+  return WORLD_PRINT_ROTATE_MIN + r0 * (WORLD_PRINT_ROTATE_MAX - WORLD_PRINT_ROTATE_MIN);
+}
+
+function hash01(s: string): number {
   let h = 2166136261;
-  const s = `${src}#${index}`;
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i);
     h = Math.imul(h, 16777619) >>> 0;
   }
-  const r0 = h / 0xffff_ffff;
-  return WORLD_PRINT_ROTATE_MIN + r0 * (WORLD_PRINT_ROTATE_MAX - WORLD_PRINT_ROTATE_MIN);
+  return h / 0xffff_ffff;
 }
 
 function aspect(still: WorldPackStill): number {
@@ -43,10 +51,10 @@ function rotatedAabb(w: number, h: number, deg: number): { w: number; h: number 
 }
 
 function rowVariant(rowIndex: number): number {
-  let h = (rowIndex + 1) * 2654435761 >>> 0;
+  let h = ((rowIndex + 1) * 2654435761) >>> 0;
   h = Math.imul(h ^ (h >>> 16), 2246822519) >>> 0;
   const r = h / 0xffff_ffff;
-  return 0.88 + r * 0.28;
+  return 0.86 + r * 0.32;
 }
 
 type PackedItem = { ar: number; rotate: number };
@@ -111,10 +119,10 @@ function layoutRows(
     const naturalW = aabbSum + gap * nGap;
     const fill = innerW > 0 ? naturalW / innerW : 1;
     let scale: number;
-    if (!last || fill >= 0.7) {
+    if (!last || fill >= 0.72) {
       scale = aabbSum > 0 ? (innerW - gap * nGap) / aabbSum : 1;
     } else {
-      scale = Math.min(1.18, aabbSum > 0 ? (innerW - gap * nGap) / aabbSum : 1);
+      scale = Math.min(1.12, aabbSum > 0 ? (innerW - gap * nGap) / aabbSum : 1);
     }
 
     const placed: { w: number; h: number; aabbW: number; aabbH: number }[] = [];
@@ -131,7 +139,7 @@ function layoutRows(
     }
 
     let x = pad;
-    if (last && fill < 0.7) {
+    if (last && fill < 0.72) {
       x = pad + Math.max(0, (innerW - usedW) / 2);
     }
 
@@ -143,6 +151,8 @@ function layoutRows(
         y: aabbY + (p.aabbH - p.h) / 2,
         w: p.w,
         h: p.h,
+        z: 20 + row.start + k,
+        overlaps: false,
       };
       x += p.aabbW + gap;
       maxX = Math.max(maxX, x - gap);
@@ -173,74 +183,93 @@ function packAt(
   return layoutRows(items, rows, innerW, rowH, gap, pad);
 }
 
+/** Neighbor spacing between rotated AABBs, 16–28px. */
 function boardGap(boardW: number): number {
-  if (boardW < 500) return 10;
-  if (boardW < 900) return 16;
-  if (boardW < 1280) return 22;
+  if (boardW < 500) return 16;
+  if (boardW < 900) return 20;
+  if (boardW < 1280) return 24;
   return 28;
 }
 
-/**
- * Loose rectangular archival moodboard. Natural aspect kept.
- * Spacing is between rotated AABBs so prints do not overlap at rest.
- */
-export function packWorldStills(
+/** Typical World board height used only to measure the old single-viewport row size. */
+function referenceViewportH(boardW: number): number {
+  if (boardW < 500) return 640;
+  if (boardW < 900) return 740;
+  return 860;
+}
+
+function fittedRowH(
   stills: readonly WorldPackStill[],
   boardW: number,
-  boardH: number
-): { slots: WorldPackSlot[]; thumbMaxH: number; gap: number } {
-  if (boardW < 8 || boardH < 8 || stills.length === 0) {
-    return { slots: [], thumbMaxH: 0, gap: 0 };
-  }
-
-  let gap = boardGap(boardW);
-  const pad = gap;
+  gap: number,
+  pad: number
+): number {
+  const boardH = referenceViewportH(boardW);
   let lo = 8;
   let hi = Math.max(9, Math.floor(boardH * 0.38));
-  let best: ReturnType<typeof packAt> | null = null;
   let bestH = 8;
 
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
     const packed = packAt(stills, boardW, mid, gap, pad);
     if (packed.totalH <= boardH + 0.5 && packed.totalW <= boardW + 0.5) {
-      best = packed;
       bestH = mid;
       lo = mid + 1;
     } else {
       hi = mid - 1;
     }
   }
+  return bestH;
+}
 
-  if (!best) {
-    const minGap = boardW < 500 ? 6 : 8;
-    gap = minGap;
-    best = packAt(stills, boardW, 8, gap, Math.min(pad, gap));
-    const sx = boardW / Math.max(1, best.totalW);
-    const sy = boardH / Math.max(1, best.totalH);
-    const s = Math.min(1, sx, sy);
-    if (s < 1) {
-      best = {
-        slots: best.slots.map((p) => ({
-          x: p.x * s,
-          y: p.y * s,
-          w: Math.max(1, p.w * s),
-          h: Math.max(1, p.h * s),
-        })),
-        totalH: best.totalH * s,
-        totalW: best.totalW * s,
-      };
-    }
+function maxRowH(boardW: number): number {
+  return Math.max(96, Math.floor(boardW * 0.42));
+}
+
+/** Comfortable print height so the board wraps instead of shrinking to one viewport. */
+function comfortRowH(boardW: number): number {
+  if (boardW < 500) return 120;
+  if (boardW < 900) return 148;
+  return 176;
+}
+
+/**
+ * Loose rectangular archival moodboard. Natural aspect kept.
+ * Rest slots use rotated-AABB gaps of 16–28px with no initial overlap.
+ * Height is content-driven (not forced into one viewport).
+ */
+export function packWorldStills(
+  stills: readonly WorldPackStill[],
+  boardW: number,
+  _boardH?: number
+): { slots: WorldPackSlot[]; thumbMaxH: number; gap: number; totalH: number; totalW: number } {
+  if (boardW < 8 || stills.length === 0) {
+    return { slots: [], thumbMaxH: 0, gap: 0, totalH: 0, totalW: 0 };
   }
 
-  const ox = Math.max(0, (boardW - best.totalW) / 2);
-  const oy = Math.max(0, (boardH - best.totalH) / 2);
-  let thumbMaxH = bestH;
-  for (const p of best.slots) thumbMaxH = Math.max(thumbMaxH, p.h);
+  const gap = boardGap(boardW);
+  const pad = gap;
+  const baseline = fittedRowH(stills, boardW, gap, pad);
+  const rowH = Math.min(
+    maxRowH(boardW),
+    Math.max(Math.round(baseline * WORLD_PRINT_SIZE_SCALE), comfortRowH(boardW))
+  );
+
+  const packed = packAt(stills, boardW, rowH, gap, pad);
+
+  let thumbMaxH = rowH;
+  let maxY = 0;
+  const slots = packed.slots.map((p) => {
+    thumbMaxH = Math.max(thumbMaxH, p.h);
+    maxY = Math.max(maxY, p.y + p.h);
+    return { ...p, overlaps: false };
+  });
 
   return {
-    slots: best.slots.map((p) => ({ ...p, x: p.x + ox, y: p.y + oy })),
+    slots,
     thumbMaxH,
     gap,
+    totalH: Math.max(packed.totalH, maxY + pad),
+    totalW: Math.min(boardW, packed.totalW),
   };
 }

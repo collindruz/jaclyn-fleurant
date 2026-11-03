@@ -28,6 +28,8 @@ import {
   itemAspect,
   posterAspect,
 } from "@/components/work/WorkMedia";
+import { STACK_VIEWER, STACK_WORK_EXPANDED } from "@/lib/stacking";
+import { createPortal } from "react-dom";
 
 const MOBILE_MQ = "(max-width: 767px)";
 
@@ -480,7 +482,9 @@ function MobileFocusLayer({
 
   return (
     <motion.div
-      className="pointer-events-auto fixed left-0 top-0 z-[200] h-[100dvh] w-full flex items-center justify-center p-4"
+      className="pointer-events-auto fixed left-0 top-0 h-[100dvh] w-full flex items-center justify-center p-4 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
+      style={{ zIndex: STACK_VIEWER }}
+      data-work-focus-layer=""
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -1001,15 +1005,19 @@ export function WorkExperience() {
             <div
               key={section.key}
               ref={expandedSection === section.key ? expandedSectionContainerRef : null}
-              className={showSectionRule ? workSectionChapterBreakClass : undefined}
-              style={
-                showSectionRule
+              className={
+                (showSectionRule ? workSectionChapterBreakClass : "") +
+                (isChExpanded ? " relative z-[60]" : "")
+              }
+              style={{
+                ...(showSectionRule
                   ? {
-                      contentVisibility: "auto",
+                      contentVisibility: "auto" as const,
                       containIntrinsicSize: "auto 720px",
                     }
-                  : undefined
-              }
+                  : null),
+                ...(isChExpanded ? { zIndex: STACK_WORK_EXPANDED } : null),
+              }}
             >
               <div className="mx-auto w-full max-w-[min(100%,1800px)] px-3 sm:px-5 md:px-7 lg:px-9">
                 <h2
@@ -1068,19 +1076,22 @@ export function WorkExperience() {
           );
         })}
 
-        {isMobile && (
-          <AnimatePresence>
-            {resolved && focusedPanelId && (
-              <MobileFocusLayer
-                key={focusedPanelId}
-                panelId={focusedPanelId}
-                item={resolved.item}
-                groupLabel={resolved.groupLabel}
-                reduceMotion={reduceMotion}
-              />
-            )}
-          </AnimatePresence>
-        )}
+        {isMobile &&
+          typeof document !== "undefined" &&
+          createPortal(
+            <AnimatePresence>
+              {resolved && focusedPanelId && (
+                <MobileFocusLayer
+                  key={focusedPanelId}
+                  panelId={focusedPanelId}
+                  item={resolved.item}
+                  groupLabel={resolved.groupLabel}
+                  reduceMotion={reduceMotion}
+                />
+              )}
+            </AnimatePresence>,
+            document.body
+          )}
       </div>
     </LayoutGroup>
   );

@@ -38,7 +38,7 @@ html {
 }
 
 .page-enter {
-  animation: page-enter 0.7s cubic-bezier(0.2, 1, 0.35, 1) both;
+  animation: page-enter 0.7s cubic-bezier(0.2, 1, 0.35, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
