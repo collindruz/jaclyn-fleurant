@@ -7,7 +7,7 @@ import { SITE_NAV } from "@/lib/site-nav";
 export function Navigation() {
   const pathname = usePathname();
 
-  if (pathname === "/intro") {
+  if (pathname === "/" || pathname === "/intro") {
     return null;
   }
 
@@ -19,7 +19,7 @@ export function Navigation() {
   return (
     <header className="sticky top-0 z-50 flex w-full flex-row items-start justify-between gap-3 bg-bone/60 px-5 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-6 text-charcoal/80 sm:gap-4 sm:px-6 sm:pt-[calc(1.75rem+env(safe-area-inset-top,0px))] sm:pb-7 md:items-center md:justify-between md:gap-0 md:px-10 md:pt-[calc(2rem+env(safe-area-inset-top,0px))] md:pb-8">
       <Link
-        href="/intro"
+        href="/"
         className="min-w-0 shrink font-sans font-normal tracking-[0.18em] text-[0.72rem] leading-snug text-charcoal/75 transition-opacity duration-1000 hover:opacity-50 sm:text-[0.78rem] md:text-[0.82rem]"
       >
         JACLYN FLEURANT
@@ -29,8 +29,7 @@ export function Navigation() {
         aria-label="Main"
       >
         {SITE_NAV.map((item) => {
-          const active =
-            item.href === "/" ? pathname === "/" : pathname === item.href;
+          const active = pathname === item.href;
           return (
             <Link
               key={item.href}

@@ -1,6 +1,6 @@
-/** Main site index — shared by homepage + global header. Read + Write are combined at `/info`. */
+/** Main site index — shared by the global header. Read + Write are combined at `/info`. */
 export const SITE_NAV = [
   { href: "/the-world", label: "World" },
-  { href: "/", label: "Work" },
+  { href: "/work", label: "Work" },
   { href: "/info", label: "Info" },
 ] as const;

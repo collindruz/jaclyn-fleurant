@@ -1,22 +1,17 @@
 import type { Metadata } from "next";
-import { WorkExperience } from "@/components/work/WorkExperience";
-import { SiteFooter } from "@/components/SiteFooter";
-import { interiorMainClass } from "@/lib/interior-layout";
+import { HomeExhibit } from "@/components/HomeExhibit";
+import { getHomeFrameSlides } from "@/lib/home-frame-slides";
 
 export const metadata: Metadata = {
-  title: "Work",
-  description:
-    "Photography and motion, organized as a small editorial color palette.",
+  title: { absolute: "JACLYN FLEURANT" },
+  description: "Stylist and creative director — styling, on-set, and live moments.",
 };
 
 export default function HomePage() {
+  const slides = getHomeFrameSlides();
   return (
-    <main className={interiorMainClass}>
-      <h1 className="sr-only">Work</h1>
-      <div className="pb-10 sm:pb-10">
-        <WorkExperience />
-      </div>
-      <SiteFooter />
-    </main>
+    <div className="relative min-h-[100dvh] w-full">
+      <HomeExhibit slides={slides} />
+    </div>
   );
 }

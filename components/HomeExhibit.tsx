@@ -162,14 +162,14 @@ const nameLinkClass =
 
 /**
  * Center name + right floating stills only (no site nav; interior pages use the global header).
- * Both the title and the stills link to / (work index).
+ * Both the title and the stills link to the Work archive.
  */
 export function HomeExhibit({ slides }: { slides: Slide[] }) {
 
   return (
     <div className="absolute inset-0 z-10 pointer-events-none">
       <h1 className="pointer-events-auto absolute left-1/2 top-1/2 z-20 m-0 -translate-x-1/2 -translate-y-1/2 p-0 text-center">
-        <Link href="/" className={nameLinkClass} aria-label="JACLYN FLEURANT — work">
+        <Link href="/work" className={nameLinkClass} aria-label="JACLYN FLEURANT — work">
           JACLYN FLEURANT
         </Link>
       </h1>
@@ -177,7 +177,7 @@ export function HomeExhibit({ slides }: { slides: Slide[] }) {
       {slides.length > 0 ? (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-end px-5 sm:px-6 md:px-10">
           <div className="pointer-events-auto w-max">
-            <Link href="/" className={workLinkClass} aria-label="View work">
+            <Link href="/work" className={workLinkClass} aria-label="View work">
               <HomeStillsCrossfade slides={slides} />
             </Link>
           </div>
