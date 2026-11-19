@@ -16,6 +16,7 @@
     "work:rebuild:groups": "npm run work:filter:person && npm run color:group",
     "work:sync-files": "node scripts/sync-site-pull-files.mjs",
     "work:catalog": "node scripts/build-work-catalog.mjs",
+    "work:layout": "node scripts/apply-work-layout.mjs",
     "work:dedupe": "node scripts/dedupe-work-images.mjs",
     "color:group": "node scripts/group-work-by-color.mjs"
   },

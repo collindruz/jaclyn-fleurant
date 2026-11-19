@@ -62,6 +62,25 @@ export function normalizeWorkSectionKey(raw: string): WorkSectionKey | null {
     return "musicVideos";
   }
   if (
+    lower === "hearts sold separately" ||
+    lower === "hearts sold separately tour" ||
+    lower === "heart sold separately tour" ||
+    squish === "heartssoldseparatelytour" ||
+    squish === "heartsoldseparatelytour" ||
+    squish === "hsstour" ||
+    t === "heartsSoldSeparatelyTour"
+  ) {
+    return "heartsSoldSeparatelyTour";
+  }
+  if (
+    lower === "style out" ||
+    lower === "styleout" ||
+    squish === "styleout" ||
+    t === "styleOut"
+  ) {
+    return "styleOut";
+  }
+  if (
     lower === "events" ||
     lower === "event" ||
     lower === "red carpet" ||
@@ -132,9 +151,11 @@ export function buildWorkSections(
   fileMetadata: Readonly<Record<string, string>> = {}
 ): WorkSections {
   const out: WorkSections = {
-    editorial: emptyColorGroups(),
+    styleOut: emptyColorGroups(),
     costumeDesign: emptyColorGroups(),
     advertising: emptyColorGroups(),
+    editorial: emptyColorGroups(),
+    heartsSoldSeparatelyTour: emptyColorGroups(),
     musicVideos: emptyColorGroups(),
     events: emptyColorGroups(),
   };

@@ -1,6 +1,6 @@
 /**
  * Visual asset map — Work stills and local videos live in categorized folders
- * under `public/images/work/{editorial,costume-design,advertising,music-videos,events}/`.
+ * under `public/images/work/{editorial,costume-design,hearts-sold-separately-tour,style-out,advertising,music-videos,events}/`.
  * Catalog: `npm run work:catalog` → `lib/work-catalog.ts`.
  * Projects: `lib/work-projects.json` (preserved by the catalog generator).
  */
@@ -10,6 +10,7 @@ import { WORK_COLOR_ORDER, WORK_SECTION_ORDER } from "./work-types";
 import { WORK_CATALOG, WORK_PROJECTS } from "./work-catalog";
 import { WORLD_STILLS_MIN } from "./world-stills-bounds";
 import { EXCLUDE_FILENAMES } from "./work-curation";
+import { applyWorkLayout, readWorkLayoutFile } from "./work-layout";
 
 export type { WorkItem } from "./work-types";
 export { WORK_COLOR_ORDER, WORK_SECTION_ORDER } from "./work-types";
@@ -21,9 +22,11 @@ export type WorkProjectSections = Record<WorkSectionKey, WorkProjectGroup[]>;
 
 function emptyProjectSections(): WorkProjectSections {
   return {
-    editorial: [],
+    styleOut: [],
     costumeDesign: [],
     advertising: [],
+    editorial: [],
+    heartsSoldSeparatelyTour: [],
     musicVideos: [],
     events: [],
   };
@@ -40,7 +43,7 @@ function emptyColorGroups(): Record<WorkColorKey, WorkItem[]> {
   };
 }
 
-function buildWorkProjectSectionsFromCatalog(): WorkProjectSections {
+export function buildWorkProjectSectionsFromCatalog(): WorkProjectSections {
   const bySrc = new Map<string, WorkItem>();
   for (const item of WORK_CATALOG) {
     if (!bySrc.has(item.src)) bySrc.set(item.src, item);
@@ -71,8 +74,10 @@ function buildWorkProjectSectionsFromCatalog(): WorkProjectSections {
   return out;
 }
 
-export const workProjectSections: WorkProjectSections =
-  buildWorkProjectSectionsFromCatalog();
+export const workProjectSections: WorkProjectSections = applyWorkLayout(
+  buildWorkProjectSectionsFromCatalog(),
+  readWorkLayoutFile()
+);
 
 /** @deprecated Color groups are not used for Work carousels. Kept for World stills. */
 export type WorkSections = Record<WorkSectionKey, Record<WorkColorKey, WorkItem[]>>;
@@ -96,9 +101,11 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> =
 /** Flat color buckets per section — unused by Work carousels; World/debug fallbacks. */
 export const workSections: WorkSections = (() => {
   const out: WorkSections = {
-    editorial: emptyColorGroups(),
+    styleOut: emptyColorGroups(),
     costumeDesign: emptyColorGroups(),
     advertising: emptyColorGroups(),
+    editorial: emptyColorGroups(),
+    heartsSoldSeparatelyTour: emptyColorGroups(),
     musicVideos: emptyColorGroups(),
     events: emptyColorGroups(),
   };

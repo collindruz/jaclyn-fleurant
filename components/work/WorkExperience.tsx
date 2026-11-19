@@ -21,6 +21,7 @@ import {
   WORK_SECTION_ORDER,
   type WorkItem,
 } from "@/lib/placeholders";
+import type { WorkProjectSections } from "@/lib/work-layout";
 import type { WorkSectionKey } from "@/lib/work-types";
 import {
   WorkExternalVideo,
@@ -76,13 +77,14 @@ function parseWorkPanelId(panelId: string): {
 }
 
 function resolveWorkItem(
-  panelId: string
+  panelId: string,
+  sections: WorkProjectSections
 ): { item: WorkItem; groupLabel: string } | null {
   const parsed = parseWorkPanelId(panelId);
   if (!parsed) return null;
   const { sectionKey, projectId, index } = parsed;
   if (Number.isNaN(index) || index < 0) return null;
-  const project = workProjectSections[sectionKey].find((p) => p.id === projectId);
+  const project = sections[sectionKey].find((p) => p.id === projectId);
   if (!project) return null;
   const item = project.items[index];
   if (!item) return null;
@@ -559,15 +561,21 @@ function MobileFocusLayer({
   );
 }
 
-function sectionHasItems(sectionKey: WorkSectionKey): boolean {
-  return workProjectSections[sectionKey].some((p) => p.items.length > 0);
+function sectionHasItems(
+  sectionKey: WorkSectionKey,
+  sections: WorkProjectSections
+): boolean {
+  return sections[sectionKey].some((p) => p.items.length > 0);
 }
 
 /** `true` if a section with content appears before this one in `WORK_SECTION_ORDER` (for spacing). */
-function sectionNeedsTopSpacer(key: WorkSectionKey): boolean {
+function sectionNeedsTopSpacer(
+  key: WorkSectionKey,
+  sections: WorkProjectSections
+): boolean {
   for (const s of WORK_SECTION_ORDER) {
     if (s.key === key) return false;
-    if (sectionHasItems(s.key)) return true;
+    if (sectionHasItems(s.key, sections)) return true;
   }
   return false;
 }
@@ -591,6 +599,7 @@ type SectionWorkScrollProps = {
   onStripHorizontal: (sk: WorkSectionKey) => void;
   onMobileImagePointerEnd: (panelId: string, p: MobileImagePointerEnd) => void;
   reduceMotion: boolean;
+  sections: WorkProjectSections;
 };
 
 /**
@@ -611,6 +620,7 @@ function SectionWorkScroll({
   onStripHorizontal,
   onMobileImagePointerEnd,
   reduceMotion,
+  sections,
 }: SectionWorkScrollProps) {
   const hasFocus = Boolean(focusedPanelId) && isMobile;
   const listId = `${sectionKey}-work-scroll`;
@@ -862,7 +872,7 @@ function SectionWorkScroll({
             onClick={handleDesktopStripClick}
             aria-label={`${sectionLabel} — projects`}
           >
-            {workProjectSections[sectionKey].flatMap((group, groupIndex, groups) => {
+            {sections[sectionKey].flatMap((group, groupIndex, groups) => {
               const items = group.items;
               if (items.length === 0) return [];
               const start = groups
@@ -925,7 +935,11 @@ function SectionWorkScroll({
   );
 }
 
-export function WorkExperience() {
+export function WorkExperience({
+  sections = workProjectSections,
+}: {
+  sections?: WorkProjectSections;
+} = {}) {
   const isMobile = useSyncExternalStore(
     subscribeMobile,
     getMobileSnapshot,
@@ -1028,7 +1042,9 @@ export function WorkExperience() {
     return () => document.removeEventListener("keydown", onKey);
   }, [isMobile, focusedPanelId, closeFocus]);
 
-  const resolved = focusedPanelId ? resolveWorkItem(focusedPanelId) : null;
+  const resolved = focusedPanelId
+    ? resolveWorkItem(focusedPanelId, sections)
+    : null;
 
   return (
     <LayoutGroup>
@@ -1041,8 +1057,8 @@ export function WorkExperience() {
         }}
       >
         {WORK_SECTION_ORDER.map((section) => {
-          if (!sectionHasItems(section.key)) return null;
-          const showSectionRule = sectionNeedsTopSpacer(section.key);
+          if (!sectionHasItems(section.key, sections)) return null;
+          const showSectionRule = sectionNeedsTopSpacer(section.key, sections);
           const sectionNum =
             WORK_SECTION_ORDER.findIndex((s) => s.key === section.key) + 1;
           const sectionIndexLabel = String(sectionNum).padStart(2, "0");
@@ -1143,6 +1159,7 @@ export function WorkExperience() {
                 onStripHorizontal={onStripHorizontal}
                 onMobileImagePointerEnd={onMobileImagePointerEnd}
                 reduceMotion={reduceMotion}
+                sections={sections}
               />
             </div>
           );

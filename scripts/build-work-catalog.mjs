@@ -19,9 +19,11 @@ const WORK_ROOT = path.join(ROOT, "public", "images", "work");
 const OUT_FILE = path.join(ROOT, "lib", "work-catalog.ts");
 
 const SECTION_FOLDERS = [
-  { folder: "editorial", key: "editorial" },
+  { folder: "style-out", key: "styleOut" },
   { folder: "costume-design", key: "costumeDesign" },
   { folder: "advertising", key: "advertising" },
+  { folder: "editorial", key: "editorial" },
+  { folder: "hearts-sold-separately-tour", key: "heartsSoldSeparatelyTour" },
   { folder: "music-videos", key: "musicVideos" },
   { folder: "events", key: "events" },
 ];

@@ -1,0 +1,924 @@
+{
+  "version": 1,
+  "enabled": true,
+  "notes": "Saved from /admin. Work uses this overlay for category, order, and hidden filenames. Files are not renamed or deleted.",
+  "hidden": [
+    "site-002.jpg",
+    "site-033.jpg",
+    "site-040.jpg",
+    "site-048.jpg",
+    "IMG_6253.JPG",
+    "site-097.png",
+    "site-098.png",
+    "site-099.png",
+    "site-177.jpg",
+    "site-183.jpg",
+    "site-201.jpg",
+    "site-202.jpg",
+    "site-204.jpg",
+    "site-213.jpg",
+    "site-214.jpg",
+    "site-215.jpg",
+    "site-219.jpg",
+    "site-220.jpg",
+    "site-221.jpg",
+    "site-224.jpg",
+    "site-225.jpg",
+    "site-226.jpg",
+    "site-227.jpg",
+    "site-228.jpg",
+    "site-281.jpg",
+    "site-279.png",
+    "site-280.png",
+    "site-285.jpg",
+    "site-316.png",
+    "site-317.png",
+    "site-318.jpg",
+    "site-319.jpg",
+    "site-320.jpg",
+    "site-321.jpg",
+    "site-327.jpg",
+    "site-329.png",
+    "site-341.png",
+    "site-351.jpg",
+    "site-352.jpg",
+    "site-353.jpg",
+    "site-354.jpg",
+    "site-355.jpg",
+    "IMG_6224.JPG",
+    "IMG_6249.JPG",
+    "IMG_6222.JPG",
+    "site-046.jpg",
+    "site-043.jpg",
+    "site-047.jpg",
+    "site-058.jpg",
+    "site-059.png",
+    "site-068.jpg",
+    "site-088.jpg",
+    "site-094.jpg",
+    "IMG_2679.JPG",
+    "IMG_8566.jpg",
+    "IMG_9267.jpg",
+    "IMG_8564.jpg",
+    "IMG_7106.jpg",
+    "IMG_3567.jpg",
+    "IMG_7107.jpg",
+    "IMG_2712.jpg",
+    "e57d7ed3cce34c5ea3c5809e4b134405.MP4",
+    "IMG_9613.JPG",
+    "IMG_3565.jpg",
+    "IMG_2682.JPG",
+    "IMG_3390.JPG",
+    "d75b104b4d174316ab70eaa5d50b748d.MP4",
+    "IMG_3486.jpg",
+    "IMG_6226.jpg",
+    "site-234.jpg",
+    "IMG_0317.JPG",
+    "site-168.jpg",
+    "IMG_0316.JPG",
+    "IMG_4986.JPG",
+    "IMG_6999.JPG",
+    "IMG_1307.JPG",
+    "site-120.jpg",
+    "site-060.png",
+    "site-092.jpg",
+    "IMG_6221.JPG",
+    "site-042.jpg",
+    "site-045.jpg",
+    "site-184.jpg"
+  ],
+  "projects": [
+    {
+      "id": "ed-highsnobiety-mariah",
+      "title": "Highsnobiety — Mariah the Scientist",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-047.jpg"
+      ]
+    },
+    {
+      "id": "ed-mariah-grey-coat",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": []
+    },
+    {
+      "id": "ed-olive-studio",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-001.jpg",
+        "/images/work/editorial/IMG_6913.JPG"
+      ]
+    },
+    {
+      "id": "ed-pink-puffer",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/IMG_6252.JPG",
+        "/images/work/editorial/IMG_6249.JPG",
+        "/images/work/editorial/site-045.jpg",
+        "/images/work/editorial/IMG_6223.JPG",
+        "/images/work/editorial/site-004.jpg",
+        "/images/work/editorial/IMG_6250.JPG",
+        "/images/work/editorial/site-046.jpg",
+        "/images/work/editorial/IMG_6225.JPG",
+        "/images/work/editorial/IMG_6221.JPG"
+      ]
+    },
+    {
+      "id": "ed-roll-img-6221",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/IMG_6222.JPG",
+        "/images/work/editorial/IMG_6224.JPG"
+      ]
+    },
+    {
+      "id": "ed-roll-img-9285",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-044.png",
+        "/images/work/editorial/site-041.jpg",
+        "/images/work/editorial/site-074.jpg",
+        "/images/work/editorial/site-084.jpg",
+        "/images/work/editorial/site-070.jpg",
+        "/images/work/editorial/IMG_9285.jpg",
+        "/images/work/editorial/IMG_9286.jpg"
+      ]
+    },
+    {
+      "id": "ed-mariah-hills",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-043.jpg"
+      ]
+    },
+    {
+      "id": "ed-lofficiel-bebe-rexha",
+      "title": "L'Officiel — Bebe Rexha",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-049.jpg",
+        "/images/work/editorial/site-052.jpg",
+        "/images/work/editorial/site-051.jpg",
+        "/images/work/editorial/site-050.jpg"
+      ]
+    },
+    {
+      "id": "ed-ugg-season",
+      "title": "UGG Season",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/IMG_1182.jpg",
+        "/images/work/editorial/IMG_1183.jpg"
+      ]
+    },
+    {
+      "id": "ed-bangs-colored-light",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-079.jpg",
+        "/images/work/editorial/site-080.jpg"
+      ]
+    },
+    {
+      "id": "ed-black-lace-studio",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-053.jpg",
+        "/images/work/editorial/site-054.jpg"
+      ]
+    },
+    {
+      "id": "ed-blue-curtain",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-093.jpg"
+      ]
+    },
+    {
+      "id": "ed-blue-gown-columns",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": []
+    },
+    {
+      "id": "ed-braids-red",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-091.jpg"
+      ]
+    },
+    {
+      "id": "ed-captain-hat",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-073.jpg",
+        "/images/work/editorial/site-075.jpg"
+      ]
+    },
+    {
+      "id": "ed-cream-smocked-outdoor",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": []
+    },
+    {
+      "id": "ed-crystal-necklace",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-092.jpg"
+      ]
+    },
+    {
+      "id": "ed-galore-tiffany-young",
+      "title": "Galore — Tiffany Young",
+      "sectionKey": "editorial",
+      "assets": []
+    },
+    {
+      "id": "ed-ivory-gown",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-063.jpg",
+        "/images/work/editorial/site-057.jpg",
+        "/images/work/editorial/site-055.jpg",
+        "/images/work/editorial/site-078.jpg",
+        "/images/work/editorial/site-056.jpg"
+      ]
+    },
+    {
+      "id": "ed-lace-overlay",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": []
+    },
+    {
+      "id": "ed-neon-platinum",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-089.jpg",
+        "/images/work/editorial/site-090.jpg"
+      ]
+    },
+    {
+      "id": "ed-organza",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-061.jpg",
+        "/images/work/editorial/site-062.jpg"
+      ]
+    },
+    {
+      "id": "ed-outdoor-other-model",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-060.png"
+      ]
+    },
+    {
+      "id": "ed-patent-boots-studio",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": []
+    },
+    {
+      "id": "ed-pool-earrings",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-066.jpg",
+        "/images/work/editorial/site-065.jpg",
+        "/images/work/editorial/site-064.jpg",
+        "/images/work/editorial/site-069.jpg"
+      ]
+    },
+    {
+      "id": "ed-redhead-outdoor",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-058.jpg",
+        "/images/work/editorial/site-059.png"
+      ]
+    },
+    {
+      "id": "ed-roll-img-5661",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/IMG_5661.JPG",
+        "/images/work/editorial/IMG_5662.JPG",
+        "/images/work/editorial/IMG_5665.JPG",
+        "/images/work/editorial/IMG_5666.JPG"
+      ]
+    },
+    {
+      "id": "ed-silver-crystal-blonde",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": []
+    },
+    {
+      "id": "ed-silver-iridescent",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": []
+    },
+    {
+      "id": "ed-wet-hair-studio",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-067.jpg",
+        "/images/work/editorial/site-068.jpg",
+        "/images/work/editorial/site-087.jpg",
+        "/images/work/editorial/site-088.jpg",
+        "/images/work/editorial/site-094.jpg"
+      ]
+    },
+    {
+      "id": "ed-white-shirt-studio",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": []
+    },
+    {
+      "id": "ed-wood-panel",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/site-072.jpg",
+        "/images/work/editorial/site-071.jpg",
+        "/images/work/editorial/site-042.jpg"
+      ]
+    },
+    {
+      "id": "co-roll-img-9262",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/IMG_8567.jpg",
+        "/images/work/costume-design/IMG_8582.jpg",
+        "/images/work/costume-design/IMG_8565.jpg",
+        "/images/work/costume-design/IMG_8562.jpg",
+        "/images/work/costume-design/site-179.jpg",
+        "/images/work/costume-design/site-181.jpg",
+        "/images/work/costume-design/IMG_3825.jpg",
+        "/images/work/costume-design/IMG_3826.jpg",
+        "/images/work/costume-design/IMG_9262.jpg",
+        "/images/work/costume-design/IMG_9263.jpg",
+        "/images/work/costume-design/site-180.jpg",
+        "/images/work/costume-design/IMG_0316.JPG",
+        "/images/work/costume-design/IMG_4897.JPEG",
+        "/images/work/costume-design/IMG_0324.JPG",
+        "/images/work/costume-design/IMG_0317.JPG",
+        "/images/work/costume-design/IMG_7105.jpg",
+        "/images/work/costume-design/IMG_7107.jpg",
+        "/images/work/costume-design/IMG_9264.jpg",
+        "/images/work/costume-design/site-178.jpg",
+        "/images/work/costume-design/IMG_9267.jpg",
+        "/images/work/costume-design/site-184.jpg",
+        "/images/work/costume-design/site-356.jpg",
+        "/images/work/costume-design/site-357.jpg",
+        "/images/work/costume-design/site-358.jpg",
+        "/images/work/costume-design/site-359.jpg",
+        "/images/work/costume-design/site-360.jpg",
+        "/images/work/costume-design/site-361.jpg",
+        "/images/work/costume-design/site-362.jpg",
+        "/images/work/costume-design/site-363.jpg",
+        "/images/work/costume-design/site-364.jpg",
+        "/images/work/costume-design/site-365.jpg",
+        "/images/work/costume-design/site-366.jpg",
+        "/images/work/costume-design/site-367.jpg"
+      ]
+    },
+    {
+      "id": "co-roll-img-8562",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/IMG_8564.jpg",
+        "/images/work/costume-design/IMG_8566.jpg"
+      ]
+    },
+    {
+      "id": "co-roll-img-7105",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/IMG_7106.jpg"
+      ]
+    },
+    {
+      "id": "co-roll-img-3565",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/IMG_3567.jpg"
+      ]
+    },
+    {
+      "id": "co-roll-img-3485",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "co-roll-img-6263",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "co-roll-img-2661",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "co-roll-img-2712",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/IMG_2679.JPG"
+      ]
+    },
+    {
+      "id": "co-roll-img-2735",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "co-roll-img-2705",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "co-roll-img-2678",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "cd-hss-pink-cowboy",
+      "title": "Hearts Sold Separately — pink cowboy",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "cd-fallon-2025",
+      "title": "The Tonight Show Starring Jimmy Fallon",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "https://www.youtube.com/shorts/-p83jyXsL_k"
+      ]
+    },
+    {
+      "id": "cd-hss-live",
+      "title": "Hearts Sold Separately — live",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "cd-bet-awards-2026",
+      "title": "BET Awards 2026",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "https://www.youtube.com/watch?v=fxSmTkcOvcM"
+      ]
+    },
+    {
+      "id": "cd-wim-2026",
+      "title": "Billboard Women in Music 2026",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "https://www.youtube.com/watch?v=eVib1QhV86I"
+      ]
+    },
+    {
+      "id": "cd-burning-blue-link",
+      "title": "Burning Blue",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "https://www.youtube.com/watch?v=RihnnP1k1rw"
+      ]
+    },
+    {
+      "id": "cd-homecoming-trailer",
+      "title": "Homecoming: A Film By Beyoncé",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "https://www.youtube.com/watch?v=fB8qvx0HOlI"
+      ]
+    },
+    {
+      "id": "cd-beyonce-gold",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/site-242.png",
+        "/images/work/costume-design/site-243.png",
+        "/images/work/costume-design/site-247.png",
+        "/images/work/costume-design/site-246.png",
+        "/images/work/costume-design/site-244.png",
+        "/images/work/costume-design/site-245.png"
+      ]
+    },
+    {
+      "id": "cd-beyonce-leopard",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/site-236.jpg"
+      ]
+    },
+    {
+      "id": "cd-beyonce-patent-red",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/site-234.jpg"
+      ]
+    },
+    {
+      "id": "cd-beyonce-silver-cape",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/site-229.jpg",
+        "/images/work/costume-design/site-231.jpg",
+        "/images/work/costume-design/site-166.jpg",
+        "/images/work/costume-design/site-167.jpg"
+      ]
+    },
+    {
+      "id": "cd-beyonce-studded",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "cd-club-looks",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/site-195.jpg",
+        "/images/work/costume-design/site-197.jpg",
+        "/images/work/costume-design/site-196.jpg"
+      ]
+    },
+    {
+      "id": "cd-plaid-cowboy",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "cd-red-dancers",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/site-168.jpg"
+      ]
+    },
+    {
+      "id": "cd-renaissance-hats",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "co-roll-img-0316",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "co-roll-img-3825",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "co-roll-img-9287",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "co-roll-img-9613",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": []
+    },
+    {
+      "id": "co-roll-img-9620",
+      "title": "Untitled",
+      "sectionKey": "costumeDesign",
+      "assets": [
+        "/images/work/costume-design/IMG_9620.jpg",
+        "/images/work/costume-design/IMG_9622.jpg"
+      ]
+    },
+    {
+      "id": "ad-hearts-sold-separately",
+      "title": "Hearts Sold Separately",
+      "sectionKey": "advertising",
+      "assets": []
+    },
+    {
+      "id": "ad-clorox-scentiva",
+      "title": "Clorox Scentiva Cherry Blossom & Peach",
+      "sectionKey": "advertising",
+      "assets": [
+        "https://www.youtube.com/watch?v=g4N97ZjaErk"
+      ]
+    },
+    {
+      "id": "ad-reebok-born-classic",
+      "title": "Reebok Born Classic. Worn for Life. — London",
+      "sectionKey": "advertising",
+      "assets": [
+        "https://www.youtube.com/watch?v=sRRUl9sJZtQ"
+      ]
+    },
+    {
+      "id": "ad-brooks-babylon-break-the-map",
+      "title": "Brooks x Babylon — Break the Map",
+      "sectionKey": "advertising",
+      "assets": [
+        "https://www.youtube.com/watch?v=tgNECKyLmGk"
+      ]
+    },
+    {
+      "id": "ad-reebok-floatzig",
+      "title": "Reebok FloatZig 1 Running Hacks",
+      "sectionKey": "advertising",
+      "assets": [
+        "https://www.youtube.com/watch?v=m8khk9vB86k",
+        "https://www.youtube.com/watch?v=PBP0NPpHcMw",
+        "https://www.youtube.com/watch?v=ctvMtHp74rY",
+        "https://www.youtube.com/watch?v=BdESXmQ-nGA"
+      ]
+    },
+    {
+      "id": "ad-reebok-through-the-fire",
+      "title": "Reebok Through the Fire",
+      "sectionKey": "advertising",
+      "assets": [
+        "https://vimeo.com/1027075641"
+      ]
+    },
+    {
+      "id": "ad-about-face-tube-job",
+      "title": "about-face tube job",
+      "sectionKey": "advertising",
+      "assets": [
+        "/images/work/advertising/site-123.jpg",
+        "/images/work/advertising/site-124.jpg"
+      ]
+    },
+    {
+      "id": "ad-calvin-klein-ckinlife",
+      "title": "Calvin Klein",
+      "sectionKey": "advertising",
+      "assets": [
+        "/images/work/advertising/site-259.jpg"
+      ]
+    },
+    {
+      "id": "ad-calvin-klein-jeans",
+      "title": "Calvin Klein Jeans",
+      "sectionKey": "advertising",
+      "assets": [
+        "/images/work/advertising/site-256.jpg",
+        "/images/work/advertising/site-257.jpg"
+      ]
+    },
+    {
+      "id": "ad-kappa-desert",
+      "title": "Kappa",
+      "sectionKey": "advertising",
+      "assets": [
+        "/images/work/advertising/site-126.png",
+        "/images/work/advertising/site-129.png",
+        "/images/work/advertising/site-130.png",
+        "/images/work/advertising/site-131.png",
+        "/images/work/advertising/site-135.png"
+      ]
+    },
+    {
+      "id": "mv-a-good-day",
+      "title": "A Good Day",
+      "sectionKey": "musicVideos",
+      "assets": [
+        "https://www.youtube.com/watch?v=8zxzlAyMg2U"
+      ]
+    },
+    {
+      "id": "mv-e85",
+      "title": "E85",
+      "sectionKey": "musicVideos",
+      "assets": [
+        "https://www.youtube.com/watch?v=rVD-zV6ctoM"
+      ]
+    },
+    {
+      "id": "mv-excavator",
+      "title": "Excavator",
+      "sectionKey": "musicVideos",
+      "assets": [
+        "https://www.youtube.com/watch?v=_SrosL0WdOQ"
+      ]
+    },
+    {
+      "id": "mv-is-it-a-crime",
+      "title": "Is It a Crime",
+      "sectionKey": "musicVideos",
+      "assets": [
+        "https://www.youtube.com/watch?v=L5agl9ioLRM"
+      ]
+    },
+    {
+      "id": "mv-burning-blue",
+      "title": "Burning Blue",
+      "sectionKey": "musicVideos",
+      "assets": [
+        "https://www.youtube.com/watch?v=Jx9h3iWudTU"
+      ]
+    },
+    {
+      "id": "mv-lento",
+      "title": "Lento",
+      "sectionKey": "musicVideos",
+      "assets": [
+        "https://www.youtube.com/watch?v=NdBHfXgI3hA"
+      ]
+    },
+    {
+      "id": "mv-out-west",
+      "title": "OUT WEST",
+      "sectionKey": "musicVideos",
+      "assets": [
+        "https://www.youtube.com/watch?v=qAlF70MdfwU",
+        "/images/work/music-videos/site-185.jpg",
+        "/images/work/music-videos/site-188.jpg",
+        "/images/work/music-videos/site-189.jpg",
+        "/images/work/music-videos/site-190.jpg",
+        "/images/work/music-videos/site-191.jpg",
+        "/images/work/music-videos/site-192.jpg",
+        "/images/work/music-videos/site-186.jpg"
+      ]
+    },
+    {
+      "id": "ev-ama-white-military",
+      "title": "American Music Awards",
+      "sectionKey": "events",
+      "assets": [
+        "/images/work/events/IMG_4986.JPG",
+        "/images/work/events/IMG_4819.jpg",
+        "/images/work/events/IMG_4988.JPG"
+      ]
+    },
+    {
+      "id": "ev-vs-floral-sheer",
+      "title": "Victoria's Secret",
+      "sectionKey": "events",
+      "assets": [
+        "/images/work/events/IMG_6999.JPG",
+        "/images/work/events/site-149.jpg",
+        "/images/work/events/site-150.jpg",
+        "/images/work/events/site-154.jpg",
+        "/images/work/events/site-155.jpg",
+        "/images/work/events/site-156.jpg"
+      ]
+    },
+    {
+      "id": "ev-billboard-wim-2019-white",
+      "title": "Billboard Women in Music 2019",
+      "sectionKey": "events",
+      "assets": []
+    },
+    {
+      "id": "ev-iheart-white-cape",
+      "title": "iHeartRadio Music Awards",
+      "sectionKey": "events",
+      "assets": [
+        "/images/work/events/site-151.jpg",
+        "/images/work/events/site-153.jpg"
+      ]
+    },
+    {
+      "id": "ev-blush-sequin-reception",
+      "title": "Untitled",
+      "sectionKey": "events",
+      "assets": [
+        "/images/work/events/site-152.jpg"
+      ]
+    },
+    {
+      "id": "ev-olive-cargo",
+      "title": "Untitled",
+      "sectionKey": "events",
+      "assets": []
+    },
+    {
+      "id": "ev-pink-trench",
+      "title": "Untitled",
+      "sectionKey": "events",
+      "assets": [
+        "/images/work/events/IMG_1178.jpg",
+        "/images/work/events/IMG_1179.jpg"
+      ]
+    },
+    {
+      "id": "ev-teal-fringe",
+      "title": "Untitled",
+      "sectionKey": "events",
+      "assets": [
+        "/images/work/events/site-147.jpg",
+        "/images/work/events/site-148.jpg"
+      ]
+    },
+    {
+      "id": "ev-white-draped-tee",
+      "title": "Untitled",
+      "sectionKey": "events",
+      "assets": [
+        "/images/work/events/IMG_1306.JPG",
+        "/images/work/events/IMG_1307.JPG",
+        "/images/work/events/IMG_6129.JPG"
+      ]
+    },
+    {
+      "id": "heartsSoldSeparatelyTour-unassigned",
+      "title": "Hearts Sold Separately Tour",
+      "sectionKey": "heartsSoldSeparatelyTour",
+      "assets": [
+        "/images/work/advertising/site-003.webp",
+        "/images/work/costume-design/IMG_3570.jpg",
+        "/images/work/costume-design/IMG_3569.jpg",
+        "/images/work/costume-design/IMG_3568.jpg",
+        "/images/work/costume-design/IMG_3573.jpg",
+        "/images/work/costume-design/IMG_3485.jpg",
+        "/images/work/costume-design/d5aad41c02be4ec596187e8328584762.MP4",
+        "/images/work/costume-design/IMG_3566.jpg",
+        "/images/work/costume-design/IMG_2682.JPG",
+        "/images/work/costume-design/IMG_2705.jpg",
+        "/images/work/costume-design/IMG_6263.jpg",
+        "/images/work/costume-design/IMG_6264.jpg",
+        "/images/work/costume-design/IMG_8140.JPG",
+        "/images/work/costume-design/IMG_2686.JPG",
+        "/images/work/costume-design/IMG_2685.JPG",
+        "/images/work/costume-design/IMG_2735.JPG",
+        "/images/work/costume-design/IMG_2736.JPG",
+        "/images/work/costume-design/IMG_2712.jpg",
+        "/images/work/costume-design/IMG_2717.jpg",
+        "/images/work/costume-design/ac6b2416ac0d4f5da01e47572918a4d5.MP4",
+        "/images/work/costume-design/IMG_2678.JPG",
+        "/images/work/costume-design/IMG_2663.JPG",
+        "/images/work/costume-design/IMG_3572.jpg",
+        "/images/work/costume-design/IMG_3571.jpg",
+        "/images/work/costume-design/6a075460084e41c09a0079d890591614.MP4",
+        "/images/work/costume-design/IMG_9287.jpg",
+        "/images/work/editorial/IMG_6226.jpg",
+        "/images/work/costume-design/IMG_8684.jpg",
+        "/images/work/costume-design/%E2%80%9CThere%E2%80%99s%20got%20to%20be%20more%E2%80%A6%E2%80%9D%F0%9F%A9%B7%F0%9F%AA%96s-o%20%40_maramoments%20for%20capturing%20this!%F0%9F%92%95%23mariahthescientist%20%23selkcub.MP4",
+        "/images/work/costume-design/IMG_9266.jpg",
+        "/images/work/costume-design/8a6ef93c3c354cd5b9f6b304256b40d8.MP4",
+        "/images/work/costume-design/60d1550b7cdd4726ba58fe18787b3e36.MP4",
+        "/images/work/costume-design/3e267b23835d44eaa80136082cf7a043.MP4",
+        "/images/work/costume-design/d75b104b4d174316ab70eaa5d50b748d.MP4",
+        "/images/work/costume-design/e57d7ed3cce34c5ea3c5809e4b134405.MP4",
+        "/images/work/costume-design/IMG_9613.JPG",
+        "/images/work/costume-design/IMG_3565.jpg",
+        "/images/work/costume-design/IMG_3486.jpg",
+        "/images/work/costume-design/IMG_3390.JPG",
+        "/images/work/costume-design/IMG_2661.JPG",
+        "/images/work/costume-design/site-175.jpg",
+        "/images/work/advertising/site-122.webp",
+        "/images/work/advertising/site-120.jpg",
+        "/images/work/advertising/site-119.jpg",
+        "/images/work/advertising/site-121.jpg"
+      ]
+    }
+  ]
+}

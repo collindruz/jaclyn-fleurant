@@ -7,7 +7,7 @@ import { SITE_NAV } from "@/lib/site-nav";
 export function Navigation() {
   const pathname = usePathname();
 
-  if (pathname === "/" || pathname === "/intro") {
+  if (pathname === "/" || pathname === "/intro" || pathname.startsWith("/admin")) {
     return null;
   }
 

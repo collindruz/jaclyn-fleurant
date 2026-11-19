@@ -1,6 +1,7 @@
 "use client";
 
 import { STACK_CURSOR } from "@/lib/stacking";
+import { usePathname } from "next/navigation";
 import {
   useEffect,
   useLayoutEffect,
@@ -106,13 +107,15 @@ const layerBase = {
 };
 
 function ArtCursor() {
+  const pathname = usePathname();
   const [hydrated, setHydrated] = useState(false);
   const finePointer = useSyncExternalStore(
     subscribeFinePointer,
     getFinePointerSnapshot,
     getFinePointerServerSnapshot
   );
-  const useCustom = hydrated && finePointer;
+  const useCustom =
+    hydrated && finePointer && !pathname.startsWith("/admin");
   const [active, setActive] = useState(false);
   const [isInteractive, setIsInteractive] = useState(false);
 

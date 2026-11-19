@@ -7,11 +7,24 @@ html {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  html,
-  body,
-  * {
+  html:not(.admin-editor),
+  html:not(.admin-editor) body,
+  html:not(.admin-editor) * {
     cursor: none !important;
   }
+}
+
+html.admin-editor,
+html.admin-editor * {
+  cursor: auto;
+}
+
+html.admin-editor [aria-label="Drag to reorder"] {
+  cursor: grab;
+}
+
+html.admin-editor [aria-label="Drag to reorder"]:active {
+  cursor: grabbing;
 }
 
 @keyframes art-cursor-wobble {
