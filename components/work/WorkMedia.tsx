@@ -62,7 +62,7 @@ export function WorkLocalVideo({
   posterHeight,
   className,
   onDesktopActivate,
-  sizes = "220px",
+  sizes = "(max-width: 1023px) 50vw, 36vw",
   priority = false,
 }: {
   src: string;
@@ -99,8 +99,6 @@ export function WorkLocalVideo({
   );
 
   const showPoster = Boolean(poster) && !(playing && videoReady);
-  const pw = posterWidth && posterWidth > 0 ? posterWidth : 4;
-  const ph = posterHeight && posterHeight > 0 ? posterHeight : 5;
 
   return (
     <div
@@ -146,9 +144,8 @@ export function WorkLocalVideo({
         <Image
           src={poster!}
           alt=""
-          width={pw}
-          height={ph}
-          className={`${className} pointer-events-none absolute inset-0`}
+          fill
+          className="pointer-events-none object-contain object-center"
           sizes={sizes}
           quality={75}
           loading={priority ? "eager" : "lazy"}
@@ -165,7 +162,7 @@ export function WorkExternalVideo({
   item,
   className,
   onDesktopActivate,
-  sizes = "220px",
+  sizes = "(max-width: 1023px) 50vw, 36vw",
   priority = false,
 }: {
   item: WorkItem;
@@ -180,7 +177,6 @@ export function WorkExternalVideo({
 
   const label = ext.title || "Video";
   const poster = item.poster;
-  const { w, h } = posterAspect(item);
 
   if (open && ext.embeddable && ext.embedUrl) {
     const src = embedPlayerSrc(ext.embedUrl, ext.provider);
@@ -240,9 +236,8 @@ export function WorkExternalVideo({
         <Image
           src={poster}
           alt=""
-          width={w}
-          height={h}
-          className={className}
+          fill
+          className={`${className} object-contain object-center`}
           sizes={sizes}
           quality={75}
           loading={priority ? "eager" : "lazy"}
