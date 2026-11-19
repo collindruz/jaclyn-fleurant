@@ -274,6 +274,7 @@ function StripItem({
   const mediaClass = "h-full w-full object-contain object-center";
   const layoutId = workFocusLayoutId(panelId);
   const t = reduceMotion ? reducedT : layoutSpring;
+  const stripSizes = workStripSizes(isMobile, isDesktopExpanded);
 
   const caption = showCaption && !isFocused && (
     <p
@@ -356,6 +357,8 @@ function StripItem({
             item={item}
             className={mediaClass}
             onDesktopActivate={activateDesktop}
+            sizes={stripSizes}
+            priority={priorityImage}
           />
         </div>
       );
@@ -371,6 +374,8 @@ function StripItem({
             posterHeight={item.posterHeight}
             className={mediaClass}
             onDesktopActivate={activateDesktop}
+            sizes={stripSizes}
+            priority={priorityImage}
           />
         </div>
       );
@@ -382,16 +387,12 @@ function StripItem({
           alt={imageAlt}
           width={natW}
           height={natH}
-          sizes={
-            isMobile
-              ? "(max-width: 767px) 70vw, 40vw"
-              : isDesktopExpanded
-                ? "(max-width: 1023px) 50vw, 36vw"
-                : "220px"
-          }
+          sizes={stripSizes}
+          quality={75}
           className={mediaClass}
           draggable={false}
-          loading={priorityImage ? "eager" : "lazy"}
+          loading="eager"
+          fetchPriority={priorityImage ? "high" : "auto"}
           decoding="async"
         />
       </div>
@@ -533,6 +534,12 @@ function MobileFocusLayer({
       </motion.div>
     </motion.div>
   );
+}
+
+function workStripSizes(isMobile: boolean, isDesktopExpanded: boolean): string {
+  if (isMobile) return "(max-width: 767px) 70vw, 40vw";
+  if (isDesktopExpanded) return "(max-width: 1023px) 50vw, 36vw";
+  return "220px";
 }
 
 function sectionHasItems(sectionKey: WorkSectionKey): boolean {
@@ -779,13 +786,12 @@ function SectionWorkScroll({
             onClick={handleDesktopStripClick}
             aria-label={`${sectionLabel} — projects`}
           >
-            {(() => {
-              let seen = 0;
-              return workProjectSections[sectionKey].flatMap((group) => {
+            {workProjectSections[sectionKey].flatMap((group, groupIndex, groups) => {
               const items = group.items;
               if (items.length === 0) return [];
-              const start = seen;
-              seen += items.length;
+              const start = groups
+                .slice(0, groupIndex)
+                .reduce((n, g) => n + g.items.length, 0);
               return [
                 <li
                   key={`${sectionKey}-project-${group.id}`}
@@ -828,17 +834,14 @@ function SectionWorkScroll({
                           onDesktopVideoActivate={(id) =>
                             onDesktopStripExpand({ panelId: id })
                           }
-                          priorityImage={
-                            sectionKey === "editorial" && start + i < 12
-                          }
+                          priorityImage={start + i < 12}
                         />
                       );
                     })}
                   </ul>
                 </li>,
               ];
-            });
-            })()}
+            })}
           </ul>
         </div>
       </div>

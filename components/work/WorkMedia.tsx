@@ -62,6 +62,8 @@ export function WorkLocalVideo({
   posterHeight,
   className,
   onDesktopActivate,
+  sizes = "220px",
+  priority = false,
 }: {
   src: string;
   title: string;
@@ -70,6 +72,8 @@ export function WorkLocalVideo({
   posterHeight?: number;
   className: string;
   onDesktopActivate?: () => void;
+  sizes?: string;
+  priority?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -145,9 +149,9 @@ export function WorkLocalVideo({
           width={pw}
           height={ph}
           className={`${className} pointer-events-none absolute inset-0`}
-          sizes="(max-width: 767px) 70vw, 28vw"
+          sizes={sizes}
           quality={75}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
           decoding="async"
           draggable={false}
         />
@@ -161,10 +165,14 @@ export function WorkExternalVideo({
   item,
   className,
   onDesktopActivate,
+  sizes = "220px",
+  priority = false,
 }: {
   item: WorkItem;
   className: string;
   onDesktopActivate?: () => void;
+  sizes?: string;
+  priority?: boolean;
 }) {
   const ext = item.external;
   const [open, setOpen] = useState(false);
@@ -235,9 +243,9 @@ export function WorkExternalVideo({
           width={w}
           height={h}
           className={className}
-          sizes="(max-width: 767px) 70vw, 28vw"
+          sizes={sizes}
           quality={75}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
           decoding="async"
           draggable={false}
         />

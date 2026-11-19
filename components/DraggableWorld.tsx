@@ -21,8 +21,8 @@ const SWIPE_PX = 48;
 const WHEEL_LOCK_MS = 560;
 const THUMB_QUALITY = 60;
 const VIEWER_QUALITY = 85;
-const THUMB_EAGER_COUNT = 12;
-const THUMB_BATCH = 16;
+const THUMB_EAGER_COUNT = 36;
+const THUMB_BATCH = 32;
 const THUMB_REST_FILTER = "[filter:grayscale(1)_contrast(1.08)]";
 
 type DraggableWorldProps = {
@@ -136,9 +136,9 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
     let timeoutId = 0;
     const ric = window.requestIdleCallback;
     if (typeof ric === "function") {
-      idleId = ric(bump, { timeout: 180 });
+      idleId = ric(bump, { timeout: 80 });
     } else {
-      timeoutId = window.setTimeout(bump, 48);
+      timeoutId = window.setTimeout(bump, 32);
     }
     return () => {
       cancelled = true;
