@@ -384,10 +384,10 @@ function StripItem({
           height={natH}
           sizes={
             isMobile
-              ? "(max-width: 767px) 80vw, 40vw"
+              ? "(max-width: 767px) 70vw, 40vw"
               : isDesktopExpanded
                 ? "(max-width: 1023px) 50vw, 36vw"
-                : "(max-width: 1024px) 40vw, 28vw"
+                : "220px"
           }
           className={mediaClass}
           draggable={false}
@@ -779,9 +779,13 @@ function SectionWorkScroll({
             onClick={handleDesktopStripClick}
             aria-label={`${sectionLabel} — projects`}
           >
-            {workProjectSections[sectionKey].flatMap((group, groupIndex) => {
+            {(() => {
+              let seen = 0;
+              return workProjectSections[sectionKey].flatMap((group) => {
               const items = group.items;
               if (items.length === 0) return [];
+              const start = seen;
+              seen += items.length;
               return [
                 <li
                   key={`${sectionKey}-project-${group.id}`}
@@ -825,9 +829,7 @@ function SectionWorkScroll({
                             onDesktopStripExpand({ panelId: id })
                           }
                           priorityImage={
-                            sectionKey === "editorial" &&
-                            groupIndex === 0 &&
-                            i < 4
+                            sectionKey === "editorial" && start + i < 12
                           }
                         />
                       );
@@ -835,7 +837,8 @@ function SectionWorkScroll({
                   </ul>
                 </li>,
               ];
-            })}
+            });
+            })()}
           </ul>
         </div>
       </div>
@@ -1010,12 +1013,6 @@ export function WorkExperience() {
                 (isChExpanded ? " relative z-[60]" : "")
               }
               style={{
-                ...(showSectionRule
-                  ? {
-                      contentVisibility: "auto" as const,
-                      containIntrinsicSize: "auto 720px",
-                    }
-                  : null),
                 ...(isChExpanded ? { zIndex: STACK_WORK_EXPANDED } : null),
               }}
             >
