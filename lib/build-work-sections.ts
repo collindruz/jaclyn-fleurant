@@ -151,8 +151,8 @@ export function buildWorkSections(
   fileMetadata: Readonly<Record<string, string>> = {}
 ): WorkSections {
   const out: WorkSections = {
-    styleOut: emptyColorGroups(),
     costumeDesign: emptyColorGroups(),
+    styleOut: emptyColorGroups(),
     advertising: emptyColorGroups(),
     editorial: emptyColorGroups(),
     heartsSoldSeparatelyTour: emptyColorGroups(),

@@ -100,8 +100,8 @@ function ensureAllSectionProjects(projects: AdminProject[]): AdminProject[] {
 
 function emptySections(): WorkProjectSections {
   return {
-    styleOut: [],
     costumeDesign: [],
+    styleOut: [],
     advertising: [],
     editorial: [],
     heartsSoldSeparatelyTour: [],

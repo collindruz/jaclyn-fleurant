@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Vercel Image Optimization returns 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED
+    // on the live site. Serve public files directly so Work (including Style Out) loads.
+    unoptimized: true,
     qualities: [60, 75, 85, 90],
     imageSizes: [16, 32, 48, 64, 80, 96, 128, 160, 256, 384],
     deviceSizes: [640, 750, 828, 1080, 1200, 1600, 1920],

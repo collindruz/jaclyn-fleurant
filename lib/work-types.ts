@@ -29,8 +29,8 @@ export type WorkColorKey = (typeof WORK_COLOR_ORDER)[number]["key"];
 
 /** Work sections — local files live in `public/images/work/{editorial,costume-design,…}`. */
 export const WORK_SECTION_ORDER = [
-  { key: "styleOut" as const, label: "Style Out" },
   { key: "costumeDesign" as const, label: "Costume Design" },
+  { key: "styleOut" as const, label: "Style Out" },
   { key: "advertising" as const, label: "Advertising" },
   { key: "editorial" as const, label: "Editorial" },
   { key: "heartsSoldSeparatelyTour" as const, label: "Hearts Sold Separately" },

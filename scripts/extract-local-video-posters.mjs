@@ -8,9 +8,12 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import { createRequire } from "module";
 import { spawnSync } from "child_process";
 import { fileURLToPath } from "url";
 import sharp from "sharp";
+
+const require = createRequire(import.meta.url);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
@@ -22,6 +25,12 @@ export function resolveFfmpeg() {
   if (which.status === 0) {
     const p = which.stdout.trim();
     if (p) return p;
+  }
+  try {
+    const packed = require("ffmpeg-static");
+    if (packed && fs.existsSync(packed)) return packed;
+  } catch {
+    /* optional */
   }
   const candidates = [
     "/tmp/jf-ffmpeg/node_modules/ffmpeg-static/ffmpeg",
@@ -44,7 +53,7 @@ function posterBasename(relPosix) {
   return `${safe || "clip"}-${hash}.jpg`;
 }
 
-function extractFirstFrame(ffmpeg, videoPath, outPath) {
+function extractFrameAt(ffmpeg, videoPath, outPath, seekSec) {
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   const result = spawnSync(
     ffmpeg,
@@ -54,7 +63,7 @@ function extractFirstFrame(ffmpeg, videoPath, outPath) {
       "-loglevel",
       "error",
       "-ss",
-      "0",
+      String(seekSec),
       "-i",
       videoPath,
       "-frames:v",
@@ -114,25 +123,33 @@ export async function extractLocalVideoPosters(videos) {
   for (const video of videos) {
     const file = posterBasename(video.rel);
     const abs = path.join(POSTER_ROOT, video.folder, file);
-    const extracted = extractFirstFrame(ffmpeg, video.full, abs);
-    if (!extracted.ok) {
+    let extracted = { ok: false, error: "no attempt" };
+    let meta = null;
+    let usedSeek = 0;
+    for (const seek of [0.35, 0.9, 1.8, 0]) {
+      const attempt = extractFrameAt(ffmpeg, video.full, abs, seek);
+      if (!attempt.ok) {
+        extracted = attempt;
+        continue;
+      }
+      try {
+        meta = await sharp(abs).rotate().metadata();
+      } catch (err) {
+        extracted = { ok: false, error: String(err?.message || err) };
+        continue;
+      }
+      extracted = attempt;
+      usedSeek = seek;
+      const blank = await blankKind(abs);
+      if (!blank) break;
+    }
+    if (!extracted.ok || !meta) {
       flags.push({
         src: video.src,
         file: `${video.folder}/${video.rel}`,
-        reason: `first-frame extract failed: ${extracted.error}`,
+        reason: `frame extract failed: ${extracted.error}`,
       });
       console.warn(`[work:catalog] poster FAIL ${video.folder}/${video.rel}: ${extracted.error}`);
-      continue;
-    }
-    let meta;
-    try {
-      meta = await sharp(abs).metadata();
-    } catch (err) {
-      flags.push({
-        src: video.src,
-        file: `${video.folder}/${video.rel}`,
-        reason: `poster unreadable: ${err?.message || err}`,
-      });
       continue;
     }
     const blank = await blankKind(abs);
@@ -140,10 +157,10 @@ export async function extractLocalVideoPosters(videos) {
       flags.push({
         src: video.src,
         file: `${video.folder}/${video.rel}`,
-        reason: `first frame is ${blank} — left as-is (no later-frame fallback)`,
+        reason: `poster still ${blank} after seek ${usedSeek}s — using it anyway`,
       });
       console.warn(
-        `[work:catalog] BLANK FIRST FRAME ${video.folder}/${video.rel} (${blank})`
+        `[work:catalog] BLANK FRAME ${video.folder}/${video.rel} (${blank})`
       );
     }
     const poster = `/images/work/video-posters/${encodeURIComponent(video.folder)}/${encodeURIComponent(file)}`;

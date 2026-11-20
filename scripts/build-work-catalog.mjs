@@ -6,9 +6,12 @@
  */
 import fs from "fs";
 import path from "path";
+import { createRequire } from "module";
 import { spawnSync } from "child_process";
 import { fileURLToPath } from "url";
 import sharp from "sharp";
+
+const require = createRequire(import.meta.url);
 import { applyWorkProjects, loadWorkProjectsFile } from "./apply-work-projects.mjs";
 import { resolveYouTubePosters } from "./prepare-youtube-posters.mjs";
 import { extractLocalVideoPosters } from "./extract-local-video-posters.mjs";
@@ -19,8 +22,8 @@ const WORK_ROOT = path.join(ROOT, "public", "images", "work");
 const OUT_FILE = path.join(ROOT, "lib", "work-catalog.ts");
 
 const SECTION_FOLDERS = [
-  { folder: "style-out", key: "styleOut" },
   { folder: "costume-design", key: "costumeDesign" },
+  { folder: "style-out", key: "styleOut" },
   { folder: "advertising", key: "advertising" },
   { folder: "editorial", key: "editorial" },
   { folder: "hearts-sold-separately-tour", key: "heartsSoldSeparatelyTour" },
@@ -368,6 +371,13 @@ function resolveFfprobe() {
     const p = which.stdout.trim();
     if (p) return p;
   }
+  try {
+    const packed = require("ffprobe-static");
+    const p = packed?.path;
+    if (p && fs.existsSync(p)) return p;
+  } catch {
+    /* optional */
+  }
   const candidates = [
     "/tmp/jf-ffmpeg/node_modules/ffprobe-static/bin/darwin/x64/ffprobe",
     "/opt/homebrew/bin/ffprobe",
@@ -388,7 +398,7 @@ function probeVideoSize(filePath) {
       "-select_streams",
       "v:0",
       "-show_entries",
-      "stream=width,height",
+      "stream=width,height,rotation:stream_tags=rotate",
       "-of",
       "json",
       filePath,
@@ -399,8 +409,14 @@ function probeVideoSize(filePath) {
   try {
     const parsed = JSON.parse(result.stdout);
     const stream = parsed?.streams?.[0];
-    const width = Number(stream?.width);
-    const height = Number(stream?.height);
+    let width = Number(stream?.width);
+    let height = Number(stream?.height);
+    const rotate = Number(stream?.tags?.rotate ?? stream?.rotation ?? 0);
+    if ((Math.abs(rotate) === 90 || Math.abs(rotate) === 270) && width > 0 && height > 0) {
+      const swap = width;
+      width = height;
+      height = swap;
+    }
     if (width > 0 && height > 0) return { width, height };
   } catch {
     return null;
@@ -518,6 +534,10 @@ async function main() {
     item.poster = poster.poster;
     if (poster.posterWidth) item.posterWidth = poster.posterWidth;
     if (poster.posterHeight) item.posterHeight = poster.posterHeight;
+    if (poster.posterWidth > 0 && poster.posterHeight > 0) {
+      item.width = poster.posterWidth;
+      item.height = poster.posterHeight;
+    }
   }
   for (const flag of localPosters.flags) {
     console.warn(`[work:catalog] local poster flag: ${flag.file || flag.src} — ${flag.reason}`);

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { WorkItem } from "@/lib/work-types";
 
 function pauseOtherWorkVideos(keep: HTMLVideoElement | null) {
@@ -54,12 +54,40 @@ export function posterAspect(item: WorkItem): { w: number; h: number } {
   return itemAspect(item);
 }
 
+function WorkPoster({
+  poster,
+  sizes,
+  priority,
+  className,
+}: {
+  poster?: string;
+  sizes: string;
+  priority: boolean;
+  className: string;
+}) {
+  if (!poster) {
+    return <div className="h-full w-full bg-charcoal/10" />;
+  }
+  return (
+    <Image
+      src={poster}
+      alt=""
+      fill
+      unoptimized
+      className={`${className} pointer-events-none object-contain object-center`}
+      sizes={sizes}
+      quality={75}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+      draggable={false}
+    />
+  );
+}
+
 export function WorkLocalVideo({
   src,
   title,
   poster,
-  posterWidth,
-  posterHeight,
   className,
   onDesktopActivate,
   sizes = "(max-width: 1023px) 50vw, 36vw",
@@ -76,84 +104,89 @@ export function WorkLocalVideo({
   priority?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
+  const [active, setActive] = useState(false);
 
-  const toggle = useCallback(
-    (e: React.MouseEvent) => {
+  const start = useCallback(
+    (e: React.SyntheticEvent) => {
       e.stopPropagation();
-      e.preventDefault();
+      if ("preventDefault" in e) e.preventDefault();
       onDesktopActivate?.();
-      const v = ref.current;
-      if (!v) return;
-      if (v.paused) {
-        pauseOtherWorkVideos(v);
-        v.muted = true;
-        void v.play().then(() => setPlaying(true));
-      } else {
-        v.pause();
-        setPlaying(false);
-      }
+      setActive(true);
     },
     [onDesktopActivate]
   );
 
-  const showPoster = Boolean(poster) && !(playing && videoReady);
+  useEffect(() => {
+    if (!active) return;
+    const v = ref.current;
+    if (!v) return;
+    pauseOtherWorkVideos(v);
+    const play = () => {
+      v.muted = false;
+      return v.play().catch(() => {
+        v.muted = true;
+        return v.play();
+      });
+    };
+    if (v.readyState >= 2) {
+      void play();
+      return;
+    }
+    const onReady = () => {
+      void play();
+    };
+    v.addEventListener("loadeddata", onReady, { once: true });
+    return () => v.removeEventListener("loadeddata", onReady);
+  }, [active]);
+
+  if (!active) {
+    return (
+      <div
+        className="relative h-full w-full"
+        onClick={start}
+        onPointerDown={stopPlayerGesture}
+        onPointerUp={stopPlayerGesture}
+        role="button"
+        tabIndex={0}
+        aria-label={`Play ${title}`}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            start(e);
+          }
+        }}
+      >
+        <WorkPoster poster={poster} sizes={sizes} priority={priority} className={className} />
+        <PlayMark />
+      </div>
+    );
+  }
 
   return (
     <div
-      className="relative h-full w-full"
-      onClick={toggle}
-      onPointerUp={(e) => e.stopPropagation()}
-      role="button"
-      tabIndex={0}
-      aria-label={playing ? `Pause ${title}` : `Play ${title}`}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          toggle(e as unknown as React.MouseEvent);
-        }
-      }}
+      data-work-player=""
+      className="relative z-10 h-full w-full bg-charcoal/10"
+      style={{ touchAction: "auto" }}
+      onPointerDown={stopPlayerGesture}
+      onPointerMove={stopPlayerGesture}
+      onPointerUp={stopPlayerGesture}
+      onPointerCancel={stopPlayerGesture}
+      onClick={stopPlayerGesture}
+      onTouchStart={stopPlayerGesture}
+      onTouchMove={stopPlayerGesture}
     >
       <video
         ref={ref}
         data-work-video=""
-        className={className}
+        className={`${className} pointer-events-auto relative z-10 object-contain object-center`}
         src={src}
         poster={poster}
-        muted
         playsInline
-        preload="none"
-        controls={playing}
+        controls
+        preload="metadata"
         title={title}
-        onLoadedData={() => setVideoReady(true)}
-        onPlaying={() => {
-          setPlaying(true);
-          setVideoReady(true);
-        }}
-        onPause={() => setPlaying(false)}
-        onPlay={() => setPlaying(true)}
-        onEnded={() => {
-          setPlaying(false);
-          setVideoReady(false);
-          const v = ref.current;
-          if (v) v.currentTime = 0;
-        }}
+        onPlay={(e) => pauseOtherWorkVideos(e.currentTarget)}
       />
-      {showPoster ? (
-        <Image
-          src={poster!}
-          alt=""
-          fill
-          className="pointer-events-none object-contain object-center"
-          sizes={sizes}
-          quality={75}
-          loading={priority ? "eager" : "lazy"}
-          decoding="async"
-          draggable={false}
-        />
-      ) : null}
-      {!playing ? <PlayMark /> : null}
     </div>
   );
 }
@@ -219,7 +252,8 @@ export function WorkExternalVideo({
     <div
       className="relative h-full w-full"
       onClick={activate}
-      onPointerUp={(e) => e.stopPropagation()}
+      onPointerDown={stopPlayerGesture}
+      onPointerUp={stopPlayerGesture}
       role="button"
       tabIndex={0}
       aria-label={
@@ -232,21 +266,7 @@ export function WorkExternalVideo({
         }
       }}
     >
-      {poster ? (
-        <Image
-          src={poster}
-          alt=""
-          fill
-          className={`${className} object-contain object-center`}
-          sizes={sizes}
-          quality={75}
-          loading={priority ? "eager" : "lazy"}
-          decoding="async"
-          draggable={false}
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center bg-charcoal/10" />
-      )}
+      <WorkPoster poster={poster} sizes={sizes} priority={priority} className={className} />
       <PlayMark />
       {!ext.embeddable ? (
         <span className="pointer-events-none absolute bottom-2 left-2 right-2 text-center font-sans text-[0.55rem] uppercase tracking-[0.14em] text-bone">

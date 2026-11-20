@@ -22,8 +22,8 @@ export type WorkProjectSections = Record<WorkSectionKey, WorkProjectGroup[]>;
 
 function emptyProjectSections(): WorkProjectSections {
   return {
-    styleOut: [],
     costumeDesign: [],
+    styleOut: [],
     advertising: [],
     editorial: [],
     heartsSoldSeparatelyTour: [],
@@ -101,8 +101,8 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> =
 /** Flat color buckets per section — unused by Work carousels; World/debug fallbacks. */
 export const workSections: WorkSections = (() => {
   const out: WorkSections = {
-    styleOut: emptyColorGroups(),
     costumeDesign: emptyColorGroups(),
+    styleOut: emptyColorGroups(),
     advertising: emptyColorGroups(),
     editorial: emptyColorGroups(),
     heartsSoldSeparatelyTour: emptyColorGroups(),

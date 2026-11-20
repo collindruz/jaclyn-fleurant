@@ -138,7 +138,7 @@ function stripItemWidthClass(isMobile: boolean, isDesktopExpanded: boolean): str
 }
 
 function stripItemStyle(item: WorkItem): CSSProperties {
-  const { w, h } = item.kind === "video" && item.external ? posterAspect(item) : itemAspect(item);
+  const { w, h } = item.kind === "video" ? posterAspect(item) : itemAspect(item);
   return {
     aspectRatio: `${w} / ${h}`,
     width: "auto",
@@ -191,7 +191,9 @@ function isLightTapGesture(dx: number, dy: number, dt: number) {
 function eventFromWorkPlayer(e: { target: EventTarget | null }) {
   const t = e.target;
   if (!(t instanceof Element)) return false;
-  return Boolean(t.closest("[data-work-player]") || t.tagName === "IFRAME");
+  return Boolean(
+    t.closest("[data-work-player]") || t.tagName === "IFRAME" || t.tagName === "VIDEO"
+  );
 }
 
 /** Muted two-digit index (01–04) — tiny, not a graphic treatment. */
@@ -415,6 +417,7 @@ function StripItem({
           sizes={stripSizes}
           quality={75}
           className="object-contain object-center"
+          unoptimized
           draggable={false}
           loading="eager"
           fetchPriority={priorityImage ? "high" : "auto"}
@@ -552,6 +555,7 @@ function MobileFocusLayer({
             height={h}
             sizes="100vw"
             className="h-full w-full object-contain object-center"
+            unoptimized
             priority
             draggable={false}
           />
