@@ -136,7 +136,19 @@
         "/images/work/style-out/IMG_3861.JPG",
         "/images/work/style-out/IMG_3874.JPG",
         "/images/work/style-out/IMG_7014.JPG",
-        "/images/work/style-out/IMG_7024.JPG"
+        "/images/work/style-out/IMG_7024.JPG",
+        "/images/work/style-out/IMG_5538.jpg",
+        "/images/work/style-out/IMG_5539.jpg",
+        "/images/work/style-out/IMG_5540.jpg",
+        "/images/work/style-out/IMG_5541.jpg",
+        "/images/work/style-out/IMG_5542.jpg",
+        "/images/work/style-out/IMG_5543.jpg",
+        "/images/work/style-out/IMG_5544.jpg",
+        "/images/work/style-out/IMG_5546.jpg",
+        "/images/work/style-out/IMG_5547.jpg",
+        "/images/work/style-out/IMG_5549.jpg",
+        "/images/work/style-out/IMG_5550.jpg",
+        "/images/work/style-out/IMG_5551.jpg"
       ]
     },
     {
@@ -250,7 +262,7 @@
     },
     {
       "id": "cd-hss-pink-cowboy",
-      "title": "Hearts Sold Separately — pink cowboy",
+      "title": "Hearts Sold Separately \u2014 pink cowboy",
       "sectionKey": "costumeDesign",
       "assets": []
     },
@@ -264,7 +276,7 @@
     },
     {
       "id": "cd-hss-live",
-      "title": "Hearts Sold Separately — live",
+      "title": "Hearts Sold Separately \u2014 live",
       "sectionKey": "costumeDesign",
       "assets": []
     },
@@ -294,7 +306,7 @@
     },
     {
       "id": "cd-homecoming-trailer",
-      "title": "Homecoming: A Film By Beyoncé",
+      "title": "Homecoming: A Film By Beyonc\u00e9",
       "sectionKey": "costumeDesign",
       "assets": [
         "https://www.youtube.com/watch?v=fB8qvx0HOlI"
@@ -425,7 +437,7 @@
     },
     {
       "id": "ad-reebok-born-classic",
-      "title": "Reebok Born Classic. Worn for Life. — London",
+      "title": "Reebok Born Classic. Worn for Life. \u2014 London",
       "sectionKey": "advertising",
       "assets": [
         "https://www.youtube.com/watch?v=sRRUl9sJZtQ"
@@ -433,7 +445,7 @@
     },
     {
       "id": "ad-brooks-babylon-break-the-map",
-      "title": "Brooks x Babylon — Break the Map",
+      "title": "Brooks x Babylon \u2014 Break the Map",
       "sectionKey": "advertising",
       "assets": [
         "https://www.youtube.com/watch?v=tgNECKyLmGk"
@@ -498,7 +510,7 @@
     },
     {
       "id": "ed-highsnobiety-mariah",
-      "title": "Highsnobiety — Mariah the Scientist",
+      "title": "Highsnobiety \u2014 Mariah the Scientist",
       "sectionKey": "editorial",
       "assets": [
         "/images/work/editorial/site-047.jpg"
@@ -568,7 +580,7 @@
     },
     {
       "id": "ed-lofficiel-bebe-rexha",
-      "title": "L'Officiel — Bebe Rexha",
+      "title": "L'Officiel \u2014 Bebe Rexha",
       "sectionKey": "editorial",
       "assets": [
         "/images/work/editorial/site-049.jpg",
@@ -651,7 +663,7 @@
     },
     {
       "id": "ed-galore-tiffany-young",
-      "title": "Galore — Tiffany Young",
+      "title": "Galore \u2014 Tiffany Young",
       "sectionKey": "editorial",
       "assets": []
     },
@@ -774,6 +786,15 @@
         "/images/work/editorial/site-072.jpg",
         "/images/work/editorial/site-071.jpg",
         "/images/work/editorial/site-042.jpg"
+      ]
+    },
+    {
+      "id": "editorial-unassigned",
+      "title": "Untitled",
+      "sectionKey": "editorial",
+      "assets": [
+        "/images/work/editorial/8f366458-6d65-4575-91aa-bbaeeaae9369.jpg.avif",
+        "/images/work/editorial/9b13c483-d638-4b01-bc5a-b5e581289a57.jpg.avif"
       ]
     },
     {
@@ -969,6 +990,20 @@
         "/images/work/events/IMG_1306.JPG",
         "/images/work/events/IMG_1307.JPG",
         "/images/work/events/IMG_6129.JPG"
+      ]
+    },
+    {
+      "id": "events-unassigned",
+      "title": "Untitled",
+      "sectionKey": "events",
+      "assets": [
+        "/images/work/events/IMG_5552.jpg",
+        "/images/work/events/IMG_5555.jpg",
+        "/images/work/events/IMG_5556.jpg",
+        "/images/work/events/IMG_5558.jpg",
+        "/images/work/events/IMG_5559.jpg",
+        "/images/work/events/IMG_5560.jpg",
+        "/images/work/events/IMG_5561.jpg"
       ]
     }
   ]

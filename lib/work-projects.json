@@ -4,7 +4,7 @@
   "projects": [
     {
       "id": "ed-highsnobiety-mariah",
-      "title": "Highsnobiety — Mariah the Scientist",
+      "title": "Highsnobiety \u2014 Mariah the Scientist",
       "section": "editorial",
       "releaseDate": null,
       "datePrecision": null,
@@ -77,7 +77,7 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_6252.JPG",
       "provisional": true,
-      "notes": "FEATURED OVERRIDE projectOrder 3. Mariah pink puffer hood look (IMG_6249–6253, site-004). IMG_6253.JPG permanently excluded. Shoot/publication name not verified.",
+      "notes": "FEATURED OVERRIDE projectOrder 3. Mariah pink puffer hood look (IMG_6249\u20136253, site-004). IMG_6253.JPG permanently excluded. Shoot/publication name not verified.",
       "projectOrder": 3,
       "lockOrder": true,
       "assetOrder": [
@@ -105,7 +105,7 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_6222.JPG",
       "provisional": true,
-      "notes": "FEATURED OVERRIDE projectOrder 4. Mariah black-fur editorial roll IMG_6221–6226. Publication not verified.",
+      "notes": "FEATURED OVERRIDE projectOrder 4. Mariah black-fur editorial roll IMG_6221\u20136226. Publication not verified.",
       "projectOrder": 4,
       "lockOrder": true,
       "assetOrder": [
@@ -131,7 +131,7 @@
       ],
       "coverAsset": "/images/work/editorial/site-044.png",
       "provisional": true,
-      "notes": "FEATURED OVERRIDE projectOrder 5. Mariah closet editorial roll IMG_9285–9286. Publication not verified.",
+      "notes": "FEATURED OVERRIDE projectOrder 5. Mariah closet editorial roll IMG_9285\u20139286. Publication not verified.",
       "projectOrder": 5,
       "lockOrder": true,
       "assetOrder": [
@@ -156,7 +156,7 @@
       ],
       "coverAsset": "/images/work/editorial/site-043.jpg",
       "provisional": true,
-      "notes": "FEATURED OVERRIDE projectOrder 6. Mariah golden-hour hills: belt look (041–043), lingerie-on-sheets look (070), brown-jacket look (084). Same talent/location; looks kept consecutive and distinct. site-074 (cream smocked, different hair/trees) kept separate — uncertain whether same shoot.",
+      "notes": "FEATURED OVERRIDE projectOrder 6. Mariah golden-hour hills: belt look (041\u2013043), lingerie-on-sheets look (070), brown-jacket look (084). Same talent/location; looks kept consecutive and distinct. site-074 (cream smocked, different hair/trees) kept separate \u2014 uncertain whether same shoot.",
       "projectOrder": 6,
       "lockOrder": true,
       "assetOrder": [
@@ -165,7 +165,7 @@
     },
     {
       "id": "ed-lofficiel-bebe-rexha",
-      "title": "L'Officiel — Bebe Rexha",
+      "title": "L'Officiel \u2014 Bebe Rexha",
       "section": "editorial",
       "releaseDate": null,
       "datePrecision": null,
@@ -178,7 +178,7 @@
       ],
       "coverAsset": "/images/work/editorial/site-049.jpg",
       "provisional": false,
-      "notes": "Cover-first within this shoot: L'Officiel cover (site-049) then related looks — pearl (052), leopard (050), yellow Prada (051). Not merged with other magazine covers.",
+      "notes": "Cover-first within this shoot: L'Officiel cover (site-049) then related looks \u2014 pearl (052), leopard (050), yellow Prada (051). Not merged with other magazine covers.",
       "lockOrder": true,
       "assetOrder": [
         "/images/work/editorial/site-049.jpg",
@@ -361,7 +361,7 @@
     },
     {
       "id": "ed-galore-tiffany-young",
-      "title": "Galore — Tiffany Young",
+      "title": "Galore \u2014 Tiffany Young",
       "section": "editorial",
       "releaseDate": null,
       "datePrecision": null,
@@ -553,7 +553,7 @@
       ],
       "coverAsset": "/images/work/editorial/IMG_5661.JPG",
       "provisional": true,
-      "notes": "Camera-roll cluster IMG_5661–5666: man in camo. Not Mariah; not featured.",
+      "notes": "Camera-roll cluster IMG_5661\u20135666: man in camo. Not Mariah; not featured.",
       "assetOrder": [
         "/images/work/editorial/IMG_5661.JPG",
         "/images/work/editorial/IMG_5662.JPG",
@@ -904,14 +904,14 @@
       "assets": [],
       "coverAsset": "/images/work/costume-design/IMG_2678.JPG",
       "provisional": true,
-      "notes": "FEATURED OVERRIDE projectOrder 10. Mariah mint chiffon cowboy HSS look. Other frames from the old IMG_2678–2686 cluster were the teal-jacket look and were moved to co-roll-img-2712.",
+      "notes": "FEATURED OVERRIDE projectOrder 10. Mariah mint chiffon cowboy HSS look. Other frames from the old IMG_2678\u20132686 cluster were the teal-jacket look and were moved to co-roll-img-2712.",
       "lockOrder": true,
       "assetOrder": [],
       "projectOrder": 10
     },
     {
       "id": "cd-hss-pink-cowboy",
-      "title": "Hearts Sold Separately — pink cowboy",
+      "title": "Hearts Sold Separately \u2014 pink cowboy",
       "section": "costumeDesign",
       "releaseDate": null,
       "datePrecision": null,
@@ -945,7 +945,7 @@
     },
     {
       "id": "cd-hss-live",
-      "title": "Hearts Sold Separately — live",
+      "title": "Hearts Sold Separately \u2014 live",
       "section": "costumeDesign",
       "releaseDate": "2026",
       "datePrecision": "year",
@@ -953,7 +953,7 @@
       "assets": [],
       "coverAsset": "/images/work/costume-design/6a075460084e41c09a0079d890591614.MP4",
       "provisional": true,
-      "notes": "All local costume MP4s share the same live staging/watermark. Treated as one performance group; venue/date not verified. Review if any clip is a different night. FEATURED OVERRIDE projectOrder 13 — local performance clips AFTER Mariah performance photo projects. Not placed first because they are videos. Clips stay together as one live group; not scattered through photo looks.",
+      "notes": "All local costume MP4s share the same live staging/watermark. Treated as one performance group; venue/date not verified. Review if any clip is a different night. FEATURED OVERRIDE projectOrder 13 \u2014 local performance clips AFTER Mariah performance photo projects. Not placed first because they are videos. Clips stay together as one live group; not scattered through photo looks.",
       "projectOrder": 13,
       "lockOrder": true,
       "assetOrder": []
@@ -1017,7 +1017,7 @@
     },
     {
       "id": "cd-homecoming-trailer",
-      "title": "Homecoming: A Film By Beyoncé",
+      "title": "Homecoming: A Film By Beyonc\u00e9",
       "section": "costumeDesign",
       "releaseDate": "2019-04-08",
       "datePrecision": "day",
@@ -1051,7 +1051,7 @@
       ],
       "coverAsset": "/images/work/costume-design/site-242.png",
       "provisional": true,
-      "notes": "Beyoncé gold pregnancy/grammy-adjacent stills. Looks kept consecutive: gold bikini (243/247), gold dress (246), stage tableau (244), dancers (245). Not Mariah.",
+      "notes": "Beyonc\u00e9 gold pregnancy/grammy-adjacent stills. Looks kept consecutive: gold bikini (243/247), gold dress (246), stage tableau (244), dancers (245). Not Mariah.",
       "lockOrder": true,
       "assetOrder": [
         "/images/work/costume-design/site-242.png",
@@ -1075,7 +1075,7 @@
       ],
       "coverAsset": "/images/work/costume-design/site-236.jpg",
       "provisional": true,
-      "notes": "Beyoncé leopard look. Distinct from other Beyoncé stills.",
+      "notes": "Beyonc\u00e9 leopard look. Distinct from other Beyonc\u00e9 stills.",
       "assetOrder": [
         "/images/work/costume-design/site-236.jpg"
       ],
@@ -1094,7 +1094,7 @@
       ],
       "coverAsset": "/images/work/costume-design/site-234.jpg",
       "provisional": true,
-      "notes": "Beyoncé patent red look. Distinct from other Beyoncé stills.",
+      "notes": "Beyonc\u00e9 patent red look. Distinct from other Beyonc\u00e9 stills.",
       "assetOrder": [
         "/images/work/costume-design/site-234.jpg"
       ],
@@ -1116,7 +1116,7 @@
       ],
       "coverAsset": "/images/work/costume-design/site-229.jpg",
       "provisional": true,
-      "notes": "Beyoncé silver mesh cape look. Distinct from site-229.",
+      "notes": "Beyonc\u00e9 silver mesh cape look. Distinct from site-229.",
       "assetOrder": [
         "/images/work/costume-design/site-229.jpg",
         "/images/work/costume-design/site-231.jpg",
@@ -1136,7 +1136,7 @@
       "assets": [],
       "coverAsset": "/images/work/costume-design/site-229.jpg",
       "provisional": true,
-      "notes": "Beyoncé studded-cape look. Not merged with other Beyoncé looks solely because of the performer.",
+      "notes": "Beyonc\u00e9 studded-cape look. Not merged with other Beyonc\u00e9 looks solely because of the performer.",
       "assetOrder": [],
       "lockOrder": true,
       "projectOrder": 22
@@ -1208,7 +1208,7 @@
       "assets": [],
       "coverAsset": "/images/work/costume-design/site-166.jpg",
       "provisional": true,
-      "notes": "Renaissance/hat performance stills (Beyoncé). Not Mariah; not featured.",
+      "notes": "Renaissance/hat performance stills (Beyonc\u00e9). Not Mariah; not featured.",
       "lockOrder": true,
       "assetOrder": [],
       "projectOrder": 26
@@ -1223,7 +1223,7 @@
       "assets": [],
       "coverAsset": "/images/work/costume-design/IMG_0316.JPG",
       "provisional": true,
-      "notes": "Gold corset performance look (IMG_0316–0317 + IMG_0324). Not Mariah; not featured.",
+      "notes": "Gold corset performance look (IMG_0316\u20130317 + IMG_0324). Not Mariah; not featured.",
       "lockOrder": true,
       "assetOrder": [],
       "projectOrder": 27
@@ -1330,11 +1330,11 @@
     },
     {
       "id": "ad-reebok-born-classic",
-      "title": "Reebok Born Classic. Worn for Life. — London",
+      "title": "Reebok Born Classic. Worn for Life. \u2014 London",
       "section": "advertising",
       "releaseDate": "2026-02-18",
       "datePrecision": "day",
-      "dateSource": "Footwear Magazine: SS26 Garment Leather / Workout Plus collection launch 2026-02-18. London hub 27 Feb–1 Mar 2026 (TheIndustry.fashion 2026-02-26).",
+      "dateSource": "Footwear Magazine: SS26 Garment Leather / Workout Plus collection launch 2026-02-18. London hub 27 Feb\u20131 Mar 2026 (TheIndustry.fashion 2026-02-26).",
       "assets": [
         "https://www.youtube.com/watch?v=sRRUl9sJZtQ"
       ],
@@ -1349,7 +1349,7 @@
     },
     {
       "id": "ad-brooks-babylon-break-the-map",
-      "title": "Brooks x Babylon — Break the Map",
+      "title": "Brooks x Babylon \u2014 Break the Map",
       "section": "advertising",
       "releaseDate": "2025-11-20",
       "datePrecision": "day",
@@ -1443,7 +1443,7 @@
       ],
       "coverAsset": "/images/work/advertising/site-259.jpg",
       "provisional": false,
-      "notes": "CALVIN KLEIN wordmark and #CKINLIFE on a golden-hour group running in a field. Same location family as the Jeans ads but different talent, wardrobe, and lockup — kept as a separate CK campaign so CK stills stay consecutive without merging two campaigns.",
+      "notes": "CALVIN KLEIN wordmark and #CKINLIFE on a golden-hour group running in a field. Same location family as the Jeans ads but different talent, wardrobe, and lockup \u2014 kept as a separate CK campaign so CK stills stay consecutive without merging two campaigns.",
       "assetOrder": [
         "/images/work/advertising/site-259.jpg"
       ],
@@ -1745,7 +1745,7 @@
       ],
       "coverAsset": "/images/work/events/site-152.jpg",
       "provisional": true,
-      "notes": "Blush sequin off-shoulder mini with Tom Ford. Different person and look from the white-cape iHeart pair — not combined. Event/date not verified (BFA 4184246).",
+      "notes": "Blush sequin off-shoulder mini with Tom Ford. Different person and look from the white-cape iHeart pair \u2014 not combined. Event/date not verified (BFA 4184246).",
       "assetOrder": [
         "/images/work/events/site-152.jpg"
       ],
@@ -1974,7 +1974,19 @@
         "/images/work/style-out/IMG_3861.JPG",
         "/images/work/style-out/IMG_3874.JPG",
         "/images/work/style-out/IMG_7014.JPG",
-        "/images/work/style-out/IMG_7024.JPG"
+        "/images/work/style-out/IMG_7024.JPG",
+        "/images/work/style-out/IMG_5538.jpg",
+        "/images/work/style-out/IMG_5539.jpg",
+        "/images/work/style-out/IMG_5540.jpg",
+        "/images/work/style-out/IMG_5541.jpg",
+        "/images/work/style-out/IMG_5542.jpg",
+        "/images/work/style-out/IMG_5543.jpg",
+        "/images/work/style-out/IMG_5544.jpg",
+        "/images/work/style-out/IMG_5546.jpg",
+        "/images/work/style-out/IMG_5547.jpg",
+        "/images/work/style-out/IMG_5549.jpg",
+        "/images/work/style-out/IMG_5550.jpg",
+        "/images/work/style-out/IMG_5551.jpg"
       ],
       "coverAsset": "/images/work/style-out/IMG_0349.jpg",
       "provisional": true,
@@ -2008,7 +2020,19 @@
         "/images/work/style-out/IMG_3861.JPG",
         "/images/work/style-out/IMG_3874.JPG",
         "/images/work/style-out/IMG_7014.JPG",
-        "/images/work/style-out/IMG_7024.JPG"
+        "/images/work/style-out/IMG_7024.JPG",
+        "/images/work/style-out/IMG_5538.jpg",
+        "/images/work/style-out/IMG_5539.jpg",
+        "/images/work/style-out/IMG_5540.jpg",
+        "/images/work/style-out/IMG_5541.jpg",
+        "/images/work/style-out/IMG_5542.jpg",
+        "/images/work/style-out/IMG_5543.jpg",
+        "/images/work/style-out/IMG_5544.jpg",
+        "/images/work/style-out/IMG_5546.jpg",
+        "/images/work/style-out/IMG_5547.jpg",
+        "/images/work/style-out/IMG_5549.jpg",
+        "/images/work/style-out/IMG_5550.jpg",
+        "/images/work/style-out/IMG_5551.jpg"
       ],
       "notes": "Style Out stills from public/images/work/style-out. HEIC originals kept on disk; JPEG siblings used on the site.",
       "projectOrder": 0
@@ -2023,7 +2047,7 @@
       "assets": [],
       "coverAsset": "/images/work/costume-design/site-356.jpg",
       "provisional": true,
-      "notes": "Consecutive site-356–367, identical 1366×2048 runway frames. Show name/season not verified.",
+      "notes": "Consecutive site-356\u2013367, identical 1366\u00d72048 runway frames. Show name/season not verified.",
       "assetOrder": []
     },
     {
@@ -2038,6 +2062,56 @@
       "provisional": true,
       "notes": "Pink garment still. Not a performance portrait; not featured.",
       "assetOrder": []
+    },
+    {
+      "id": "events-unassigned",
+      "title": "Untitled",
+      "section": "events",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "provisional": true,
+      "assets": [
+        "/images/work/events/IMG_5552.jpg",
+        "/images/work/events/IMG_5555.jpg",
+        "/images/work/events/IMG_5556.jpg",
+        "/images/work/events/IMG_5558.jpg",
+        "/images/work/events/IMG_5559.jpg",
+        "/images/work/events/IMG_5560.jpg",
+        "/images/work/events/IMG_5561.jpg"
+      ],
+      "assetOrder": [
+        "/images/work/events/IMG_5552.jpg",
+        "/images/work/events/IMG_5555.jpg",
+        "/images/work/events/IMG_5556.jpg",
+        "/images/work/events/IMG_5558.jpg",
+        "/images/work/events/IMG_5559.jpg",
+        "/images/work/events/IMG_5560.jpg",
+        "/images/work/events/IMG_5561.jpg"
+      ],
+      "coverAsset": "/images/work/events/IMG_5552.jpg",
+      "lockOrder": true,
+      "notes": "New stills added from category folder."
+    },
+    {
+      "id": "editorial-unassigned",
+      "title": "Untitled",
+      "section": "editorial",
+      "releaseDate": null,
+      "datePrecision": null,
+      "dateSource": null,
+      "provisional": true,
+      "assets": [
+        "/images/work/editorial/8f366458-6d65-4575-91aa-bbaeeaae9369.jpg.avif",
+        "/images/work/editorial/9b13c483-d638-4b01-bc5a-b5e581289a57.jpg.avif"
+      ],
+      "assetOrder": [
+        "/images/work/editorial/8f366458-6d65-4575-91aa-bbaeeaae9369.jpg.avif",
+        "/images/work/editorial/9b13c483-d638-4b01-bc5a-b5e581289a57.jpg.avif"
+      ],
+      "coverAsset": "/images/work/editorial/8f366458-6d65-4575-91aa-bbaeeaae9369.jpg.avif",
+      "lockOrder": true,
+      "notes": "New stills added from category folder."
     }
   ]
 }
