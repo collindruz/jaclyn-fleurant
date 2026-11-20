@@ -1,10 +1,10 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import type { WorldStill } from "@/lib/placeholders";
 import { packWorldStills, type WorldPackSlot } from "@/lib/world-pack";
 import { STACK_VIEWER } from "@/lib/stacking";
-import Image from "next/image";
+import { releaseWorldThumbs, requestWorldThumb } from "@/lib/world-thumb";
 import {
   memo,
   useCallback,
@@ -19,10 +19,7 @@ import { createPortal } from "react-dom";
 const TAP_MOVE_PX = 16;
 const SWIPE_PX = 48;
 const WHEEL_LOCK_MS = 560;
-const THUMB_QUALITY = 60;
-const VIEWER_QUALITY = 85;
 const THUMB_EAGER_COUNT = 36;
-const THUMB_BATCH = 32;
 const THUMB_REST_FILTER = "[filter:grayscale(1)_contrast(1.08)]";
 
 type DraggableWorldProps = {
@@ -54,10 +51,13 @@ function useWorldBoard() {
       const hh = header ? header.getBoundingClientRect().height : 0;
       const viewportH = window.visualViewport?.height ?? window.innerHeight;
       const safeBottom = readSafeInsetBottom();
-      setBox({
-        w: window.innerWidth,
-        h: Math.max(64, viewportH - hh - safeBottom),
-      });
+      const next = {
+        w: Math.round(window.innerWidth),
+        h: Math.round(Math.max(64, viewportH - hh - safeBottom)),
+      };
+      setBox((prev) =>
+        prev.w === next.w && prev.h === next.h ? prev : next
+      );
     };
     measure();
     window.addEventListener("resize", measure);
@@ -89,7 +89,6 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
   const n = list.length;
   const board = useWorldBoard();
   const [enlargedIndex, setEnlargedIndex] = useState<number | null>(null);
-  const [thumbLimit, setThumbLimit] = useState(THUMB_EAGER_COUNT);
 
   const packed = useMemo(
     () => packWorldStills(list, board.w, board.h),
@@ -97,13 +96,8 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
   );
 
   useEffect(() => {
-    if (board.w < 8 || board.h < 8 || packed.slots.length === 0) return;
-    const hs = packed.slots.map((s) => s.h);
-    const avgH = hs.reduce((a, b) => a + b, 0) / hs.length;
-    console.info(
-      `[world-pack] thumbMaxH=${packed.thumbMaxH.toFixed(1)} avgH=${avgH.toFixed(1)} gap=${packed.gap} pad=${packed.pad} board=${board.w}x${board.h} n=${packed.slots.length}`
-    );
-  }, [board.w, board.h, packed]);
+    return () => releaseWorldThumbs();
+  }, []);
 
   const closeEnlarge = useCallback(() => {
     setEnlargedIndex(null);
@@ -123,31 +117,6 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
   const onPrintTap = useCallback((i: number) => {
     setEnlargedIndex(i);
   }, []);
-
-  useEffect(() => {
-    if (enlargedIndex != null) return;
-    if (thumbLimit >= n) return;
-    let cancelled = false;
-    const bump = () => {
-      if (cancelled) return;
-      setThumbLimit((c) => Math.min(n, c + THUMB_BATCH));
-    };
-    let idleId = 0;
-    let timeoutId = 0;
-    const ric = window.requestIdleCallback;
-    if (typeof ric === "function") {
-      idleId = ric(bump, { timeout: 80 });
-    } else {
-      timeoutId = window.setTimeout(bump, 32);
-    }
-    return () => {
-      cancelled = true;
-      if (idleId && typeof window.cancelIdleCallback === "function") {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId) window.clearTimeout(timeoutId);
-    };
-  }, [thumbLimit, n, enlargedIndex]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -176,6 +145,7 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
     enlargedIndex != null && n > 1 ? list[(enlargedIndex + 1) % n] : null;
   const viewerOpen = enlargedIndex != null;
   const boardH = board.h > 0 ? board.h : undefined;
+  const packReady = packed.slots.length > 0;
 
   return (
     <div
@@ -189,6 +159,7 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
         width: "100%",
         minHeight: boardH ? undefined : "50vh",
         padding: 0,
+        opacity: packReady ? 1 : 0,
       }}
       role="group"
       aria-label="Stills"
@@ -207,15 +178,12 @@ export function DraggableWorld({ stills }: DraggableWorldProps) {
             <WorldPrint
               key={still.src}
               src={still.src}
-              width={still.width}
-              height={still.height}
               index={i}
               n={n}
               slot={slot}
               isEnlarged={enlargedIndex === i}
               onPrintTap={onPrintTap}
               eager={i < THUMB_EAGER_COUNT}
-              showImage={i < thumbLimit}
             />
           );
         })}
@@ -256,7 +224,14 @@ function WorldEnlarge({
   onPrev: () => void;
   onNext: () => void;
 }) {
-  const reduceMotion = useReducedMotion() ?? false;
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduceMotion(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
   const wheelLock = useRef(0);
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
   const skipClick = useRef(false);
@@ -380,28 +355,27 @@ function WorldEnlarge({
           }}
           onClick={onPhotoClick}
         >
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={still.src}
             alt=""
             width={natW}
             height={natH}
             className="pointer-events-none h-auto w-full select-none object-contain object-center"
-            sizes="90vw"
-            quality={VIEWER_QUALITY}
-            priority
+            decoding="async"
             draggable={false}
           />
         </motion.button>
       </AnimatePresence>
       {nextStill ? (
         <div className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden>
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={nextStill.src}
             alt=""
             width={nextStill.width > 32 ? nextStill.width : 1600}
             height={nextStill.height > 32 ? nextStill.height : 2000}
-            sizes="90vw"
-            quality={VIEWER_QUALITY}
+            decoding="async"
             draggable={false}
           />
         </div>
@@ -412,30 +386,41 @@ function WorldEnlarge({
 
 type WorldPrintProps = {
   src: string;
-  width: number;
-  height: number;
   index: number;
   n: number;
   slot: WorldPackSlot;
   isEnlarged: boolean;
   onPrintTap: (index: number) => void;
   eager: boolean;
-  showImage: boolean;
 };
 
 const WorldPrint = memo(function WorldPrint({
   src,
-  width,
-  height,
   index,
   n,
   slot,
   isEnlarged,
   onPrintTap,
   eager,
-  showImage,
 }: WorldPrintProps) {
-  const displayW = Math.max(1, Math.ceil(slot.w));
+  const [thumbSrc, setThumbSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const dpr = Math.min(2, typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
+    const tw = Math.max(1, Math.round(slot.w * dpr));
+    const th = Math.max(1, Math.round(slot.h * dpr));
+    requestWorldThumb(src, tw, th)
+      .then((url) => {
+        if (!cancelled) setThumbSrc(url);
+      })
+      .catch(() => {
+        if (!cancelled) setThumbSrc(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [src, slot.w, slot.h]);
 
   return (
     <button
@@ -460,19 +445,18 @@ const WorldPrint = memo(function WorldPrint({
       onClick={() => onPrintTap(index)}
     >
       <div data-world-image="" className="group/still h-full w-full">
-        {showImage ? (
-          <Image
-            src={src}
+        {thumbSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={thumbSrc}
             alt=""
-            width={width}
-            height={height}
+            width={Math.max(1, Math.round(slot.w))}
+            height={Math.max(1, Math.round(slot.h))}
             className={`pointer-events-none block h-full w-full select-none object-contain object-center transition-[filter] duration-[550ms] ease-in-out motion-reduce:duration-75 ${
               isEnlarged
                 ? "[filter:none] grayscale-0"
                 : `${THUMB_REST_FILTER} md:group-hover/still:grayscale-0 md:group-hover/still:[filter:none]`
             }`}
-            sizes={`${displayW}px`}
-            quality={THUMB_QUALITY}
             draggable={false}
             loading={eager ? "eager" : "lazy"}
             fetchPriority={index < 4 ? "high" : "auto"}
