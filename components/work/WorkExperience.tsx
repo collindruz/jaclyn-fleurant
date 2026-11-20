@@ -35,14 +35,13 @@ import { createPortal } from "react-dom";
 const MOBILE_MQ = "(max-width: 767px)";
 
 function subscribeMobile(onChange: () => void) {
-  if (typeof window === "undefined") return () => {};
   const mq = window.matchMedia(MOBILE_MQ);
   mq.addEventListener("change", onChange);
   return () => mq.removeEventListener("change", onChange);
 }
 
 function getMobileSnapshot() {
-  return typeof window !== "undefined" && window.matchMedia(MOBILE_MQ).matches;
+  return window.matchMedia(MOBILE_MQ).matches;
 }
 
 function getServerMobileSnapshot() {
@@ -270,7 +269,7 @@ type StripItemProps = {
   onMobileImagePointerEnd: (panelId: string, p: MobileImagePointerEnd) => void;
   reduceMotion: boolean;
   /** Desktop: register tile root for center-scroll. */
-  registerDesktopItemRef?: (panelId: string, el: HTMLLIElement | null) => void;
+  registerDesktopItemRef?: (panelId: string, el: HTMLElement | null) => void;
   onDesktopVideoActivate?: (panelId: string) => void;
   priorityImage?: boolean;
 };
@@ -366,7 +365,7 @@ function StripItem({
   // Mobile: keep list identity without occupying strip width while this item is in the focus layer
   if (isMobile && isFocused) {
     return (
-      <li
+      <div
         className="h-0 w-0 max-w-0 shrink-0 grow-0 overflow-hidden p-0"
         aria-hidden
       />
@@ -430,11 +429,10 @@ function StripItem({
   // Desktop / tablet: static list item, no tap focus (stripArmed ignored)
   if (!isMobile) {
     return (
-      <li
+      <div
         ref={(el) => registerDesktopItemRef?.(panelId, el)}
         className={itemWidthClass}
         style={stripItemStyle(item)}
-        role="listitem"
         data-work-panel={panelId}
         aria-describedby={showCaption ? capId : undefined}
       >
@@ -445,7 +443,7 @@ function StripItem({
           {mediaInner}
         </div>
         {caption}
-      </li>
+      </div>
     );
   }
 
@@ -458,11 +456,10 @@ function StripItem({
 
   // Mobile: motion; pointer gestures decide strip activation vs open (no click — avoids scroll fights)
   return (
-    <motion.li
+    <motion.div
       layout={false}
       className={`${itemWidthClass} ${mobileCursorClass}`}
       style={stripItemStyle(item)}
-      role="listitem"
       data-work-panel={panelId}
       aria-describedby={showCaption && !isFocused ? capId : undefined}
       data-cursor={stripArmed && !isFaded ? "interactive" : undefined}
@@ -483,7 +480,7 @@ function StripItem({
         {mediaInner}
       </motion.div>
       {caption}
-    </motion.li>
+    </motion.div>
   );
 }
 
@@ -629,9 +626,9 @@ function SectionWorkScroll({
   const hasFocus = Boolean(focusedPanelId) && isMobile;
   const listId = `${sectionKey}-work-scroll`;
   const scrollerRef = useRef<HTMLUListElement | null>(null);
-  const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+  const itemRefs = useRef<Map<string, HTMLElement>>(new Map());
   const registerDesktopItemRef = useCallback(
-    (panelId: string, el: HTMLLIElement | null) => {
+    (panelId: string, el: HTMLElement | null) => {
       const m = itemRefs.current;
       if (el) m.set(panelId, el);
       else m.delete(panelId);
@@ -713,7 +710,7 @@ function SectionWorkScroll({
         ? itemRefs.current.get(panelId) ??
           (scroller.querySelector(
             `[data-work-panel="${CSS.escape(panelId)}"]`
-          ) as HTMLLIElement | null)
+          ) as HTMLElement | null)
         : null);
 
     const item = itemEl();
@@ -893,9 +890,8 @@ function SectionWorkScroll({
                   >
                     {group.title}
                   </span>
-                  <ul
-                    className="m-0 flex w-max shrink-0 grow-0 basis-auto list-none items-center justify-start gap-[14px] p-0 sm:gap-4 md:gap-4"
-                    role="list"
+                  <div
+                    className="m-0 flex w-max shrink-0 grow-0 basis-auto items-center justify-start gap-[14px] p-0 sm:gap-4 md:gap-4"
                     aria-label={group.title}
                   >
                     {items.map((item, i) => {
@@ -928,7 +924,7 @@ function SectionWorkScroll({
                         />
                       );
                     })}
-                  </ul>
+                  </div>
                 </li>,
               ];
             })}

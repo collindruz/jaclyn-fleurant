@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { WorkItem } from "@/lib/work-types";
 
@@ -56,28 +55,23 @@ export function posterAspect(item: WorkItem): { w: number; h: number } {
 
 function WorkPoster({
   poster,
-  sizes,
-  priority,
   className,
 }: {
   poster?: string;
-  sizes: string;
-  priority: boolean;
+  sizes?: string;
+  priority?: boolean;
   className: string;
 }) {
   if (!poster) {
     return <div className="h-full w-full bg-charcoal/10" />;
   }
   return (
-    <Image
+    // Native img avoids next/image hydration mismatches on YouTube/Vimeo posters.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       src={poster}
       alt=""
-      fill
-      unoptimized
-      className={`${className} pointer-events-none object-contain object-center`}
-      sizes={sizes}
-      quality={75}
-      loading={priority ? "eager" : "lazy"}
+      className={`${className} pointer-events-none absolute inset-0 h-full w-full object-contain object-center`}
       decoding="async"
       draggable={false}
     />
