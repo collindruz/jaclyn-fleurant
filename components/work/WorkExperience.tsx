@@ -4,16 +4,13 @@ import {
   AnimatePresence,
   LayoutGroup,
   motion,
-  useReducedMotion,
 } from "framer-motion";
-import Image from "next/image";
 import {
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
-  useSyncExternalStore,
   type CSSProperties,
 } from "react";
 import {
@@ -22,7 +19,7 @@ import {
   type WorkItem,
 } from "@/lib/placeholders";
 import type { WorkProjectSections } from "@/lib/work-layout";
-import type { WorkSectionKey } from "@/lib/work-types";
+import type { WorkProjectGroup, WorkSectionKey } from "@/lib/work-types";
 import {
   WorkExternalVideo,
   WorkLocalVideo,
@@ -33,20 +30,6 @@ import { STACK_VIEWER, STACK_WORK_EXPANDED } from "@/lib/stacking";
 import { createPortal } from "react-dom";
 
 const MOBILE_MQ = "(max-width: 767px)";
-
-function subscribeMobile(onChange: () => void) {
-  const mq = window.matchMedia(MOBILE_MQ);
-  mq.addEventListener("change", onChange);
-  return () => mq.removeEventListener("change", onChange);
-}
-
-function getMobileSnapshot() {
-  return window.matchMedia(MOBILE_MQ).matches;
-}
-
-function getServerMobileSnapshot() {
-  return false;
-}
 
 function workFocusLayoutId(panelId: string) {
   return `work-focus-${panelId}`;
@@ -75,6 +58,14 @@ function parseWorkPanelId(panelId: string): {
   };
 }
 
+function groupsInSection(
+  sections: WorkProjectSections,
+  sectionKey: WorkSectionKey
+): WorkProjectGroup[] {
+  const groups = sections[sectionKey];
+  return Array.isArray(groups) ? groups : [];
+}
+
 function resolveWorkItem(
   panelId: string,
   sections: WorkProjectSections
@@ -83,9 +74,11 @@ function resolveWorkItem(
   if (!parsed) return null;
   const { sectionKey, projectId, index } = parsed;
   if (Number.isNaN(index) || index < 0) return null;
-  const project = sections[sectionKey].find((p) => p.id === projectId);
+  const project = groupsInSection(sections, sectionKey).find(
+    (p) => p.id === projectId
+  );
   if (!project) return null;
-  const item = project.items[index];
+  const item = project.items?.[index];
   if (!item) return null;
   return { item, groupLabel: project.title };
 }
@@ -409,17 +402,14 @@ function StripItem({
     }
     return (
       <div className={lift}>
-        <Image
+        {/* Native img: next/image wrappers hydrate differently than SSR and overlay the site. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={item.src}
           alt={imageAlt}
-          fill
-          sizes={stripSizes}
-          quality={75}
-          className="object-contain object-center"
-          unoptimized
+          className="absolute inset-0 h-full w-full object-contain object-center"
           draggable={false}
-          loading="eager"
-          fetchPriority={priorityImage ? "high" : "auto"}
+          loading={priorityImage ? "eager" : "lazy"}
           decoding="async"
         />
       </div>
@@ -545,16 +535,15 @@ function MobileFocusLayer({
             className="h-full w-full object-contain object-center"
           />
         ) : (
-          <Image
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={item.src}
             alt={imageAlt}
             width={w}
             height={h}
-            sizes="100vw"
             className="h-full w-full object-contain object-center"
-            unoptimized
-            priority
             draggable={false}
+            decoding="async"
           />
         )}
       </motion.div>
@@ -566,7 +555,9 @@ function sectionHasItems(
   sectionKey: WorkSectionKey,
   sections: WorkProjectSections
 ): boolean {
-  return sections[sectionKey].some((p) => p.items.length > 0);
+  return groupsInSection(sections, sectionKey).some(
+    (p) => (p.items?.length ?? 0) > 0
+  );
 }
 
 /** `true` if a section with content appears before this one in `WORK_SECTION_ORDER` (for spacing). */
@@ -873,7 +864,7 @@ function SectionWorkScroll({
             onClick={handleDesktopStripClick}
             aria-label={`${sectionLabel} — projects`}
           >
-            {sections[sectionKey].flatMap((group, groupIndex, groups) => {
+            {groupsInSection(sections, sectionKey).flatMap((group, groupIndex, groups) => {
               const items = group.items;
               if (items.length === 0) return [];
               const start = groups
@@ -940,11 +931,24 @@ export function WorkExperience({
 }: {
   sections?: WorkProjectSections;
 } = {}) {
-  const isMobile = useSyncExternalStore(
-    subscribeMobile,
-    getMobileSnapshot,
-    getServerMobileSnapshot
-  );
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    const mobile = window.matchMedia(MOBILE_MQ);
+    const motionMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMobile = () => setIsMobile(mobile.matches);
+    const updateMotion = () => setReduceMotion(motionMq.matches);
+    updateMobile();
+    updateMotion();
+    mobile.addEventListener("change", updateMobile);
+    motionMq.addEventListener("change", updateMotion);
+    setMounted(true);
+    return () => {
+      mobile.removeEventListener("change", updateMobile);
+      motionMq.removeEventListener("change", updateMotion);
+    };
+  }, []);
   const isDesktop = !isMobile;
   const [expandedSection, setExpandedSection] = useState<WorkSectionKey | null>(
     null
@@ -959,7 +963,6 @@ export function WorkExperience({
   >({});
   const stripReadyRef = useRef(stripReady);
   const expandedSectionContainerRef = useRef<HTMLDivElement | null>(null);
-  const reduceMotion = useReducedMotion() ?? false;
 
   useEffect(() => {
     stripReadyRef.current = stripReady;
@@ -1165,8 +1168,8 @@ export function WorkExperience({
           );
         })}
 
-        {isMobile &&
-          typeof document !== "undefined" &&
+        {mounted &&
+          isMobile &&
           createPortal(
             <AnimatePresence>
               {resolved && focusedPanelId && (

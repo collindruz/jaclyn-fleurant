@@ -2,6 +2,8 @@ import { promises as fs } from "fs";
 import path from "path";
 import {
   applyWorkLayout,
+  isWorkLayoutActive,
+  normalizeWorkProjectSections,
   parseWorkLayout,
   type WorkLayoutFile,
   type WorkProjectSections,
@@ -19,9 +21,13 @@ export function workLayoutDiskPath(): string {
 export async function loadWorkLayoutFromDisk(): Promise<WorkLayoutFile | null> {
   try {
     const raw = await fs.readFile(LAYOUT_PATH, "utf8");
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== "object") return null;
-    return parsed as WorkLayoutFile;
+    const data = JSON.parse(raw) as unknown;
+    const parsed = parseWorkLayout(data);
+    if (parsed.ok) return parsed.layout;
+    if (isWorkLayoutActive(data as WorkLayoutFile)) {
+      return data as WorkLayoutFile;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -47,6 +53,13 @@ export async function writeWorkLayoutAtomic(
 
 /** Live Work sections from disk so /admin Save updates Work without a JSON hand-edit. */
 export async function getLiveWorkProjectSections(): Promise<WorkProjectSections> {
-  const layout = await loadWorkLayoutFromDisk();
-  return applyWorkLayout(buildWorkProjectSectionsFromCatalog(), layout);
+  const catalog = normalizeWorkProjectSections(
+    buildWorkProjectSectionsFromCatalog()
+  );
+  try {
+    const layout = await loadWorkLayoutFromDisk();
+    return normalizeWorkProjectSections(applyWorkLayout(catalog, layout));
+  } catch {
+    return catalog;
+  }
 }

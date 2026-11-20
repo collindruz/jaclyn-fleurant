@@ -150,15 +150,10 @@ export function buildWorkSections(
   sitePullOrder: readonly string[],
   fileMetadata: Readonly<Record<string, string>> = {}
 ): WorkSections {
-  const out: WorkSections = {
-    costumeDesign: emptyColorGroups(),
-    styleOut: emptyColorGroups(),
-    advertising: emptyColorGroups(),
-    editorial: emptyColorGroups(),
-    heartsSoldSeparatelyTour: emptyColorGroups(),
-    musicVideos: emptyColorGroups(),
-    events: emptyColorGroups(),
-  };
+  const out = {} as WorkSections;
+  for (const { key } of WORK_SECTION_ORDER) {
+    out[key] = emptyColorGroups();
+  }
 
   for (const { key: colorKey } of WORK_COLOR_ORDER) {
     for (const item of curated[colorKey] || []) {
@@ -183,7 +178,9 @@ export function mergeWorkSectionsToFlatColorGroups(
   for (const { key: colorKey } of WORK_COLOR_ORDER) {
     const seen = new Set<string>();
     for (const { key: sectionKey } of WORK_SECTION_ORDER) {
-      for (const item of sections[sectionKey][colorKey]) {
+      const bucket = sections[sectionKey]?.[colorKey];
+      if (!Array.isArray(bucket)) continue;
+      for (const item of bucket) {
         if (seen.has(item.src)) continue;
         seen.add(item.src);
         out[colorKey].push(item);

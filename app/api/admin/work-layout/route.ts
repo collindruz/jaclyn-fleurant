@@ -17,11 +17,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
 
-  const result = await writeWorkLayoutAtomic(body);
-  if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: 400 });
+  try {
+    const result = await writeWorkLayoutAtomic(body);
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+    return NextResponse.json({ ok: true, enabled: true });
+  } catch {
+    return NextResponse.json(
+      { error: "Could not write the layout file." },
+      { status: 500 }
+    );
   }
-  return NextResponse.json({ ok: true, enabled: true });
 }
 
 export async function GET() {

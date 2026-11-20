@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { WORK_SECTION_ORDER, type WorkSectionKey } from "@/lib/work-types";
 import {
   layoutFromEditorState,
+  parseWorkLayout,
   type AdminInventory,
   type AdminPhoto,
   type AdminProject,
@@ -45,8 +46,9 @@ export function AdminEditor({ inventory }: Props) {
   );
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [sectionFilter, setSectionFilter] = useState<WorkSectionKey | "all">(
-    "all"
+    WORK_SECTION_ORDER[0]?.key ?? "costumeDesign"
   );
+  const [gridReady, setGridReady] = useState(false);
   const [drag, setDrag] = useState<DragState | null>(null);
   const [dropKey, setDropKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -62,6 +64,7 @@ export function AdminEditor({ inventory }: Props) {
 
   useEffect(() => {
     document.documentElement.classList.add("admin-editor");
+    setGridReady(true);
     return () => document.documentElement.classList.remove("admin-editor");
   }, []);
 
@@ -102,10 +105,15 @@ export function AdminEditor({ inventory }: Props) {
     setSaveState("saving");
     setSaveError(null);
     try {
+      const payload = layoutPayload();
+      const checked = parseWorkLayout(payload);
+      if (!checked.ok) {
+        throw new Error(checked.error);
+      }
       const res = await fetch("/api/admin/work-layout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(layoutPayload()),
+        body: JSON.stringify(checked.layout),
       });
       const data = (await res.json().catch(() => null)) as
         | { ok?: boolean; error?: string }
@@ -322,7 +330,11 @@ export function AdminEditor({ inventory }: Props) {
         </div>
       </header>
 
-      {mode === "preview" ? (
+      {!gridReady ? (
+        <p className="px-5 py-16 font-sans text-[0.72rem] uppercase tracking-[0.14em] text-charcoal/35 sm:px-8">
+          Loading editor…
+        </p>
+      ) : mode === "preview" ? (
         <PreviewBoard
           projects={projects}
           photosBySrc={photosBySrc}

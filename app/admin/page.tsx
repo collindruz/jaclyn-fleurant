@@ -12,7 +12,12 @@ export const metadata: Metadata = {
 
 export default async function AdminPage() {
   if (process.env.NODE_ENV === "production") notFound();
-  const savedLayout = await loadWorkLayoutFromDisk();
-  const inventory = getAdminInventory(savedLayout);
+  let inventory;
+  try {
+    const savedLayout = await loadWorkLayoutFromDisk();
+    inventory = getAdminInventory(savedLayout);
+  } catch {
+    inventory = getAdminInventory(null);
+  }
   return <AdminEditor inventory={inventory} />;
 }

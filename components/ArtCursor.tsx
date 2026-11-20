@@ -2,13 +2,7 @@
 
 import { STACK_CURSOR } from "@/lib/stacking";
 import { usePathname } from "next/navigation";
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /** #2C2A27 at ~55% — thin stroke default. */
 const CURSOR_COLOR = "rgba(44, 42, 39, 0.55)";
@@ -41,20 +35,6 @@ const INTERACTIVE_SELECTOR =
   'a, button, [role="button"], [data-cursor="interactive"]';
 
 const CURSOR_LAYER = STACK_CURSOR;
-
-function subscribeFinePointer(onChange: () => void) {
-  const mq = window.matchMedia(FINE_POINTER_MQ);
-  mq.addEventListener("change", onChange);
-  return () => mq.removeEventListener("change", onChange);
-}
-
-function getFinePointerSnapshot() {
-  return window.matchMedia(FINE_POINTER_MQ).matches;
-}
-
-function getFinePointerServerSnapshot() {
-  return false;
-}
 
 const STAR_PATH =
   "M11 3 L12.3 9.2 L18.7 11.1 L12.4 13.2 L11.2 18.8 L9.6 13.1 L3.2 10.9 L9.7 8.8 Z";
@@ -109,18 +89,19 @@ const layerBase = {
 function ArtCursor() {
   const pathname = usePathname();
   const [hydrated, setHydrated] = useState(false);
-  const finePointer = useSyncExternalStore(
-    subscribeFinePointer,
-    getFinePointerSnapshot,
-    getFinePointerServerSnapshot
-  );
+  const [finePointer, setFinePointer] = useState(false);
   const useCustom =
     hydrated && finePointer && !pathname.startsWith("/admin");
   const [active, setActive] = useState(false);
   const [isInteractive, setIsInteractive] = useState(false);
 
   useLayoutEffect(() => {
+    const mq = window.matchMedia(FINE_POINTER_MQ);
+    const update = () => setFinePointer(mq.matches);
+    update();
+    mq.addEventListener("change", update);
     setHydrated(true);
+    return () => mq.removeEventListener("change", update);
   }, []);
 
   const target = useRef({ x: 0, y: 0 });

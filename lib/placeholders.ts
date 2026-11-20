@@ -21,15 +21,11 @@ const ph = "/images/placeholder.svg";
 export type WorkProjectSections = Record<WorkSectionKey, WorkProjectGroup[]>;
 
 function emptyProjectSections(): WorkProjectSections {
-  return {
-    costumeDesign: [],
-    styleOut: [],
-    advertising: [],
-    editorial: [],
-    heartsSoldSeparatelyTour: [],
-    musicVideos: [],
-    events: [],
-  };
+  const out = {} as WorkProjectSections;
+  for (const section of WORK_SECTION_ORDER) {
+    out[section.key] = [];
+  }
+  return out;
 }
 
 function emptyColorGroups(): Record<WorkColorKey, WorkItem[]> {
@@ -74,10 +70,14 @@ export function buildWorkProjectSectionsFromCatalog(): WorkProjectSections {
   return out;
 }
 
-export const workProjectSections: WorkProjectSections = applyWorkLayout(
-  buildWorkProjectSectionsFromCatalog(),
-  readWorkLayoutFile()
-);
+export const workProjectSections: WorkProjectSections = (() => {
+  const catalog = buildWorkProjectSectionsFromCatalog();
+  try {
+    return applyWorkLayout(catalog, readWorkLayoutFile());
+  } catch {
+    return catalog;
+  }
+})();
 
 /** @deprecated Color groups are not used for Work carousels. Kept for World stills. */
 export type WorkSections = Record<WorkSectionKey, Record<WorkColorKey, WorkItem[]>>;
@@ -100,18 +100,15 @@ export const workColorGroups: Record<WorkColorKey, WorkItem[]> =
 
 /** Flat color buckets per section — unused by Work carousels; World/debug fallbacks. */
 export const workSections: WorkSections = (() => {
-  const out: WorkSections = {
-    costumeDesign: emptyColorGroups(),
-    styleOut: emptyColorGroups(),
-    advertising: emptyColorGroups(),
-    editorial: emptyColorGroups(),
-    heartsSoldSeparatelyTour: emptyColorGroups(),
-    musicVideos: emptyColorGroups(),
-    events: emptyColorGroups(),
-  };
+  const out = {} as WorkSections;
+  for (const { key } of WORK_SECTION_ORDER) {
+    out[key] = emptyColorGroups();
+  }
   for (const { key: sectionKey } of WORK_SECTION_ORDER) {
-    for (const group of workProjectSections[sectionKey]) {
-      for (const item of group.items) {
+    const groups = workProjectSections[sectionKey];
+    if (!Array.isArray(groups)) continue;
+    for (const group of groups) {
+      for (const item of group.items ?? []) {
         const color = (item.colorKey as WorkColorKey | undefined) ?? "neutral";
         if (out[sectionKey][color]) out[sectionKey][color].push(item);
       }

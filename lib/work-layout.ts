@@ -99,15 +99,24 @@ function ensureAllSectionProjects(projects: AdminProject[]): AdminProject[] {
 }
 
 function emptySections(): WorkProjectSections {
-  return {
-    costumeDesign: [],
-    styleOut: [],
-    advertising: [],
-    editorial: [],
-    heartsSoldSeparatelyTour: [],
-    musicVideos: [],
-    events: [],
-  };
+  const out = {} as WorkProjectSections;
+  for (const section of WORK_SECTION_ORDER) {
+    out[section.key] = [];
+  }
+  return out;
+}
+
+/** Always has an array for every key in WORK_SECTION_ORDER. */
+export function normalizeWorkProjectSections(
+  input: Partial<WorkProjectSections> | null | undefined
+): WorkProjectSections {
+  const out = emptySections();
+  if (!input) return out;
+  for (const section of WORK_SECTION_ORDER) {
+    const groups = input[section.key];
+    out[section.key] = Array.isArray(groups) ? groups : [];
+  }
+  return out;
 }
 
 function catalogBySrc(): Map<string, WorkItem> {
@@ -158,7 +167,12 @@ const MAX_TITLE = 200;
 export function isWorkLayoutActive(
   layout: WorkLayoutFile | null | undefined
 ): layout is WorkLayoutFile {
-  return Boolean(layout?.enabled && layout.projects && layout.projects.length > 0);
+  return Boolean(
+    layout?.enabled &&
+      Array.isArray(layout.projects) &&
+      layout.projects.length > 0 &&
+      Array.isArray(layout.hidden)
+  );
 }
 
 export function parseWorkLayout(
@@ -265,18 +279,24 @@ export function applyWorkLayout(
   base: WorkProjectSections,
   layout: WorkLayoutFile | null | undefined
 ): WorkProjectSections {
-  if (!isWorkLayoutActive(layout)) return base;
+  const safeBase = normalizeWorkProjectSections(base);
+  if (!isWorkLayoutActive(layout)) return safeBase;
 
+  try {
   const bySrc = catalogBySrc();
   for (const section of WORK_SECTION_ORDER) {
-    for (const group of base[section.key]) {
-      for (const item of group.items) {
+    for (const group of safeBase[section.key]) {
+      for (const item of group.items ?? []) {
         if (!bySrc.has(item.src)) bySrc.set(item.src, item);
       }
     }
   }
 
-  const hidden = new Set(layout.hidden.map((f) => f.trim()).filter(Boolean));
+  const hidden = new Set(
+    (Array.isArray(layout.hidden) ? layout.hidden : [])
+      .map((f) => f.trim())
+      .filter(Boolean)
+  );
   const titleById = new Map<string, string>();
   const provisionalById = new Map<string, boolean | undefined>();
   for (const project of WORK_PROJECTS) {
@@ -284,7 +304,7 @@ export function applyWorkLayout(
     provisionalById.set(project.id, project.provisional);
   }
   for (const section of WORK_SECTION_ORDER) {
-    for (const group of base[section.key]) {
+    for (const group of safeBase[section.key]) {
       titleById.set(group.id, group.title);
       provisionalById.set(group.id, group.provisional);
     }
@@ -295,7 +315,8 @@ export function applyWorkLayout(
   for (const rec of layout.projects) {
     if (!SECTION_KEYS.has(rec.sectionKey)) continue;
     const items: WorkItem[] = [];
-    for (const src of rec.assets) {
+    const assetList = Array.isArray(rec.assets) ? rec.assets : [];
+    for (const src of assetList) {
       const item = bySrc.get(src);
       if (!item || used.has(item.src)) continue;
       if (hidden.has(workAssetBasename(item.src))) continue;
@@ -315,7 +336,10 @@ export function applyWorkLayout(
       items,
     });
   }
-  return out;
+  return normalizeWorkProjectSections(out);
+  } catch {
+    return safeBase;
+  }
 }
 
 export function readWorkLayoutFile(): WorkLayoutFile {
@@ -382,22 +406,28 @@ export function getAdminInventory(
 
   const layout = layoutOverride ?? (layoutJson as WorkLayoutFile);
   if (isWorkLayoutActive(layout)) {
-    const layoutHidden = new Set(
-      layout.hidden.map((f) => f.trim()).filter(Boolean)
-    );
-    return {
-      photos,
-      projects: ensureAllSectionProjects(
-        layout.projects.map((p) => ({
-          id: p.id,
-          title: p.title,
-          sectionKey: p.sectionKey,
-          assets: [...p.assets],
-        }))
-      ),
-      hidden: [...layoutHidden],
-      baselineHidden: [...EXCLUDE_FILENAMES],
-    };
+    try {
+      const layoutHidden = new Set(
+        (Array.isArray(layout.hidden) ? layout.hidden : [])
+          .map((f) => f.trim())
+          .filter(Boolean)
+      );
+      return {
+        photos,
+        projects: ensureAllSectionProjects(
+          layout.projects.map((p) => ({
+            id: p.id,
+            title: p.title,
+            sectionKey: p.sectionKey,
+            assets: Array.isArray(p.assets) ? [...p.assets] : [],
+          }))
+        ),
+        hidden: [...layoutHidden],
+        baselineHidden: [...EXCLUDE_FILENAMES],
+      };
+    } catch {
+      /* fall through to catalog inventory */
+    }
   }
 
   return {
@@ -418,11 +448,13 @@ export function layoutFromEditorState(input: {
     notes:
       "Saved from /admin. Work uses this overlay for category, order, and hidden filenames. Files are not renamed or deleted.",
     hidden: [...input.hidden],
-    projects: projectsInSectionOrder(input.projects).map((p) => ({
+    projects: projectsInSectionOrder(
+      ensureAllSectionProjects(input.projects)
+    ).map((p) => ({
       id: p.id,
       title: p.title,
       sectionKey: p.sectionKey,
-      assets: [...p.assets],
+      assets: Array.isArray(p.assets) ? [...p.assets] : [],
     })),
   };
 }
